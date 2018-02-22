@@ -122,3 +122,33 @@ function manualdirectdebit_civicrm_angularModules(&$angularModules) {
 function manualdirectdebit_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
   _manualdirectdebit_civix_civicrm_alterSettingsFolders($metaDataFolders);
 }
+
+/**
+ * Implements hook_civicrm_navigationMenu().
+ *
+ *
+ */
+function manualdirectdebit_civicrm_navigationMenu(&$menu) {
+
+  // adding direct debit menu item in 'Administer' category
+  $directDebitMenuItem =  array (
+    'name'       => ts('Direct Debit'),
+    'url'        => NULL,
+    'permission' => 'administer CiviCRM',
+    'operator'   => NULL,
+    'separator'  => NULL,
+  );
+  _manualdirectdebit_civix_insert_navigation_menu($menu, 'Administer/', $directDebitMenuItem);
+
+  // adding direct debit code in subcategory
+  $ddCodeSubMenuItem =  array (
+    'name'       => ts('Direct Debit Codes'),
+    'url'        => 'civicrm/admin/options/direct_debit_codes',
+    'permission' => 'administer CiviCRM',
+    'operator'   => NULL,
+    'separator'  => NULL,
+  );
+  _manualdirectdebit_civix_insert_navigation_menu($menu, 'Administer/'.$directDebitMenuItem['name'], $ddCodeSubMenuItem);
+
+}
+

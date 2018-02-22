@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<menu>
+    <item>
+        <path>civicrm/admin/options/direct_debit_codes</path>
+        <title>Direct Debit Codes</title>
+        <desc></desc>
+        <page_callback>CRM_Admin_Page_Options</page_callback>
+        <access_arguments>administer CiviCRM</access_arguments>
+        <weight>30</weight>
+    </item>
+</menu>
