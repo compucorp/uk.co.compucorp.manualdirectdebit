@@ -1,6 +1,7 @@
 <?php
 
 require_once 'manualdirectdebit.civix.php';
+
 use CRM_ManualDirectDebit_ExtensionUtil as E;
 
 /**
@@ -122,3 +123,29 @@ function manualdirectdebit_civicrm_angularModules(&$angularModules) {
 function manualdirectdebit_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
   _manualdirectdebit_civix_civicrm_alterSettingsFolders($metaDataFolders);
 }
+
+/**
+ * Implements hook_civicrm_navigationMenu().
+ *
+ */
+function manualdirectdebit_civicrm_navigationMenu(&$menu) {
+  $directDebitMenuItem = [
+    'name' => ts('Direct Debit'),
+    'url' => NULL,
+    'permission' => 'administer CiviCRM',
+    'operator' => NULL,
+    'separator' => NULL,
+  ];
+  _manualdirectdebit_civix_insert_navigation_menu($menu, 'Administer/', $directDebitMenuItem);
+
+  $directDebitCodeSubMenuItem = [
+    'name' => ts('Direct Debit Codes'),
+    'url' => 'civicrm/admin/options/direct_debit_codes',
+    'permission' => 'administer CiviCRM',
+    'operator' => NULL,
+    'separator' => NULL,
+  ];
+  _manualdirectdebit_civix_insert_navigation_menu($menu, 'Administer/' . $directDebitMenuItem['name'], $directDebitCodeSubMenuItem);
+
+}
+

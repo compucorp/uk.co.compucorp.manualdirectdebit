@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <extension key="uk.co.compucorp.manualdirectdebit" type="module">
+  <downloadUrl>https://github.com/compucorp/uk.co.compucorp.manualdirectdebit/master</downloadUrl>
   <file>manualdirectdebit</file>
   <name>Manual Direct Debit</name>
   <description>Manual Direct Debit</description>
