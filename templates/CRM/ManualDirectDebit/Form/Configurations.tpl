@@ -3,7 +3,7 @@
     <div class="crm-section">
         <div class="label">{$form.$elementName.label}</div>
         <div class="content">{$form.$elementName.html}
-            {if $isHelp.$elementName}{help id=$form.$elementName.name}{/if}
+            {if $fieldsWithHelp.$elementName}{help id=$form.$elementName.name}{/if}
         </div>
         <div class="clear"></div>
     </div>
@@ -14,7 +14,7 @@
     <div class="crm-section">
         <div class="label">{$form.$elementName.label}</div>
         <div class="content">{$form.$elementName.html}
-            {if $isHelp.$elementName}{help id=$form.$elementName.name}{/if}
+            {if $fieldsWithHelp.$elementName}{help id=$form.$elementName.name}{/if}
         </div>
         <div class="clear"></div>
     </div>

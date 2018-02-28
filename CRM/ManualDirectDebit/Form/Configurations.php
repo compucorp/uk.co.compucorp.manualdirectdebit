@@ -69,10 +69,9 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
       ],
     ]);
 
-    // export form elements
     $this->assign('mandateConfigSection', $this->mandateConfigs);
     $this->assign('paymentConfigSection', $this->paymentConfigs);
-    $this->assign('isHelp', $fieldsWithHelp);
+    $this->assign('fieldsWithHelp', $fieldsWithHelp);
 
   }
 
@@ -88,7 +87,7 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
    *
    * @return array
    */
-  public function getAllowedConfigFields() {
+  function getAllowedConfigFields() {
     if (!empty($this->allowedConfigFields )) {
       return $this->allowedConfigFields;
     }
