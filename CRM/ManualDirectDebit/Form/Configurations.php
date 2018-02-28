@@ -87,7 +87,7 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
    *
    * @return array
    */
-  function getAllowedConfigFields() {
+  private function getAllowedConfigFields() {
     if (!empty($this->allowedConfigFields )) {
       return $this->allowedConfigFields;
     }
