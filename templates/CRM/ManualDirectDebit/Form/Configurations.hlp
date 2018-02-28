@@ -1,0 +1,19 @@
+{*
+	Help texts for Manual Direct Debit Settings.
+*}
+
+{htxt id="manualdirectdebit_minimum_days_to_first_payment-title"}
+  {ts}For new mandates, Direct Debit first
+contribution date should be set to the nearest new instruction run
+date with an extra offset of the number of days configured here.{/ts}
+{/htxt}
+
+
+{htxt id="inactivity_code-title"}
+  {ts}Mandates with inactive codes will not be selectable when
+creating a new Direct Debit contribution/ payment plan.
+Mandates and contributions that link to mandates with these
+codes will not be included in the batch.{/ts}
+{/htxt}
+
+

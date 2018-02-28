@@ -8,6 +8,7 @@
         <div class="clear"></div>
     </div>
 {/foreach}
+
 <h3>{ts}Payment config{/ts}</h3>
 {foreach from=$paymentConfigSection item=elementName}
     <div class="crm-section">

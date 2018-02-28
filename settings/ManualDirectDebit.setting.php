@@ -30,7 +30,7 @@ return [
     'default' => 0,
     'is_help' => FALSE,
     'is_required' => TRUE,
-    'html_attributes' => getSequenceOfDays(30),
+    'html_attributes' => generateSequenceNumbers(30),
     'extra_data' => [
       'class' => 'crm-select2',
       'multiple' => 'multiple',
@@ -49,7 +49,7 @@ return [
     'default' => 1,
     'is_required' => TRUE,
     'is_help' => FALSE,
-    'html_attributes' => getSequenceOfDays(31),
+    'html_attributes' => generateSequenceNumbers(31),
     'extra_data' => [
       'class' => 'crm-select2',
       'multiple' => 'multiple',
@@ -75,17 +75,17 @@ return [
 ];
 
 /**
- * function generate int arrays from 1 till $amountOfDays
+ * Generates a list of sequence numbers starting from 1 to the specified limit.
  *
- * @param int $amountOfDays
+ * @param int $limit
  *
- * @return  array sequence
+ * @return  array
  *
  */
-function getSequenceOfDays($amountOfDays) {
-  $sequenceOfDays = [];
-  for ($i = 1; $i <= $amountOfDays; $i++) {
-    $sequenceOfDays[] = $i;
+function generateSequenceNumbers($limit) {
+  $sequence = [];
+  for ($i = 1; $i <= $limit; $i++) {
+    $sequence[] = $i;
   }
-  return $sequenceOfDays;
+  return $sequence;
 }

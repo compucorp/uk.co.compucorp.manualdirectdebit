@@ -155,5 +155,5 @@ function manualdirectdebit_civicrm_navigationMenu(&$menu) {
     'separator' => NULL,
   ];
   _manualdirectdebit_civix_insert_navigation_menu($menu, 'Administer/' . $directDebitMenuItem['name'], $directDebitConfigurationSubMenuItem);
-
 }
+
