@@ -138,31 +138,32 @@ function manualdirectdebit_civicrm_navigationMenu(&$menu) {
   ];
   _manualdirectdebit_civix_insert_navigation_menu($menu, 'Administer/', $directDebitMenuItem);
 
-  $directDebitCodeSubMenuItem = [
-    'name' => ts('Direct Debit Codes'),
-    'url' => 'civicrm/admin/options/direct_debit_codes',
-    'permission' => 'administer CiviCRM',
-    'operator' => NULL,
-    'separator' => NULL,
+  $subMenuItems = [
+    [
+      'name' => ts('Direct Debit Codes'),
+      'url' => 'civicrm/admin/options/direct_debit_codes',
+      'permission' => 'administer CiviCRM',
+      'operator' => NULL,
+      'separator' => NULL,
+    ],
+    [
+      'name' => ts('Direct Debit Configuration'),
+      'url' => 'civicrm/admin/direct_debit_configuration',
+      'permission' => 'administer CiviCRM',
+      'operator' => NULL,
+      'separator' => NULL,
+    ],
+    [
+      'name' => ts('Direct Debit Originator Number'),
+      'url' => 'civicrm/admin/options/direct_debit_originator_number',
+      'permission' => 'administer CiviCRM',
+      'operator' => NULL,
+      'separator' => NULL,
+    ],
   ];
-  _manualdirectdebit_civix_insert_navigation_menu($menu, 'Administer/' . $directDebitMenuItem['name'], $directDebitCodeSubMenuItem);
 
-  $directDebitConfigurationSubMenuItem = [
-    'name' => ts('Direct Debit Configuration'),
-    'url' => 'civicrm/admin/direct_debit_configuration',
-    'permission' => 'administer CiviCRM',
-    'operator' => NULL,
-    'separator' => NULL,
-  ];
-  _manualdirectdebit_civix_insert_navigation_menu($menu, 'Administer/' . $directDebitMenuItem['name'], $directDebitConfigurationSubMenuItem);
-
-  $directDebitOriginatorNumberSubMenuItem = [
-    'name' => ts('Direct Debit Originator Number'),
-    'url' => 'civicrm/admin/options/direct_debit_originator_number',
-    'permission' => 'administer CiviCRM',
-    'operator' => NULL,
-    'separator' => NULL,
-  ];
-  _manualdirectdebit_civix_insert_navigation_menu($menu, 'Administer/' . $directDebitMenuItem['name'], $directDebitOriginatorNumberSubMenuItem);
+  foreach ($subMenuItems as $menuItem) {
+    _manualdirectdebit_civix_insert_navigation_menu($menu, 'Administer/' . $directDebitMenuItem['name'], $menuItem);
+  }
 }
 
