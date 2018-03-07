@@ -14,6 +14,51 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
 
   public function uninstall() {
     $this->executeSqlFile('sql/uninstall.sql');
+    $this->uninstallCustomInformation();
+  }
+
+  /**
+   *  Uninstall custom information
+   */
+  private function uninstallCustomInformation() {
+    $this->deleteField('OptionGroup', 'direct_debit_codes');
+    $this->deleteField('OptionGroup', 'direct_debit_originator_number');
+    $this->deleteField('CustomGroup', 'direct_debit_mandate');
+    $this->deleteField('CustomGroup', 'direct_debit_information');
+    $this->deleteField('UFGroup', 'Direct Debit Information', 'title');
+    $this->deleteField('PaymentProcessor', 'OfflineDirectDebit', "payment_processor_type_id");
+    $this->deleteField('PaymentProcessorType', 'OfflineDirectDebit');
+  }
+
+  /**
+   * Function deletes custom field
+   *
+   * @param string $entityType clarify entity,
+   * @param string $fieldIdentifier help to find id of field,
+   * @param string $searchBy specify type of $fieldIdentifier
+   */
+  private function deleteField($entityType, $fieldIdentifier, $searchBy = 'name') {
+    civicrm_api3($entityType, 'delete', [
+      'id' => $this->getIdByName($entityType, $fieldIdentifier, $searchBy),
+    ]);
+  }
+
+  /**
+   * Function return id of $entityType field
+   *
+   * @param string $entityType specify group entity,
+   * @param string $fieldIdentifier help to find id of field,
+   * @param string $searchBy specify type of $fieldIdentifier
+   *
+   * @return int
+   */
+  private function getIdByName($entityType, $fieldIdentifier, $searchBy) {
+    $id = civicrm_api3($entityType, 'getvalue', [
+      'return' => "id",
+      $searchBy => $fieldIdentifier,
+    ]);
+
+    return (int) $id;
   }
 
   /**
