@@ -8,8 +8,16 @@ use CRM_ManualDirectDebit_ExtensionUtil as E;
 class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base {
 
   public function install() {
+
     $this->executeSqlFile('sql/install.sql');
+    $this->createDirectDebitPaymentProcessorType();
     $this->createDirectDebitPaymentProcessor();
+    $result = civicrm_api3('ContributionPage', 'create', [
+      'financial_type_id' => 1,
+      'is_recur' => 1,
+      'payment_processor' => "Direct Debit",
+      'title' => "Renew offline auto-renewal memberships",
+    ]);
   }
 
   public function uninstall() {
@@ -21,50 +29,77 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
    *  Uninstall custom information
    */
   private function uninstallCustomInformation() {
-    $this->deleteField('OptionGroup', 'direct_debit_codes');
-    $this->deleteField('OptionGroup', 'direct_debit_originator_number');
-    $this->deleteField('CustomGroup', 'direct_debit_mandate');
-    $this->deleteField('CustomGroup', 'direct_debit_information');
-    $this->deleteField('UFGroup', 'Direct Debit Information', 'title');
-    $this->deleteField('PaymentProcessor', 'OfflineDirectDebit', "payment_processor_type_id");
-    $this->deleteField('PaymentProcessorType', 'OfflineDirectDebit');
+    $customValuesForUninstall = [
+      [
+        "entityType" => "OptionGroup",
+        "searchValue" => "direct_debit_codes",
+      ],
+      [
+        "entityType" => "OptionGroup",
+        "searchValue" => "direct_debit_originator_number",
+      ],
+      [
+        "entityType" => "CustomGroup",
+        "searchValue" => "direct_debit_mandate",
+      ],
+      [
+        "entityType" => "CustomGroup",
+        "searchValue" => "direct_debit_information",
+      ],
+      [
+        "entityType" => "UFGroup",
+        "searchValue" => "Direct Debit Information",
+        "searchField" => "title",
+      ],
+      [
+        "entityType" => "PaymentProcessor",
+        "searchValue" => "OfflineDirectDebit",
+        "searchField" => "payment_processor_type_id",
+      ],
+      [
+        "entityType" => "PaymentProcessorType",
+        "searchValue" => "OfflineDirectDebit",
+      ],
+      [
+        "entityType" => "ContributionPage",
+        "searchValue" => "Renew offline auto-renewal memberships",
+        "searchField" => "title",
+      ],
+    ];
+
+    foreach ($customValuesForUninstall as $customValue) {
+      $this->deleteEntityRecord(
+        $customValue['entityType'],
+        $customValue['searchValue'],
+        isset($customValue['searchField']) ? $customValue['searchField'] : ""
+      );
+    }
   }
 
   /**
-   * Function deletes custom field
+   * Deletes a record for the specified CiviCRM entity based on
+   * the search field and search value.
    *
-   * @param string $entityType clarify entity,
-   * @param string $fieldIdentifier help to find id of field,
-   * @param string $searchBy specify type of $fieldIdentifier
+   * @param string $entityType
+   *   The entity type for the record we want to remove (e.g OptionValue,
+   *   PaymentProcessor ..etc). it should be a valid Custom or CiviCRM core
+   *   entity type.
+   * @param string $searchValue
+   *   The search value to find the record that we want to remove
+   * @param string $searchField
+   *   The field that we search the search value against.
    */
-  private function deleteField($entityType, $fieldIdentifier, $searchBy = 'name') {
-    civicrm_api3($entityType, 'delete', [
-      'id' => $this->getIdByName($entityType, $fieldIdentifier, $searchBy),
+  private function deleteEntityRecord($entityType, $searchValue, $searchField = 'name') {
+    civicrm_api3($entityType, 'get', [
+      $searchField => $searchValue,
+      'api.' . $entityType . '.delete' => ['id' => '$value.id'],
     ]);
-  }
-
-  /**
-   * Function return id of $entityType field
-   *
-   * @param string $entityType specify group entity,
-   * @param string $fieldIdentifier help to find id of field,
-   * @param string $searchBy specify type of $fieldIdentifier
-   *
-   * @return int
-   */
-  private function getIdByName($entityType, $fieldIdentifier, $searchBy) {
-    $id = civicrm_api3($entityType, 'getvalue', [
-      'return' => "id",
-      $searchBy => $fieldIdentifier,
-    ]);
-
-    return (int) $id;
   }
 
   /**
    * Will install the DirectDebit payment processor
    */
-  private function createDirectDebitPaymentProcessor() {
+  private function createDirectDebitPaymentProcessorType() {
     $paymentProcessorType = [
       "name" => "OfflineDirectDebit",
       "title" => ts("Offline Direct Debit"),
@@ -77,7 +112,12 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       "payment_type" => CRM_Core_Payment::PAYMENT_TYPE_DIRECT_DEBIT,
     ];
     civicrm_api3('PaymentProcessorType', 'create', $paymentProcessorType);
+  }
 
+  /**
+   * Will install the DirectDebit payment processor
+   */
+  private function createDirectDebitPaymentProcessor() {
     $paymentProcessor = [
       'name' => ts('Direct Debit'),
       'description' => '',
