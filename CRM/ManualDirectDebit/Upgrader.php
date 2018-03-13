@@ -62,7 +62,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       $this->deleteEntityRecord(
         $customValue['entityType'],
         $customValue['searchValue'],
-        isset($customValue['searchField']) ? $customValue['searchField'] : ""
+        isset($customValue['searchField']) ? $customValue['searchField'] : 'name'
       );
     }
   }
@@ -80,7 +80,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
    * @param string $searchField
    *   The field that we search the search value against.
    */
-  private function deleteEntityRecord($entityType, $searchValue, $searchField = 'name') {
+  private function deleteEntityRecord($entityType, $searchValue, $searchField) {
     civicrm_api3($entityType, 'get', [
       $searchField => $searchValue,
       'api.' . $entityType . '.delete' => ['id' => '$value.id'],
@@ -131,6 +131,5 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     ];
     civicrm_api3('OptionValue', 'create', $paymentInstrument);
   }
-
 
 }
