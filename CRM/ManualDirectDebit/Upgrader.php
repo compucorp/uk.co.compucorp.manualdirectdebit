@@ -8,20 +8,11 @@ use CRM_ManualDirectDebit_ExtensionUtil as E;
 class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base {
 
   public function install() {
-
-    $this->executeSqlFile('sql/install.sql');
     $this->createDirectDebitPaymentProcessorType();
     $this->createDirectDebitPaymentProcessor();
-    $result = civicrm_api3('ContributionPage', 'create', [
-      'financial_type_id' => 1,
-      'is_recur' => 1,
-      'payment_processor' => "Direct Debit",
-      'title' => "Renew offline auto-renewal memberships",
-    ]);
   }
 
   public function uninstall() {
-    $this->executeSqlFile('sql/uninstall.sql');
     $this->uninstallCustomInformation();
   }
 
@@ -60,11 +51,6 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
         "entityType" => "PaymentProcessorType",
         "searchValue" => "OfflineDirectDebit",
       ],
-      [
-        "entityType" => "ContributionPage",
-        "searchValue" => "Renew offline auto-renewal memberships",
-        "searchField" => "title",
-      ],
     ];
 
     foreach ($customValuesForUninstall as $customValue) {
@@ -97,7 +83,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   }
 
   /**
-   * Will install the DirectDebit payment processor
+   * Installs the 'Direct Debit' payment processor Type
    */
   private function createDirectDebitPaymentProcessorType() {
     $paymentProcessorType = [
@@ -115,7 +101,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   }
 
   /**
-   * Will install the DirectDebit payment processor
+   * Installs the 'Direct Debit' payment processor
    */
   private function createDirectDebitPaymentProcessor() {
     $paymentProcessor = [
