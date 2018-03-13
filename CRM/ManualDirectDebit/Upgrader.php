@@ -10,6 +10,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   public function install() {
     $this->createDirectDebitPaymentProcessorType();
     $this->createDirectDebitPaymentProcessor();
+    $this->createDirectDebitPaymentInstrument();
   }
 
   public function uninstall() {
@@ -41,6 +42,10 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
         "entityType" => "UFGroup",
         "searchValue" => "Direct Debit Information",
         "searchField" => "title",
+      ],
+      [
+        "entityType" => "OptionValue",
+        "searchValue" => "direct_debit",
       ],
       [
         "entityType" => "PaymentProcessor",
@@ -113,5 +118,19 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     ];
     civicrm_api3('PaymentProcessor', 'create', $paymentProcessor);
   }
+
+
+  /**
+   * Installs the 'Direct Debit' payment instrument
+   */
+  private function createDirectDebitPaymentInstrument() {
+    $paymentInstrument = [
+      'option_group_id' => "payment_instrument",
+      'label' => "Direct Debit",
+      'name' => "direct_debit",
+    ];
+    civicrm_api3('OptionValue', 'create', $paymentInstrument);
+  }
+
 
 }
