@@ -166,4 +166,3 @@ function manualdirectdebit_civicrm_navigationMenu(&$menu) {
     _manualdirectdebit_civix_insert_navigation_menu($menu, 'Administer/' . $directDebitMenuItem['name'], $menuItem);
   }
 }
-
