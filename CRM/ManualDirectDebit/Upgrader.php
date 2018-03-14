@@ -8,9 +8,9 @@ use CRM_ManualDirectDebit_ExtensionUtil as E;
 class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base {
 
   public function install() {
+    $this->createDirectDebitPaymentInstrument();
     $this->createDirectDebitPaymentProcessorType();
     $this->createDirectDebitPaymentProcessor();
-    $this->createDirectDebitPaymentInstrument();
   }
 
   public function uninstall() {
@@ -88,6 +88,18 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   }
 
   /**
+   * Installs the 'Direct Debit' payment instrument
+   */
+  private function createDirectDebitPaymentInstrument() {
+    $paymentInstrument = [
+      'option_group_id' => "payment_instrument",
+      'label' => "Direct Debit",
+      'name' => "direct_debit",
+    ];
+    civicrm_api3('OptionValue', 'create', $paymentInstrument);
+  }
+
+  /**
    * Installs the 'Direct Debit' payment processor Type
    */
   private function createDirectDebitPaymentProcessorType() {
@@ -115,21 +127,9 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       'payment_processor_type_id' => 'OfflineDirectDebit',
       'domain_id' => CRM_Core_Config::domainID(),
       'is_active' => 1,
+      'payment_instrument_id' => 'direct_debit',
     ];
     civicrm_api3('PaymentProcessor', 'create', $paymentProcessor);
-  }
-
-
-  /**
-   * Installs the 'Direct Debit' payment instrument
-   */
-  private function createDirectDebitPaymentInstrument() {
-    $paymentInstrument = [
-      'option_group_id' => "payment_instrument",
-      'label' => "Direct Debit",
-      'name' => "direct_debit",
-    ];
-    civicrm_api3('OptionValue', 'create', $paymentInstrument);
   }
 
 }
