@@ -110,7 +110,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       "is_active" => 1,
       "user_name_label" => ts("Offline Direct Debit"),
       "class_name" => "Payment_Manual",
-      "billing_mode" => "1",
+      "billing_mode" => CRM_Core_Payment::BILLING_MODE_BUTTON,
       "is_recur" => "1",
       "payment_type" => CRM_Core_Payment::PAYMENT_TYPE_DIRECT_DEBIT,
     ];
