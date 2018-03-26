@@ -74,8 +74,8 @@ class CRM_ManualDirectDebit_DAO_RecurrMandateRef extends CRM_Core_DAO {
         'recurr_id' => [
           'name' => 'recurr_id',
           'type' => CRM_Utils_Type::T_INT,
-          'title' => ts('Recurr id'),
-          'description' => 'Recurr id',
+          'title' => ts('Reccuring Contribution ID'),
+          'description' => 'Reccuring Contribution ID',
           'required' => TRUE,
           'import' => TRUE,
           'where' => self::getTableName() . '.recurr_id',
