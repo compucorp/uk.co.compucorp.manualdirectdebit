@@ -266,3 +266,47 @@ function getMandateCustomFieldId() {
 
   return $mandateIdCustomFieldId;
 }
+
+/**
+ * Implements hook_civicrm_pageRun().
+ *
+ */
+function manualdirectdebit_civicrm_pageRun(&$page) {
+  if (get_class($page) == 'CRM_Contribute_Page_ContributionRecur') {
+    $contactId = CRM_Utils_Request::retrieve('cid', 'Integer', $page, FALSE);
+    $recurrentContributionId = CRM_Utils_Request::retrieve('id', 'Integer', $page, FALSE);
+    $groupId = civicrm_api3('CustomGroup', 'getvalue', [
+      'return' => "id",
+      'name' => "direct_debit_mandate",
+    ]);
+
+    $mandateIdCustomFieldId = getMandateCustomFieldId();
+
+    try {
+      $mandateId = civicrm_api3('Contribution', 'getvalue', [
+        'return' => "custom_$mandateIdCustomFieldId",
+        'contribution_recur_id' => $recurrentContributionId,
+      ]);
+
+      $contributionId = civicrm_api3('Contribution', 'getvalue', [
+        'return' => "id",
+        'contribution_recur_id' => $recurrentContributionId,
+      ]);
+    }
+    catch (CiviCRM_API3_Exception $e) {
+      CRM_Core_Session::setStatus(t("Contribution don't exist"), $title = 'Error', $type = 'alert');
+      return FALSE;
+    }
+
+    CRM_Core_Resources::singleton()
+      ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/directDebitInformation.js')
+      ->addSetting([
+        'urlData' => [
+          'gid' => $groupId,
+          'cid' => $contactId,
+          'recId' => $contributionId,
+          'mandateId' => $mandateId,
+        ],
+      ]);
+  }
+}
