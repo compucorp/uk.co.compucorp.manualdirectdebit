@@ -166,3 +166,103 @@ function manualdirectdebit_civicrm_navigationMenu(&$menu) {
     _manualdirectdebit_civix_insert_navigation_menu($menu, 'Administer/' . $directDebitMenuItem['name'], $menuItem);
   }
 }
+
+/**
+ * Implements hook_civicrm_postProcess().
+ *
+ */
+function manualdirectdebit_civicrm_postProcess($formName, &$form) {
+  $action = $form->getAction();
+
+  if ($formName == 'CRM_Contribute_Form_Contribution' && $action == CRM_Core_Action::ADD) {
+    $contributionId = (int) $form->getVar('_id');
+    $assignedContactId = (int) $form->getVar('_contactID');
+    $mandateId = getIdOfNewMandate($assignedContactId);
+    if ($form->_params['is_recur'] == 1) {
+      $recurrContributionId = $form->_params['contributionRecurID'];
+      saveDependencyBetweenContributionAndMandate($recurrContributionId, $mandateId);
+    }
+
+    saveMandateInContribution($contributionId, $mandateId);
+  }
+}
+
+/**
+ * Gets id of last inserted direct debit mandate
+ *
+ * @param $assignedContactId
+ *
+ * @return int
+ */
+function getIdOfNewMandate($assignedContactId) {
+  $tableName = 'civicrm_value_dd_mandate';
+
+  createNewMandate($assignedContactId, $tableName);
+
+  $query = CRM_Utils_SQL_Select::from($tableName);
+  $query->select('LAST_INSERT_ID()');
+  $result = CRM_Core_DAO::executeQuery($query->toSQL());
+  $fetched = $result->fetchAll();
+  $lastInsertedMandateId = $fetched[0]['LAST_INSERT_ID()'];
+
+  return (int) $lastInsertedMandateId;
+}
+
+/**
+ * Creates new direct debit mandate
+ *
+ * @param $assignedContactId
+ * @param $tableName
+ */
+function createNewMandate($assignedContactId, $tableName) {
+  $rows[] = [
+    'entity_id' => $assignedContactId,
+  ];
+
+  $insert = CRM_Utils_SQL_Insert::into($tableName);
+  $insert->rows($rows);
+  CRM_Core_DAO::executeQuery($insert->toSQL());
+}
+
+
+/**
+ * Inserts into data base dependency between contribution and mandate
+ *
+ * @param $recurrId
+ * @param $mandateId
+ */
+function saveDependencyBetweenContributionAndMandate($recurrId, $mandateId) {
+  $rows = [
+    'recurr_id' => $recurrId,
+    'mandate_id' => $mandateId
+  ];
+  CRM_ManualDirectDebit_BAO_RecurrMandateRef::create($rows);
+}
+
+/**
+ * Inserts into Direct Debit Mandate table mandate id
+ *
+ * @param $assignedContactId
+ * @param $mandateId
+ */
+function saveMandateInContribution($contributionId, $mandateId) {
+  $mandateIdCustomFieldId = getMandateCustomFieldId();
+  civicrm_api3('Contribution', 'create', [
+    "custom_$mandateIdCustomFieldId" => $mandateId,
+    'id' => $contributionId,
+  ]);
+}
+
+/**
+ * Gets id of custom value
+ *
+ * @return array
+ */
+function getMandateCustomFieldId() {
+  $mandateIdCustomFieldId = civicrm_api3('CustomField', 'getvalue', [
+    'return' => "id",
+    'name' => "mandate_id",
+  ]);
+
+  return $mandateIdCustomFieldId;
+}
