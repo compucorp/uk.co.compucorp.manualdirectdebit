@@ -9,13 +9,13 @@ class CRM_ManualDirectDebit_BAO_RecurrMandateRef extends CRM_ManualDirectDebit_D
    * @return \CRM_ManualDirectDebit_BAO_RecurrMandateRef|null
    */
   public static function retrieve($params, $defaults) {
-    $object = new self();
-    $object->copyValues($params);
+    $self = new self();
+    $self->copyValues($params);
 
-    if ($object->find(TRUE)) {
-      CRM_Core_DAO::storeValues($object, $defaults);
-      $object->free();
-      return $object;
+    if ($self->find(TRUE)) {
+      CRM_Core_DAO::storeValues($self, $defaults);
+      $self->free();
+      return $self;
     }
 
     return NULL;
@@ -27,10 +27,10 @@ class CRM_ManualDirectDebit_BAO_RecurrMandateRef extends CRM_ManualDirectDebit_D
    * @return \CRM_Core_DAO
    */
   public static function add($params) {
-    $entity = new self();
-    $entity->copyValues($params);
+    $recurrMandateRef = new self();
+    $recurrMandateRef->copyValues($params);
 
-    return $entity->save();
+    return $recurrMandateRef->save();
   }
 
   /**
@@ -38,7 +38,7 @@ class CRM_ManualDirectDebit_BAO_RecurrMandateRef extends CRM_ManualDirectDebit_D
    *
    * @return \CRM_Core_DAO
    */
-  public static function &create($params) {
+  public static function create($params) {
     if (!empty($params['id'])) {
       CRM_Utils_Hook::pre('edit', self::getEntityName(), $params['id'], $params);
     }
@@ -60,18 +60,6 @@ class CRM_ManualDirectDebit_BAO_RecurrMandateRef extends CRM_ManualDirectDebit_D
     }
 
     return $entityData;
-  }
-
-  /**
-   * Gets all rows
-   *
-   * @return array
-   */
-  public static function getAll() {
-    $query = CRM_Utils_SQL_Select::from(self::getTableName())
-      ->toSQL();
-
-    return CRM_Core_DAO::executeQuery($query)->fetchAll();
   }
 
 }
