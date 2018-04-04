@@ -175,11 +175,10 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
   $action = $form->getAction();
 
   if ($formName == 'CRM_Contribute_Form_Contribution' && $action == CRM_Core_Action::ADD) {
-    $createManualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_CreateDirectDebitMandate((int) $form->getVar('_contactID'));
-    $createManualDirectDebit->assignMandateIdIntoContribution((int) $form->getVar('_id'));
-    if ($form->_params['is_recur']) {
-      $createManualDirectDebit->assignMandateIdIntoRecurringContribution($form->_params['contributionRecurID']);
-    }
+
+    $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
+
+    $manualDirectDebit->create();
   }
 }
 
@@ -189,7 +188,7 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
  */
 function manualdirectdebit_civicrm_pageRun(&$page) {
   if (get_class($page) == 'CRM_Contribute_Page_ContributionRecur') {
-    $injectCustomGroup = new CRM_ManualDirectDebit_Hook_PageRun_CustomGroupInjector();
-    $injectCustomGroup->injectDirectDebitInformation();
+    $injectCustomGroup = new CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInjector();
+    $injectCustomGroup->inject();
   }
 }
