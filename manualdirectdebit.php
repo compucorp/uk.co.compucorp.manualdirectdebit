@@ -166,3 +166,29 @@ function manualdirectdebit_civicrm_navigationMenu(&$menu) {
     _manualdirectdebit_civix_insert_navigation_menu($menu, 'Administer/' . $directDebitMenuItem['name'], $menuItem);
   }
 }
+
+/**
+ * Implements hook_civicrm_postProcess().
+ *
+ */
+function manualdirectdebit_civicrm_postProcess($formName, &$form) {
+  $action = $form->getAction();
+
+  if ($formName == 'CRM_Contribute_Form_Contribution' && $action == CRM_Core_Action::ADD) {
+
+    $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
+
+    $manualDirectDebit->create();
+  }
+}
+
+/**
+ * Implements hook_civicrm_pageRun().
+ *
+ */
+function manualdirectdebit_civicrm_pageRun(&$page) {
+  if (get_class($page) == 'CRM_Contribute_Page_ContributionRecur') {
+    $injectCustomGroup = new CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInjector();
+    $injectCustomGroup->inject();
+  }
+}
