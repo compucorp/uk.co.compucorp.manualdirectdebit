@@ -3,7 +3,7 @@
 /**
  * Generates `Start Date` field if it wasn't filed by user
  */
-class CRM_ManualDirectDebit_Hook_Custom_StartDateGenerator {
+class CRM_ManualDirectDebit_Hook_Custom_MandateStartDateGenerator {
 
   /**
    * Current year
@@ -38,7 +38,7 @@ class CRM_ManualDirectDebit_Hook_Custom_StartDateGenerator {
    *
    * @param $month
    */
-  public function setMonth($month) {
+  private function setMonth($month) {
     if ($month > 12) {
       $this->month = 1;
       $this->year++;
@@ -61,7 +61,7 @@ class CRM_ManualDirectDebit_Hook_Custom_StartDateGenerator {
    *
    * @return string
    */
-  public function calculateStartDate() {
+  public function generate() {
     if ($this->day > $this->collectionDay) {
       $this->setMonth($this->month + 1);
     }
