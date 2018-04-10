@@ -24,9 +24,17 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
   }
 
   public function create() {
-    $this->mandateID = $this->createMandate();
-    $this->assignContributionMandate();
-    $this->assignRecurringContributionMandate();
+    if ($this->form->_params['is_recur']) {
+      if ($this->form->_paymentProcessor['name'] == "Direct Debit") {
+        $this->mandateID = $this->createMandate();
+        $this->assignContributionMandate();
+        $this->assignRecurringContributionMandate();
+      }
+    }
+    else {
+      $this->mandateID = $this->createMandate();
+      $this->assignContributionMandate();
+    }
   }
 
   /**
@@ -51,13 +59,11 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
    *
    */
   public function assignRecurringContributionMandate() {
-    if($this->form->_params['is_recur']){
-      $rows = [
-        'recurr_id' => $this->form->_params['contributionRecurID'],
-        'mandate_id' => $this->mandateID,
-      ];
-      CRM_ManualDirectDebit_BAO_RecurrMandateRef::create($rows);
-    }
+    $rows = [
+      'recurr_id' => $this->form->_params['contributionRecurID'],
+      'mandate_id' => $this->mandateID,
+    ];
+    CRM_ManualDirectDebit_BAO_RecurrMandateRef::create($rows);
   }
 
   /**
@@ -68,10 +74,20 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
   private function createMandate() {
     $tableName = 'civicrm_value_dd_mandate';
     $sqlInsertedInDirectDebitMandate = "INSERT INTO `$tableName` (`entity_id`) VALUES (%1)";
-    CRM_Core_DAO::executeQuery($sqlInsertedInDirectDebitMandate, [1 => [$this->form->getVar('_contactID'), 'String']]);
+    CRM_Core_DAO::executeQuery($sqlInsertedInDirectDebitMandate, [
+      1 => [
+        $this->form->getVar('_contactID'),
+        'String',
+      ],
+    ]);
 
     $sqlSelectedDebitMandateID = "SELECT MAX(`id`) AS id FROM `$tableName` WHERE `entity_id` = %1";
-    $queryResult = CRM_Core_DAO::executeQuery($sqlSelectedDebitMandateID, [1 => [$this->form->getVar('_contactID'), 'String']]);
+    $queryResult = CRM_Core_DAO::executeQuery($sqlSelectedDebitMandateID, [
+      1 => [
+        $this->form->getVar('_contactID'),
+        'String',
+      ],
+    ]);
     $queryResult->fetch();
     $generatedMandateId = $queryResult->id;
 
