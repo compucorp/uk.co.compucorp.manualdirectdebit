@@ -196,9 +196,9 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
  *
  */
 function manualdirectdebit_civicrm_custom($op, $groupID, $entityID, &$params) {
-  if (isDirectDebitCustomGroup($groupID) && isAcceptableOperation($op)) {
-    $necessaryFieldGenerator = new CRM_ManualDirectDebit_Hook_Custom_MandateDataGenerator($entityID, $params);
-    $necessaryFieldGenerator->generate();
+  if (_manualdirectdebit_isDirectDebitCustomGroup($groupID) && ($op == 'create' || $op == 'edit')) {
+    $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_MandateDataGenerator($entityID, $params);
+    $mandateDataGenerator->generate();
   }
 }
 
@@ -209,7 +209,7 @@ function manualdirectdebit_civicrm_custom($op, $groupID, $entityID, &$params) {
  *
  * @return bool
  */
-function isDirectDebitCustomGroup($groupID) {
+function _manualdirectdebit_isDirectDebitCustomGroup($groupID) {
   $directDebitMandateId = civicrm_api3('CustomGroup', 'getvalue', [
     'sequential' => 1,
     'return' => "id",
@@ -217,15 +217,4 @@ function isDirectDebitCustomGroup($groupID) {
   ]);
 
   return $groupID == $directDebitMandateId;
-}
-
-/**
- * Checks if operation is acceptable
- *
- * @param $op
- *
- * @return bool
- */
-function isAcceptableOperation($op) {
-  return $op == 'create' || $op == 'edit';
 }

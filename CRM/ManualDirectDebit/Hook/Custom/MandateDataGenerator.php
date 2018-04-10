@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Generates necessary field if it wasn't filed by user
+ * This class Generates the required mandate fields automatically in case they are not submitted by the user
  */
 class CRM_ManualDirectDebit_Hook_Custom_MandateDataGenerator {
 
@@ -27,7 +27,7 @@ class CRM_ManualDirectDebit_Hook_Custom_MandateDataGenerator {
   private $savedFields;
 
   /**
-   * Array of necessary fields, which must to be generated
+   * List of the mandate fields to be generated
    *
    * @var array
    */
@@ -133,12 +133,12 @@ class CRM_ManualDirectDebit_Hook_Custom_MandateDataGenerator {
   }
 
   /**
-   * Launches process of necessary field generation
+   * Generates and saves the required mandate fields  values if they are not supplied by the user.
    *
    */
   public function generate() {
     $this->generateFieldsValues();
-    $this->saveGenerated();
+    $this->saveGeneratedValues();
     $this->updateContributionReceiveDate();
   }
 
@@ -230,14 +230,14 @@ class CRM_ManualDirectDebit_Hook_Custom_MandateDataGenerator {
   /**
    * Saves all generated values
    */
-  private function saveGenerated() {
+  private function saveGeneratedValues() {
     $tableName = "civicrm_value_dd_mandate";
     $setValueTemplateFields = [];
     $fieldsValues = [];
     $i = 0;
-    foreach ($this->fieldsToGenerate as $key => $necessaryField) {
+    foreach ($this->fieldsToGenerate as $key => $field) {
       $setValueTemplateFields[] = $tableName . "." . $key . " = %" . ($i);
-      $fieldsValues[$i] = [$necessaryField, ucfirst(gettype($necessaryField))];
+      $fieldsValues[$i] = [$field, ucfirst(gettype($field))];
       $i++;
     }
     $setValueTemplate = implode(', ', $setValueTemplateFields);

@@ -67,7 +67,7 @@ class CRM_ManualDirectDebit_Hook_Custom_MandateStartDateGenerator {
     }
     $this->day = $this->collectionDay;
 
-    $this->generateClosestAppropriateDate();
+    $this->generateClosestDate();
 
     $date = new DateTime();
     $date->setDate($this->year, $this->month, $this->day);
@@ -76,17 +76,17 @@ class CRM_ManualDirectDebit_Hook_Custom_MandateStartDateGenerator {
   }
 
   /**
-   * Generates closest appropriate valid date
+   * Generates closest valid date
    *
    * @return bool
    */
-  private function generateClosestAppropriateDate() {
+  private function generateClosestDate() {
     if (checkdate($this->month, $this->day, $this->year)) {
       return TRUE;
     }
     else {
       $this->day--;
-      return $this->generateClosestAppropriateDate();
+      return $this->generateClosestDate();
     }
   }
 
