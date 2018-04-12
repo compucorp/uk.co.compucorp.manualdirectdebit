@@ -8,4 +8,14 @@
         <access_arguments>administer CiviCRM</access_arguments>
         <page_type>0</page_type>
     </item>
+    <item>
+        <path>civicrm/direct_debit/batch/instructions_batch</path>
+        <title>New instructions batch</title>
+        <page_callback>CRM_ManualDirectDebit_Form_InstructionsBatch</page_callback>
+    </item>
+    <item>
+        <path>civicrm/direct_debit/batchtransaction</path>
+        <title>Accounting Batch</title>
+        <page_callback>CRM_ManualDirectDebit_Page_BatchTransaction</page_callback>
+    </item>
 </menu>

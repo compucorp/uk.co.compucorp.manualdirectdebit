@@ -160,6 +160,13 @@ function manualdirectdebit_civicrm_navigationMenu(&$menu) {
       'operator' => NULL,
       'separator' => NULL,
     ],
+    [
+      'name' => ts('Create New Direct Debit Instructions'),
+      'url' => 'civicrm/direct_debit/batch/instructions_batch?reset=1&action=add',
+      'permission' => 'administer CiviCRM',
+      'operator' => NULL,
+      'separator' => 2,
+    ],
   ];
 
   foreach ($subMenuItems as $menuItem) {
@@ -217,4 +224,26 @@ function _manualdirectdebit_isDirectDebitCustomGroup($groupID) {
   ]);
 
   return $groupID == $directDebitMandateId;
+}
+
+/**
+ * Implements hook_civicrm_links().
+ *
+ */
+function manualdirectdebit_civicrm_links($op, $objectName, $objectId, &$links, &$mask, &$values) {
+
+  if ($objectName == 'Batch') {
+    $batch = CRM_Batch_BAO_Batch::findById($objectId);
+
+    $instructionsBatchTypeId = CRM_Core_OptionGroup::getRowValues('batch_type', 'instructions_batch', 'name', 'String', FALSE);
+    if ($batch->type_id == $instructionsBatchTypeId['value']) {
+      foreach ($links as &$link) {
+        switch ($link['name']) {
+          case 'Transactions':
+            $link['url'] = 'civicrm/direct_debit/batchtransaction';
+            break;
+        }
+      }
+    }
+  }
 }
