@@ -6,13 +6,6 @@
 class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
 
   /**
-   * Id of newly generated mandate
-   *
-   * @var int
-   */
-  private $mandateID;
-
-  /**
    * Contribution form object from Hook
    *
    * @var object
@@ -23,55 +16,12 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
     $this->form = $form;
   }
 
-  public function create() {
-    if ($this->form->_params['is_recur']) {
-      if ($this->form->_paymentProcessor['name'] == "Direct Debit") {
-        $this->mandateID = $this->createMandate();
-        $this->assignContributionMandate();
-        $this->assignRecurringContributionMandate();
-      }
-    }
-    else {
-      $this->mandateID = $this->createMandate();
-      $this->assignContributionMandate();
-    }
-  }
-
-  /**
-   * Assign a newly generated mandate into appropriate contribution
-   *
-   */
-  public function assignContributionMandate() {
-    $currentContributionID = (int) $this->form->getVar('_id');
-    $mandateIdCustomFieldId = civicrm_api3('CustomField', 'getvalue', [
-      'return' => "id",
-      'name' => "mandate_id",
-    ]);
-
-    civicrm_api3('Contribution', 'create', [
-      "custom_$mandateIdCustomFieldId" => $this->mandateID,
-      'id' => $currentContributionID,
-    ]);
-  }
-
-  /**
-   * Assign a newly generated mandate into appropriate recurring contribution
-   *
-   */
-  public function assignRecurringContributionMandate() {
-    $rows = [
-      'recurr_id' => $this->form->_params['contributionRecurID'],
-      'mandate_id' => $this->mandateID,
-    ];
-    CRM_ManualDirectDebit_BAO_RecurrMandateRef::create($rows);
-  }
-
   /**
    * Creates a new direct debit mandate and returns id of the last inserted one
    *
    * @return int
    */
-  private function createMandate() {
+  public function createMandate() {
     $tableName = 'civicrm_value_dd_mandate';
     $sqlInsertedInDirectDebitMandate = "INSERT INTO `$tableName` (`entity_id`) VALUES (%1)";
     CRM_Core_DAO::executeQuery($sqlInsertedInDirectDebitMandate, [
@@ -91,7 +41,9 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
     $queryResult->fetch();
     $generatedMandateId = $queryResult->id;
 
-    return $generatedMandateId;
+    // sets mandate id, for saving dependency between mandate and contribution
+    $mandateContributionConnector = CRM_ManualDirectDebit_Hook_MandateContributionConnector::getInstance();
+    $mandateContributionConnector->setMandateId($generatedMandateId);
   }
 
 }

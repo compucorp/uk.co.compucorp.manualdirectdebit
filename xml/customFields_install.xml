@@ -271,24 +271,6 @@
             <in_selector>1</in_selector>
         </CustomField>
         <CustomField>
-            <name>collection_day</name>
-            <label>Collection Day</label>
-            <data_type>Int</data_type>
-            <html_type>Text</html_type>
-            <is_required>1</is_required>
-            <is_searchable>1</is_searchable>
-            <is_search_range>0</is_search_range>
-            <weight>31</weight>
-            <is_active>1</is_active>
-            <is_view>0</is_view>
-            <text_length>64</text_length>
-            <note_columns>60</note_columns>
-            <note_rows>4</note_rows>
-            <column_name>collection_day</column_name>
-            <custom_group_name>direct_debit_mandate</custom_group_name>
-            <in_selector>1</in_selector>
-        </CustomField>
-        <CustomField>
             <name>mandate_id</name>
             <label>Mandate ID</label>
             <data_type>String</data_type>
@@ -612,22 +594,6 @@
             <in_selector>0</in_selector>
             <is_searchable>0</is_searchable>
             <label>Authorisation File</label>
-            <field_type>Contact</field_type>
-            <is_multi_summary>1</is_multi_summary>
-            <profile_group_name>direct_debit_mandate</profile_group_name>
-        </ProfileField>
-        <ProfileField>
-            <field_name>custom.civicrm_value_dd_mandate.collection_day</field_name>
-            <is_active>1</is_active>
-            <is_view>0</is_view>
-            <is_required>1</is_required>
-            <weight>16</weight>
-            <help_post></help_post>
-            <help_pre></help_pre>
-            <visibility>User and User Admin Only</visibility>
-            <in_selector>0</in_selector>
-            <is_searchable>0</is_searchable>
-            <label>Collection Day</label>
             <field_type>Contact</field_type>
             <is_multi_summary>1</is_multi_summary>
             <profile_group_name>direct_debit_mandate</profile_group_name>

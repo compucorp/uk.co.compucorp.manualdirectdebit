@@ -3,7 +3,7 @@
 /**
  * Generates `Start Date` field if it wasn't filed by user
  */
-class CRM_ManualDirectDebit_Hook_Custom_MandateStartDateGenerator {
+class CRM_ManualDirectDebit_Hook_Custom_ContributionRecurStartDateGenerator {
 
   /**
    * Current year
@@ -27,11 +27,11 @@ class CRM_ManualDirectDebit_Hook_Custom_MandateStartDateGenerator {
   private $day;
 
   /**
-   * Collection day
+   * Cycle day
    *
    * @var int
    */
-  private $collectionDay;
+  private $cycleDay;
 
   /**
    * Protects setting month bigger then 12, and in that case set it to 1
@@ -48,12 +48,12 @@ class CRM_ManualDirectDebit_Hook_Custom_MandateStartDateGenerator {
     }
   }
 
-  public function __construct($collectionDay) {
-    $this->year = (new DateTime())->format('Y');
-    $this->month = (new DateTime())->format('m');
-    $this->day = (new DateTime())->format('d');
+  public function __construct($cycleDay, $mandateStartDate) {
+    $this->year = DateTime::createFromFormat('Y-m-d H:i:s', $mandateStartDate)->format('Y');
+    $this->month = DateTime::createFromFormat('Y-m-d H:i:s', $mandateStartDate)->format('m');
+    $this->day = DateTime::createFromFormat('Y-m-d H:i:s', $mandateStartDate)->format('d');
 
-    $this->collectionDay = $collectionDay;
+    $this->cycleDay = $cycleDay;
   }
 
   /**
@@ -62,10 +62,10 @@ class CRM_ManualDirectDebit_Hook_Custom_MandateStartDateGenerator {
    * @return string
    */
   public function generate() {
-    if ($this->day > $this->collectionDay) {
+    if ($this->day > $this->cycleDay) {
       $this->setMonth($this->month + 1);
     }
-    $this->day = $this->collectionDay;
+    $this->day = $this->cycleDay;
 
     $this->generateClosestDate();
 

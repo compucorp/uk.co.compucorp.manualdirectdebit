@@ -176,7 +176,7 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
 
   if ($formName == 'CRM_Contribute_Form_Contribution' && $action == CRM_Core_Action::ADD) {
     $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
-    $manualDirectDebit->create();
+    $manualDirectDebit->createMandate();
   }
 }
 
@@ -185,6 +185,14 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
  *
  */
 function manualdirectdebit_civicrm_pageRun(&$page) {
+  if (get_class($page) == 'CRM_Contribute_Page_Tab') {
+    $contributionId = $page->getVar('_id');
+    $hideDirectDebitField = new CRM_ManualDirectDebit_Hook_PageRun_Contribution_DirectDebitInformation();
+    $hideDirectDebitField->setContributionId($contributionId);
+
+    $hideDirectDebitField->analyzeView();
+  }
+
   if (get_class($page) == 'CRM_Contribute_Page_ContributionRecur') {
     $injectCustomGroup = new CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInjector($page);
     $injectCustomGroup->inject();
@@ -197,7 +205,7 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
  */
 function manualdirectdebit_civicrm_custom($op, $groupID, $entityID, &$params) {
   if (_manualdirectdebit_isDirectDebitCustomGroup($groupID) && ($op == 'create' || $op == 'edit')) {
-    $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_MandateDataGenerator($entityID, $params);
+    $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_DataGenerator($entityID, $params);
     $mandateDataGenerator->generate();
   }
 }
@@ -217,4 +225,9 @@ function _manualdirectdebit_isDirectDebitCustomGroup($groupID) {
   ]);
 
   return $groupID == $directDebitMandateId;
+}
+
+function manualdirectdebit_civicrm_postSave_civicrm_contribution($dao){
+  $mandateContributionConnector = CRM_ManualDirectDebit_Hook_MandateContributionConnector::getInstance();
+  $mandateContributionConnector->setContributionProperties($dao);
 }
