@@ -137,6 +137,7 @@ function manualdirectdebit_civicrm_navigationMenu(&$menu) {
     'separator' => NULL,
   ];
   _manualdirectdebit_civix_insert_navigation_menu($menu, 'Administer/', $directDebitMenuItem);
+  $batchTypes = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, NULL, 'name');
 
   $subMenuItems = [
     [
@@ -159,6 +160,19 @@ function manualdirectdebit_civicrm_navigationMenu(&$menu) {
       'permission' => 'administer CiviCRM',
       'operator' => NULL,
       'separator' => NULL,
+    ],
+    [
+      'name' => ts('Create New Instructions Batch'),
+      'url' => 'civicrm/direct_debit/batch?reset=1&action=add&type_id=' . array_search('instructions_batch', $batchTypes),
+      'permission' => 'administer CiviCRM',
+      'operator' => NULL,
+      'separator' => 2,
+    ],
+    [
+      'name' => ts('Export Direct Debit Payments'),
+      'url' => 'civicrm/direct_debit/batch?reset=1&action=add&type_id=' . array_search('dd_payments', $batchTypes),
+      'permission' => 'administer CiviCRM',
+      'operator' => NULL,
     ],
   ];
 
@@ -227,6 +241,31 @@ function _manualdirectdebit_isDirectDebitCustomGroup($groupID) {
   return $groupID == $directDebitMandateId;
 }
 
+/**
+ * Implements hook_civicrm_links().
+ *
+ */
+function manualdirectdebit_civicrm_links($op, $objectName, $objectId, &$links, &$mask, &$values) {
+
+  if ($objectName == 'Batch') {
+    $batch = CRM_Batch_BAO_Batch::findById($objectId);
+
+    $instructionsBatchTypeId = CRM_Core_OptionGroup::getRowValues('batch_type', 'instructions_batch', 'name', 'String', FALSE);
+    if ($batch->type_id == $instructionsBatchTypeId['value']) {
+      foreach ($links as &$link) {
+        switch ($link['name']) {
+          case 'Transactions':
+            $link['url'] = 'civicrm/direct_debit/batch-transaction';
+            break;
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_civicrm_postSave_civicrm_contribution().
+ */
 function manualdirectdebit_civicrm_postSave_civicrm_contribution($dao){
   $mandateContributionConnector = CRM_ManualDirectDebit_Hook_MandateContributionConnector::getInstance();
   $mandateContributionConnector->setContributionProperties($dao);
