@@ -56,7 +56,6 @@ class CRM_ManualDirectDebit_Hook_Custom_ContributionDataGenerator {
 
   /**
    * Launches generation of required contribution fields
-   *
    */
   public function generateContributionFieldsValues() {
     $this->generateCycleDate();
@@ -65,7 +64,6 @@ class CRM_ManualDirectDebit_Hook_Custom_ContributionDataGenerator {
 
   /**
    * Generates cycle date
-   *
    */
   private function generateCycleDate() {
     $mandateStartDateDayNumber = DateTime::createFromFormat('Y-m-d H:i:s', $this->mandateStartDate)->format('d');
@@ -102,7 +100,6 @@ class CRM_ManualDirectDebit_Hook_Custom_ContributionDataGenerator {
 
   /**
    * Generates Recurring Contribution `Start date`
-   *
    */
   private function generateRecurringContributionStartDate() {
     $startDateGenerator = new CRM_ManualDirectDebit_Hook_Custom_ContributionRecurStartDateGenerator($this->cycleDay, $this->mandateStartDate);
@@ -111,7 +108,6 @@ class CRM_ManualDirectDebit_Hook_Custom_ContributionDataGenerator {
 
   /**
    * Saves all generated values
-   *
    */
   public function saveGeneratedContributionValues() {
     civicrm_api3('ContributionRecur', 'get', [

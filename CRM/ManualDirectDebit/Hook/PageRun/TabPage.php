@@ -3,7 +3,7 @@
 /**
  *  This class is responsible for displaying Direct Debit information block on the Contribution page
  */
-class CRM_ManualDirectDebit_Hook_PageRun_Contribution_DirectDebitInformation {
+class CRM_ManualDirectDebit_Hook_PageRun_Contribution_TabPage {
 
   /**
    * Contribution Id
@@ -16,7 +16,7 @@ class CRM_ManualDirectDebit_Hook_PageRun_Contribution_DirectDebitInformation {
    *  Hides Direct Debit information if the contribution doesn't has mandate
    *
    */
-  public function analyzeView() {
+  public function hideDirectDebitFields() {
     if (isset($this->contributionId) && !empty($this->contributionId)) {
 
       if ($this->isCustomFieldNeedToHide($this->contributionId)) {

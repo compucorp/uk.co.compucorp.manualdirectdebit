@@ -46,15 +46,6 @@ class CRM_ManualDirectDebit_Hook_Custom_MandateDataGenerator {
   public function __construct($entityID, $settings, &$params) {
     $this->settings = $settings;
     $this->savedFields = $params;
-    $this->setMandateId($entityID);
-  }
-
-  /**
-   * Sets `mandateId` property
-   *
-   * @param $entityID
-   */
-  private function setMandateId($entityID) {
     $this->mandateId = $this->getLastMandateId($entityID);
   }
 
@@ -125,7 +116,6 @@ class CRM_ManualDirectDebit_Hook_Custom_MandateDataGenerator {
 
   /**
    * Saves all generated values
-   *
    */
   public function saveGeneratedMandateValues() {
     $setValueTemplateFields = [];

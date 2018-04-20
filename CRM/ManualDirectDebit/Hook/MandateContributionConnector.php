@@ -2,7 +2,6 @@
 
 /**
  * Class provide saving dependency between mandate and contribution
- *
  */
 class CRM_ManualDirectDebit_Hook_MandateContributionConnector {
 
@@ -145,7 +144,6 @@ class CRM_ManualDirectDebit_Hook_MandateContributionConnector {
 
   /**
    * Assigns a mandate into recurring contribution
-   *
    */
   private function assignRecurringContributionMandate() {
     $rows = [
@@ -157,7 +155,6 @@ class CRM_ManualDirectDebit_Hook_MandateContributionConnector {
 
   /**
    * Assigns a mandate into contribution
-   *
    */
   private function assignContributionMandate() {
     $mandateIdCustomFieldId = civicrm_api3('CustomField', 'getvalue', [
@@ -176,17 +173,17 @@ class CRM_ManualDirectDebit_Hook_MandateContributionConnector {
    * @return bool
    */
   private function isPaymentInstrumentDirectDebit() {
-    $paymentInstrumentId = civicrm_api3('OptionValue', 'getvalue', array(
+    $paymentInstrumentId = civicrm_api3('OptionValue', 'getvalue', [
       'return' => "value",
       'label' => "Direct Debit",
-    ));
+    ]);
 
     return $paymentInstrumentId == $this->currentPaymentInstrumentId;
   }
 
   /**
-   * Refreshes all properties after saving dependency for reusing instance of class
-   *
+   * Refreshes all properties after saving dependency for reusing instance of
+   * class
    */
   private function refreshProperties() {
     unset($this->mandateId);

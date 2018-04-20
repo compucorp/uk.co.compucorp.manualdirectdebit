@@ -34,7 +34,6 @@ class CRM_ManualDirectDebit_Hook_Custom_DataGenerator {
 
   /**
    *  Sets `settings` property
-   *
    */
   private function setManualDirectDebitSettings() {
     $this->settings = $this->getManualDirectDebitSettings();
@@ -86,7 +85,6 @@ class CRM_ManualDirectDebit_Hook_Custom_DataGenerator {
 
   /**
    * Generates and saves the required fields values if they are not supplied by the user.
-   *
    */
   public function generate() {
     $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_MandateDataGenerator($this->entityID, $this->settings, $this->savedFields);
