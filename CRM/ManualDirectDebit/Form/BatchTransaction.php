@@ -136,7 +136,6 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
    * Get action links.
    *
    * @return array
-   *
    */
   public function &links() {
     if (!($this->links)) {
@@ -161,7 +160,6 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
 
   /**
    * Assigns instruction or direct debit payment batch properties for transaction
-   *
    */
   private function assignSearchProperties($batchType) {
     $ddCodes = CRM_Core_OptionGroup::values('direct_debit_codes');

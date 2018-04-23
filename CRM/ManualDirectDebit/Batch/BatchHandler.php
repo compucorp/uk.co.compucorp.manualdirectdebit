@@ -10,7 +10,6 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
    * Batch id
    *
    * @var integer
-   *
    */
   private $batchID;
 
@@ -83,12 +82,9 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
 
     $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction($params['batch_id'], $params);
 
-    $mandateItems = $batchTransaction->getRows();
-    foreach ($mandateItems as &$mandateItem) {
-      unset($mandateItem['check']);
-    }
+    $mandateItems = $batchTransaction->getDDMandateInstructions();
 
-    $mandateItems['headers'] =  [
+    $headers = [
       ts('Contact ID'),
       ts('Account Holder Name'),
       ts('Sort code'),
@@ -98,13 +94,13 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       ts('Transaction Type'),
     ];
 
-    $fileName = $this->generateCSVFile($mandateItems);
+    $fileName = $this->generateCSVFile($headers, $mandateItems);
 
     $this->createActivityExport($fileName);
 
     CRM_Utils_System::setHttpHeader('Content-Type', 'text/plain');
     CRM_Utils_System::setHttpHeader('Content-Disposition', 'attachment; filename=' . CRM_Utils_File::cleanFileName(basename($fileName)));
-    CRM_Utils_System::setHttpHeader('Content-Length', '' . filesize($fileName));
+    CRM_Utils_System::setHttpHeader('Content-Length', '' . filesize($config->customFileUploadDir . CRM_Utils_File::cleanFileName(basename($fileName))));
     ob_clean();
     flush();
     readfile($config->customFileUploadDir . CRM_Utils_File::cleanFileName(basename($fileName)));
@@ -114,25 +110,23 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
   /**
    * Creates csv File
    *
-   * @param array $export
+   * @param array $headers
+   *
+   * @param \CRM_Core_DAO $export
    *
    * @return string
-   *
    */
-  private function generateCSVFile($export) {
+  private function generateCSVFile($headers, $export) {
     $config = CRM_Core_Config::singleton();
     $fileName = $config->uploadDir . 'Instructions_Batch' . $this->batchID . '_' . date('YmdHis') . '.csv';
     $out = fopen($fileName, 'w');
-    if (!empty($export['headers'])) {
-      fputcsv($out, $export['headers']);
+
+    fputcsv($out, $headers);
+
+    while ($export->fetch()) {
+      fputcsv($out, $export->toArray());
     }
-    unset($export['headers']);
-    if (!empty($export)) {
-      foreach ($export as $fields) {
-        fputcsv($out, $fields);
-      }
-      fclose($out);
-    }
+    fclose($out);
 
     return $fileName;
   }
@@ -141,7 +135,6 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
    * Creates activity with type "Export Accounting Batch".
    *
    * @param string $fileName
-   *
    */
   private function createActivityExport($fileName) {
     $session = CRM_Core_Session::singleton();

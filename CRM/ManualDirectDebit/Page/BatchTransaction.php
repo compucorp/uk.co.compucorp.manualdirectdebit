@@ -39,7 +39,6 @@ class CRM_ManualDirectDebit_Page_BatchTransaction extends CRM_Core_Page_Basic {
    *
    * @return array
    *   (reference) of action links
-   *
    */
   public function &links() {
     return $this->links;
@@ -60,7 +59,6 @@ class CRM_ManualDirectDebit_Page_BatchTransaction extends CRM_Core_Page_Basic {
    *
    * @return string
    *   Classname of edit form.
-   *
    */
   public function editForm() {
     return 'CRM_ManualDirectDebit_Form_BatchTransaction';
@@ -71,7 +69,6 @@ class CRM_ManualDirectDebit_Page_BatchTransaction extends CRM_Core_Page_Basic {
    *
    * @return string
    *   name of this page.
-   *
    */
   public function editName() {
     return 'Batch';
@@ -84,7 +81,6 @@ class CRM_ManualDirectDebit_Page_BatchTransaction extends CRM_Core_Page_Basic {
    *
    * @return string
    *   user context.
-   *
    */
   public function userContext($mode = NULL) {
     return 'civicrm/direct_debit/batch-transaction';

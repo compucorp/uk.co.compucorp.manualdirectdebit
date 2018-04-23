@@ -21,16 +21,16 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     $session = CRM_Core_Session::singleton();
     $session->replaceUserContext(CRM_Utils_System::url('civicrm/direct_debit/batch', "reset=1&action=add&type_id=" . $batchType['value']));
 
-    CRM_Utils_System::setTitle(E::ts('Create %1', [ 1 => $batchType['label']]));
+    CRM_Utils_System::setTitle(E::ts('Create %1', [1 => $batchType['label']]));
 
     $this->assign('batch_id', CRM_ManualDirectDebit_Batch_BatchHandler::getMaxBatchId() + 1);
+    $this->add('hidden', 'batch_id', CRM_ManualDirectDebit_Batch_BatchHandler::getMaxBatchId() + 1);
     $this->add('hidden', 'type_id', $batchType['value']);
     $this->assign('batch_type', $batchType['label']);
   }
 
   /**
    * Builds the form object.
-   *
    */
   public function buildQuickForm() {
     parent::buildQuickForm();
@@ -72,7 +72,6 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
 
   /**
    * postProcess function.
-   *
    */
   public function postProcess() {
     $session = CRM_Core_Session::singleton();
@@ -122,6 +121,31 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     ];
 
     CRM_Activity_BAO_Activity::create($activityParams);
+  }
+
+  /**
+   * Intercept QF validation and do our own redirection.
+   *
+   * @return bool
+   *   true if no error found
+   */
+  public function validate() {
+    $errors = parent::validate();
+    $params = $this->controller->exportValues($this->_name);
+
+    if ($params['batch_id'] <= CRM_ManualDirectDebit_Batch_BatchHandler::getMaxBatchId()) {
+      $title = ts('Batch ID already exists');
+      $message = ts('Batch ID %1 already exists. It is likely another batch 
+        has just been created a moment ago.', [1 => $params['batch_id']]);
+
+      CRM_Core_Session::setStatus($message, $title, 'error');
+
+      $this->controller->setDestination(NULL, TRUE);
+      header("Refresh:0; {$_SERVER['HTTP_REFERER']}");
+      exit;
+    }
+
+    return $errors;
   }
 
 }
