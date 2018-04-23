@@ -187,7 +187,7 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
 function manualdirectdebit_civicrm_pageRun(&$page) {
   if (get_class($page) == 'CRM_Contribute_Page_Tab') {
     $contributionId = $page->getVar('_id');
-    $pageProcessor = new CRM_ManualDirectDebit_Hook_PageRun_Contribution_TabPage();
+    $pageProcessor = new CRM_ManualDirectDebit_Hook_PageRun_TabPage();
     $pageProcessor->setContributionId($contributionId);
     $pageProcessor->hideDirectDebitFields();
 
