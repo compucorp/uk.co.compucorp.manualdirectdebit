@@ -176,7 +176,7 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
 
   if ($formName == 'CRM_Contribute_Form_Contribution' && $action == CRM_Core_Action::ADD) {
     $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
-    $manualDirectDebit->createMandate();
+    $manualDirectDebit->checkPaymentOptionToCreateMandate();
   }
 }
 

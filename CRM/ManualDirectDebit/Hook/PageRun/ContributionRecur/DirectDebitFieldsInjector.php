@@ -25,6 +25,7 @@ class CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInje
     $mandateId = $this->getMandateId();
 
     if ($mandateId) {
+      CRM_Core_Resources::singleton()->addStyleFile('uk.co.compucorp.manualdirectdebit', 'css/directDebitMandate.css');
       CRM_Core_Resources::singleton()
         ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/directDebitInformation.js')
         ->addSetting([

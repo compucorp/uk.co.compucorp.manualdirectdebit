@@ -32,7 +32,7 @@ CRM.$(function ($) {
 '                     <tbody>' +
       '                 <tr>\n' +
 '                         <td class="label">Mandate ID</td>\n' +
-'                         <td class="html-adjust">' + urlData.mandateId + '</td>\n' +
+'                         <td class="html-adjust" id="directDebitMandate"><span>' + urlData.mandateId + '</span></td>\n' +
 '                       </tr>\n' +
 '                     </tbody>' +
       '             </table>\n' +
@@ -44,7 +44,7 @@ CRM.$(function ($) {
       '   </tbody>' +
       '</table>');
 
-    CRM.$('.crm-accordion-body').click(function () {
+    CRM.$('#directDebitMandate').click(function () {
       CRM.loadPage(url);
     });
   }
