@@ -17,9 +17,38 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
   }
 
   /**
+   * Checks if payment option appropriate for creating mandate
+   */
+  public function checkPaymentOptionToCreateMandate() {
+    $isRecurring = isset($this->form->getVar('_params')['is_recur']) && !empty($this->form->getVar('_params')['is_recur']);
+
+    if ($isRecurring){
+      $selectedPaymentProcessor = $this->form->getVar('_params')['payment_processor_id'];
+      $directDebitPaymentProcessor = civicrm_api3('PaymentProcessor', 'getvalue', array(
+        'return' => "id",
+        'name' => "direct debit",
+      ));
+
+      if($selectedPaymentProcessor == $directDebitPaymentProcessor){
+        $this->createMandate();
+      }
+    } else {
+      $selectedPaymentInstrument = $this->form->getVar('_params')['payment_instrument_id'];
+      $directDebitPaymentInstrument = civicrm_api3('OptionValue', 'getvalue', array(
+        'return' => "value",
+        'name' => "direct_debit",
+      ));
+
+      if ($selectedPaymentInstrument == $directDebitPaymentInstrument){
+        $this->createMandate();
+      }
+    }
+  }
+
+  /**
    * Creates a new direct debit mandate and returns id of the last inserted one
    */
-  public function createMandate() {
+  private function createMandate() {
     $tableName = 'civicrm_value_dd_mandate';
 
     $transaction = new CRM_Core_Transaction();

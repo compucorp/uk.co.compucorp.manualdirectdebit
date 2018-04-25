@@ -1,0 +1,9 @@
+#directDebitMandate:hover {
+  background-color: #ffffcc;
+}
+
+#directDebitMandate {
+  cursor: pointer;
+  transition: 0.3s;
+  color: #2786c2;
+}
