@@ -46,21 +46,116 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
 
       $this->_values = civicrm_api3('Batch', 'getSingle', ['id' => $this->batchID]);
       $batchType = CRM_Core_OptionGroup::getRowValues('batch_type', $this->_values['type_id'], 'value', 'String', FALSE);
-
-      $this->assignSearchProperties($batchType);
       CRM_Utils_System::setTitle($batchType['label']);
 
-      $values = json_decode($this->_values['data'], TRUE);
-      $ddCode = civicrm_api3('OptionValue', 'getvalue', [
-        'return' => "value",
-        'option_group_id' => "direct_debit_codes",
-        'name' => "new_direct_debit_i_setup",
-      ]);
-
-      $values['values']['dd_code'] = $ddCode;
-      $values['values']['start_date'] = date('Y-m-d H:i:s');
-      $this->assign($values['values']);
+      $this->assignSearchProperties($batchType);
     }
+  }
+
+  /**
+   * Assigns properties for transaction
+   *
+   * @param array $batchType
+   */
+  private function assignSearchProperties($batchType) {
+    $searchData = [];
+    if ($batchType['name'] == 'instructions_batch') {
+      $searchData = $this->assignInstructionsSearchProperties();
+    }
+
+    if ($batchType['name'] == 'dd_payments') {
+      $searchData = $this->assignDDPaymentsSearchProperties();
+    }
+
+    $this->assign('searchData', json_encode($searchData));
+    $this->assign('batchType_id', $batchType['value']);
+  }
+
+  /**
+   * Assigns instruction batch properties for transaction
+   *
+   */
+  private function assignInstructionsSearchProperties() {
+    $ddCodes = CRM_Core_OptionGroup::values('direct_debit_codes');
+    $batchData = json_decode($this->_values['data'], TRUE);
+
+    $this->addElement('hidden', 'entityTable', 'civicrm_value_dd_mandate');
+    $this->assign('tableTitle', ts('Available instructions'));
+    $this->assign('entityTable', 'civicrm_value_dd_mandate');
+
+    if ($this->_action == CRM_Core_Action::VIEW) {
+      CRM_Utils_System::setTitle(ts('New Direct Debit Instructions Batches - %1', [1 => $this->batch->title]));
+    }
+
+    return [
+      [
+        'name' => 'originator_number',
+        'value' => $batchData['values']['originator_number'],
+      ],
+      [
+        'name' => 'dd_code',
+        'value' => [array_search('0N', $ddCodes)],
+      ],
+      [
+        'name' => 'start_date',
+        'value' => date('Y-m-d H:i:s'),
+      ],
+    ];
+  }
+
+  /**
+   * Assigns direct debit payment batch properties for transaction
+   *
+   */
+  private function assignDDPaymentsSearchProperties() {
+    $ddCodes = CRM_Core_OptionGroup::values('direct_debit_codes');
+    $paymentInstrument = CRM_Core_OptionGroup::values('payment_instrument', FALSE, FALSE, FALSE, NULL, 'name');
+    $contributionStatus = CRM_Core_OptionGroup::values('contribution_status', FALSE, FALSE, FALSE, NULL, 'name');
+    $recurStatus = $contributionStatus;
+    unset($recurStatus[array_search('Cancelled', $contributionStatus)]);
+
+    $batchData = json_decode($this->_values['data'], TRUE);
+
+    $this->addElement('hidden', 'entityTable', 'civicrm_contribution');
+    $this->assign('tableTitle', ts('Available Payments'));
+    $this->assign('entityTable', 'civicrm_contribution');
+
+    if ($this->_action == CRM_Core_Action::VIEW) {
+      CRM_Utils_System::setTitle(ts('Direct Debit Payment Batches - %1', [1 => $this->batch->title]));
+    }
+
+    return [
+      [
+        'name' => 'originator_number',
+        'value' => $batchData['values']['originator_number'],
+      ],
+      [
+        'name' => 'dd_code',
+        'value' => [
+          array_search('01', $ddCodes),
+          array_search('17', $ddCodes),
+        ],
+      ],
+      [
+        'name' => 'receive_date',
+        'value' => date('Y-m-d H:i:s'),
+      ],
+      [
+        'name' => 'recur_status',
+        'value' => array_values(array_flip($recurStatus)),
+      ],
+      [
+        'name' => 'contribution_status',
+        'value' => [
+          array_search('Pending', $contributionStatus),
+          array_search('Cancelled', $contributionStatus),
+        ],
+      ],
+      [
+        'name' => 'payment_instrument',
+        'value' => array_search('direct_debit', $paymentInstrument),
+      ],
+    ];
   }
 
   /**

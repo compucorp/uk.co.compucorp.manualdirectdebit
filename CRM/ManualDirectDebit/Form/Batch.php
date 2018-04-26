@@ -23,8 +23,9 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
 
     CRM_Utils_System::setTitle(E::ts('Create %1', [1 => $batchType['label']]));
 
-    $this->assign('batch_id', CRM_ManualDirectDebit_Batch_BatchHandler::getMaxBatchId() + 1);
-    $this->add('hidden', 'batch_id', CRM_ManualDirectDebit_Batch_BatchHandler::getMaxBatchId() + 1);
+    $newBatchID = CRM_ManualDirectDebit_Batch_BatchHandler::getMaxBatchId() + 1;
+    $this->assign('batch_id', $newBatchID);
+    $this->add('hidden', 'batch_id', $newBatchID);
     $this->add('hidden', 'type_id', $batchType['value']);
     $this->assign('batch_type', $batchType['label']);
   }
@@ -34,6 +35,7 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
    */
   public function buildQuickForm() {
     parent::buildQuickForm();
+    $this->addFormRule([get_class($this), 'validateBatchID'], $this);
 
     $attributes = CRM_Core_DAO::getAttribute('CRM_Batch_DAO_Batch');
     $this->add('text', 'title', ts('Batch Name'), $attributes['name'], TRUE);
@@ -54,6 +56,15 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
         'isDefault' => TRUE,
       ],
     ]);
+  }
+
+  public static function validateBatchID($fields, $files, $self) {
+
+    if ($fields['batch_id'] <= CRM_ManualDirectDebit_Batch_BatchHandler::getMaxBatchId()) {
+      $errors['batch_id'] = ts('Batch ID %1 already exists. It is likely another batch has just been created a moment ago. Please refresh the page and try again.', [1 => $fields['batch_id']]);
+    }
+
+    return empty($errors) ? TRUE : $errors;
   }
 
   /**
@@ -121,31 +132,6 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     ];
 
     CRM_Activity_BAO_Activity::create($activityParams);
-  }
-
-  /**
-   * Intercept QF validation and do our own redirection.
-   *
-   * @return bool
-   *   true if no error found
-   */
-  public function validate() {
-    $errors = parent::validate();
-    $params = $this->controller->exportValues($this->_name);
-
-    if ($params['batch_id'] <= CRM_ManualDirectDebit_Batch_BatchHandler::getMaxBatchId()) {
-      $title = ts('Batch ID already exists');
-      $message = ts('Batch ID %1 already exists. It is likely another batch 
-        has just been created a moment ago.', [1 => $params['batch_id']]);
-
-      CRM_Core_Session::setStatus($message, $title, 'error');
-
-      $this->controller->setDestination(NULL, TRUE);
-      header("Refresh:0; {$_SERVER['HTTP_REFERER']}");
-      exit;
-    }
-
-    return $errors;
   }
 
 }

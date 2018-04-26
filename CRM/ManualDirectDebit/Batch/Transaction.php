@@ -172,8 +172,17 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $this->batchID = $batchID;
     $this->notPresent = $notPresent;
     $this->params = $params;
+
+    if (empty($this->params['entityTable'])) {
+      $this->params['entityTable'] = self::DD_MANDATE_TABLE;
+    }
+
     $this->setColumnHeader($columnHeader);
     $this->setReturnValues($returnValues);
+
+    if ($this->params['entityTable'] == self::DD_MANDATE_TABLE) {
+      $this->addReturnValues(['amount' => '0 as amount']);
+    }
   }
 
 
@@ -214,7 +223,8 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   private function setReturnValues($returnValues = []) {
     if (empty($returnValues) || !is_array($returnValues)) {
       $returnValues = [
-        'id' => self::DD_MANDATE_TABLE . '.id as id',
+        'id' => $this->params['entityTable'] . '.id as id',
+        'mandate_id' => self::DD_MANDATE_TABLE . '.id as mandate_id',
         'contact_id' => self::DD_MANDATE_TABLE . '.entity_id as contact_id',
         'name' => self::DD_MANDATE_TABLE . '.account_holder_name as name',
         'sort_code' => self::DD_MANDATE_TABLE . '.sort_code as sort_code',
@@ -287,16 +297,17 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $query->join('contribution_recur', 'LEFT JOIN civicrm_contribution_recur ON civicrm_contribution.contribution_recur_id = civicrm_contribution_recur.id');
     $query->join('entity_batch', 'LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . $this->params['entityTable'] . '.id AND civicrm_entity_batch.entity_table = \'' . $this->params['entityTable'] . '\'');
     $query->join('civicrm_option_group', 'LEFT JOIN civicrm_option_group ON civicrm_option_group.name = "direct_debit_codes"');
-    $query->join('civicrm_option_value', 'LEFT JOIN civicrm_option_value ON civicrm_option_group.id = civicrm_option_value.option_group_id AND civicrm_option_value.value = ' . $this->params['entityTable'] . '.dd_code');
+    $query->join('civicrm_option_value', 'LEFT JOIN civicrm_option_value ON civicrm_option_group.id = civicrm_option_value.option_group_id AND civicrm_option_value.value = ' . self::DD_MANDATE_TABLE . '.dd_code');
 
     //select
     $query->select(implode(' , ', $this->returnValues));
 
     foreach ($this->searchableFields as $k => $field) {
       if (isset($this->params[$k])) {
-        if($field['op'] == 'IN'){
+        if ($field['op'] == 'IN') {
           $query->where($field['field'] . ' ' . $field['op'] . ' (@' . $k . ')', [$k => explode(',', $this->params[$k])]);
-        } else {
+        }
+        else {
           $query->where($field['field'] . ' ' . $field['op'] . ' @' . $k, [$k => $this->params[$k]]);
         }
       }
@@ -344,7 +355,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   /**
    * Adds new properties for SQL select function
    *
-   * @param $returnValues
+   * @param array $returnValues
    *
    * @return array
    */
@@ -359,7 +370,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   /**
    * Adds new columns for rows
    *
-   * @param $columnHeader
+   * @param array $columnHeader
    *
    * @return array
    */
