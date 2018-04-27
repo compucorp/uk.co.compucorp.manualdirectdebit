@@ -58,10 +58,29 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     ]);
   }
 
+  /**
+   * BatchID form rule.
+   *
+   * @param array $fields
+   *   The input form values.
+   * @param array $files
+   *   The uploaded files if any.
+   * @param object $self
+   *
+   * @return bool|array
+   *   true if no errors, else array of errors
+   */
   public static function validateBatchID($fields, $files, $self) {
 
     if ($fields['batch_id'] <= CRM_ManualDirectDebit_Batch_BatchHandler::getMaxBatchId()) {
-      $errors['batch_id'] = ts('Batch ID %1 already exists. It is likely another batch has just been created a moment ago. Please refresh the page and try again.', [1 => $fields['batch_id']]);
+      $errors['batch_id'] = ts(
+        'Batch ID %1 already exists. It is likely another batch has just been created a moment ago. Please %2 to reload the page and try again.',
+        [
+          1 => $fields['batch_id'],
+          2 => '<a href="' . CRM_Utils_System::url('civicrm/direct_debit/batch', "reset=1&action=add&type_id=" . $fields['type_id']) . '">' . ts('click here') . '</a>',
+        ]
+      );
+      $self->assign('batch_id', $fields['batch_id']);
     }
 
     return empty($errors) ? TRUE : $errors;
