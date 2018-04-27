@@ -73,7 +73,6 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
 
   /**
    * Assigns instruction batch properties for transaction
-   *
    */
   private function assignInstructionsSearchProperties() {
     $ddCodes = CRM_Core_OptionGroup::values('direct_debit_codes');
@@ -105,7 +104,6 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
 
   /**
    * Assigns direct debit payment batch properties for transaction
-   *
    */
   private function assignDDPaymentsSearchProperties() {
     $ddCodes = CRM_Core_OptionGroup::values('direct_debit_codes');
@@ -160,7 +158,6 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
 
   /**
    * Builds the form object.
-   *
    */
   public function buildQuickForm() {
 
@@ -216,7 +213,6 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
 
   /**
    * postProcess function.
-   *
    */
   public function postProcess() {
     $params = $this->controller->exportValues($this->_name);
