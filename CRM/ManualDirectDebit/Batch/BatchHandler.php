@@ -77,7 +77,17 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
    * @param array $params
    */
   public function createExportFile($params) {
-    $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction($params['batch_id'], $params);
+    $returnValues = [
+      'contact_id' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.entity_id as contact_id',
+      'name' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.account_holder_name as name',
+      'sort_code' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.sort_code as sort_code',
+      'account_number' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.ac_number as account_number',
+      'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0) as amount',
+      'reference_number' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.dd_ref as reference_number',
+      'transaction_type' => 'civicrm_option_value.label as transaction_type',
+    ];
+
+    $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction($params['batch_id'], $params, [], $returnValues);
 
     $mandateItems = $batchTransaction->getDDMandateInstructions();
 
