@@ -372,6 +372,22 @@
             <description>To cancel a Direct Debit</description>
             <option_group_name>direct_debit_codes</option_group_name>
         </OptionValue>
+        <OptionValue>
+            <label>New Direct Debit Instructions</label>
+            <name>instructions_batch</name>
+            <is_reserved>1</is_reserved>
+            <is_active>1</is_active>
+            <description>New Direct Debit Instructions</description>
+            <option_group_name>batch_type</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Direct Debit Payments</label>
+            <name>dd_payments</name>
+            <is_reserved>1</is_reserved>
+            <is_active>1</is_active>
+            <description>Direct Debit Payments</description>
+            <option_group_name>batch_type</option_group_name>
+        </OptionValue>
     </OptionValues>
     <ProfileGroups>
         <ProfileGroup>
