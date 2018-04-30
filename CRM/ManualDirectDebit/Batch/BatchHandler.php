@@ -101,27 +101,24 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       ts('Transaction Type'),
     ];
 
-    $contents = $this->generateCSVFile($headers, $mandateItems);
-
     $fileName = 'Batch_' . $this->batchID . '_' . date('YmdHis') . '.csv';
     CRM_Utils_System::setHttpHeader('Content-Type', 'text/plain');
     CRM_Utils_System::setHttpHeader('Content-Disposition', 'attachment; filename=' . CRM_Utils_File::cleanFileName(basename($fileName)));
+    CRM_Utils_File::cleanFileName(basename($fileName));
     ob_clean();
     flush();
-    echo $contents;
+    $this->outputCSVFile($headers, $mandateItems);
     CRM_Utils_System::civiExit();
   }
 
   /**
-   * Creates csv File
+   * Output CSV File
    *
    * @param array $headers
    *
    * @param \CRM_Core_DAO $export
-   *
-   * @return string
    */
-  private function generateCSVFile($headers, $export) {
+  private function outputCSVFile($headers, $export) {
     $out = fopen('php://temp/maxmemory:'. (12*1024*1024), 'r+');
     fputcsv($out, $headers);
 
@@ -129,10 +126,8 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       fputcsv($out, $export->toArray());
     }
     rewind($out);
-    $contents = stream_get_contents($out);
+    fpassthru($out);
     fclose($out);
-
-    return $contents;
   }
 
   /**
