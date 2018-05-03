@@ -8,7 +8,7 @@
         <div class="content">{$form.title.html}</div>
     </div>
     <div class="clear">
-        <div class="label">{ts}Type{/ts}</div>
+        <div class="label">{ts}Batch Type{/ts}</div>
         <div class="content">{$batch_type}</div>
     </div>
     <div class="clear">
