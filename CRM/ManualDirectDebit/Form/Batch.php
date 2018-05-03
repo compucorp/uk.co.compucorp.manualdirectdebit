@@ -95,7 +95,20 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
   public function setDefaultValues() {
     $defaults = parent::setDefaultValues();
 
-    $defaults['title'] = CRM_Batch_BAO_Batch::generateBatchName();
+    $sql = "SELECT max(id) FROM civicrm_batch";
+    $batchNo = CRM_Core_DAO::singleValueQuery($sql) + 1;
+
+    $batchTypeID = CRM_Utils_Request::retrieveValue('type_id', 'String', NULL);
+    $batchType = CRM_Core_OptionGroup::getRowValues('batch_type', $batchTypeID, 'value', 'String', FALSE);
+
+    if ($batchType['name'] == 'instructions_batch') {
+      $defaults['title'] = ts('New Instruction Batch - %1', [1 => $batchNo]);
+    }
+
+    if ($batchType['name'] == 'dd_payments') {
+      $defaults['title'] = ts('Direct Debit Batch - %1', [1 => $batchNo]);
+    }
+
 
     return $defaults;
   }
