@@ -102,11 +102,11 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     $batchType = CRM_Core_OptionGroup::getRowValues('batch_type', $batchTypeID, 'value', 'String', FALSE);
 
     if ($batchType['name'] == 'instructions_batch') {
-      $defaults['title'] = ts('New Instruction Batch - %1', array(1 => $batchNo));
+      $defaults['title'] = ts('New Instruction Batch - %1', [1 => $batchNo]);
     }
 
     if ($batchType['name'] == 'dd_payments') {
-      $defaults['title'] = ts('Direct Debit Batch - %1', array(1 => $batchNo));
+      $defaults['title'] = ts('Direct Debit Batch - %1', [1 => $batchNo]);
     }
 
 
