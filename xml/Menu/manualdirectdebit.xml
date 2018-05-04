@@ -18,4 +18,15 @@
     <title>New batch</title>
     <page_callback>CRM_ManualDirectDebit_Form_Batch</page_callback>
   </item>
+  <item>
+    <path>civicrm/direct_debit/batch-list</path>
+    <title>Batch List</title>
+    <page_callback>CRM_ManualDirectDebit_Page_BatchList</page_callback>
+  </item>
+  <item>
+    <path>civicrm/direct_debit/batch/export</path>
+    <title>Accounting Batch Export</title>
+    <page_callback>CRM_ManualDirectDebit_Page_AJAX::export</page_callback>
+    <weight>610</weight>
+  </item>
 </menu>

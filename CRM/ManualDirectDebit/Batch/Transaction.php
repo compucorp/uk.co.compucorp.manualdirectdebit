@@ -250,7 +250,6 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $mandateItems = $this->getDDMandateInstructions();
 
     $batch = new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID);
-    $ddCodes = CRM_Core_OptionGroup::values('direct_debit_codes');
 
     $rows = [];
     while ($mandateItems->fetch()) {
@@ -276,6 +275,18 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       }
       else {
         $row['check'] = NULL;
+      }
+
+      if (!empty($mandateItems->contact_id)) {
+        switch ($batch->getBatchType()) {
+          case "instructions_batch":
+            $row['action'] = $this->getLinkToMandate($mandateItems->mandate_id, $mandateItems->contact_id);
+            break;
+
+          case "dd_payments":
+            $row['action'] = $this->getLinkToRecurringContribution($mandateItems->id, $mandateItems->contact_id);
+            break;
+        }
       }
 
       $rows[$mandateItems->id] = $row;
@@ -380,5 +391,58 @@ class CRM_ManualDirectDebit_Batch_Transaction {
 
     return $this->columnHeader;
   }
+
+  /**
+   * Gets link to mandate
+   *
+   * @return string
+   */
+  private function getLinkToMandate($mandateId, $contactId) {
+    $linkToMandate = CRM_Core_Action::formLink(
+      [
+        'view' => [
+          'name' => ts('View'),
+          'title' => ts('View Mandate'),
+          'extra' => 'onclick = "contactMandate( %%mandate_id%%, %%contact_id%% );"',
+        ],
+      ],
+      NULL,
+      [
+        'mandate_id' => $mandateId,
+        'contact_id' => $contactId,
+      ]
+    );
+    return $linkToMandate;
+  }
+
+  /**
+   * Gets link to contribution
+   *
+   * @return string
+   */
+  private function getLinkToRecurringContribution($contributionId, $contactId) {
+    $recContributionId = civicrm_api3('Contribution', 'getvalue', [
+      'return' => "contribution_recur_id",
+      'id' => $contributionId,
+    ]);
+
+    $linkToRecurringContribution = CRM_Core_Action::formLink(
+      [
+        'view' => [
+          'name' => ts('View'),
+          'title' => ts('View Contribution'),
+          'extra' => 'onclick = "contactRecurContribution( %%recur_contribution_id%%, %%contact_id%% );"',
+        ],
+      ],
+      NULL,
+      [
+        'recur_contribution_id' => $recContributionId,
+        'contact_id' => $contactId,
+      ]
+    );
+
+    return $linkToRecurringContribution;
+  }
+
 
 }

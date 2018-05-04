@@ -66,16 +66,66 @@ class CRM_ManualDirectDebit_Page_AJAX {
       'amount',
       'reference_number',
       'transaction_type',
+      'action',
     ];
 
     if ($return) {
       return CRM_Utils_JSON::encodeDataTableSelector($mandateItems, $sEcho, $iTotal, $iFilteredTotal, $selectorElements);
     }
     CRM_Utils_System::setHttpHeader('Content-Type', 'application/json');
-    echo CRM_Utils_JSON::encodeDataTableSelector($mandateItems, $sEcho, $iTotal, $iFilteredTotal, $selectorElements);
+    echo self::encodeDataTableSelector($mandateItems, $sEcho, $iTotal, $iFilteredTotal, $selectorElements);
     CRM_Utils_System::civiExit();
   }
 
+  /**
+   * Generates string for DataTable.js library
+   *
+   * @param array $params
+   *   Associated array of row elements.
+   * @param int $sEcho
+   *   Datatable needs this to make it more secure.
+   * @param int $iTotal
+   *   Total records.
+   * @param int $iFilteredTotal
+   *   Total records on a page.
+   * @param array $selectorElements
+   *   Selector elements.
+   *
+   * @return string
+   */
+  private static function encodeDataTableSelector($params, $sEcho, $iTotal, $iFilteredTotal, $selectorElements) {
+    $sOutput = '{';
+    $sOutput .= '"sEcho": ' . intval($sEcho) . ', ';
+    $sOutput .= '"iTotalRecords": ' . $iTotal . ', ';
+    $sOutput .= '"iTotalDisplayRecords": ' . $iFilteredTotal . ', ';
+    $sOutput .= '"aaData": [ ';
+    foreach ((array) $params as $key => $value) {
+      $addcomma = FALSE;
+      $sOutput .= "{";
+      foreach ($selectorElements as $element) {
+        if ($addcomma) {
+          $sOutput .= ",";
+        }
+        // CRM-7130 --lets addslashes to only double quotes,
+        // since we are using it to quote the field value.
+        // str_replace helps to provide a break for new-line
+        $sOutput .= '"' . $element . '" :"' . addcslashes(str_replace([
+            "\r\n",
+            "\n",
+            "\r",
+          ], '<br />', $value[$element]), '"\\') . '"';
+
+        // remove extra spaces and tab character that breaks dataTable CRM-12551
+        $sOutput = preg_replace("/\s+/", " ", $sOutput);
+        $addcomma = TRUE;
+      }
+      $sOutput .= "},";
+    }
+    $sOutput = substr_replace($sOutput, "", -1);
+    $sOutput .= '] }';
+
+    return $sOutput;
+  }
 
   /**
    * Callback to perform action on batch records.
@@ -137,6 +187,8 @@ class CRM_ManualDirectDebit_Page_AJAX {
     $methods = [
       'assign' => 'create',
       'remove' => 'del',
+      'discard' => 'create',
+      'submit' => 'create',
     ];
 
     $response = ['status' => 'record-updated-fail'];
@@ -157,13 +209,36 @@ class CRM_ManualDirectDebit_Page_AJAX {
               'batch_id' => $entityID,
             ];
             break;
+          case 'discard':
+            $dd = new CRM_ManualDirectDebit_Batch_BatchHandler($recordID);
+            if ($dd->discardBatch()) {
+              $batchStatus = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id', ['labelColumn' => 'name']);
+              $params['status_id'] = CRM_Utils_Array::key('Discarded', $batchStatus);
+              $session = CRM_Core_Session::singleton();
+              $params['modified_date'] = date('YmdHis');
+              $params['modified_id'] = $session->get('userID');
+              $params['id'] = $recordID;
+            }
+            break;
+          case 'submit':
+            $dd = new CRM_ManualDirectDebit_Batch_BatchHandler($recordID);
+
+            if ($dd->submitBatch()) {
+              $batchStatus = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id', ['labelColumn' => 'name']);
+              $params['status_id'] = CRM_Utils_Array::key('Submitted', $batchStatus);
+              $session = CRM_Core_Session::singleton();
+              $params['modified_date'] = date('YmdHis');
+              $params['modified_id'] = $session->get('userID');
+              $params['id'] = $recordID;
+            }
+            break;
         }
 
         if (method_exists($recordBAO, $methods[$op]) && !empty($params)) {
           $updated = call_user_func_array([
             $recordBAO,
             $methods[$op],
-          ], [ & $params]);
+          ], [& $params]);
           if ($updated) {
             $redirectStatus = $updated->status_id;
             $response = [
@@ -175,6 +250,15 @@ class CRM_ManualDirectDebit_Page_AJAX {
       }
     }
     CRM_Utils_JSON::output($response);
+  }
+
+  /**
+   * Exports batch items to csv.
+   */
+  public static function export() {
+    $id = CRM_Utils_Request::retrieveValue('id', 'String');
+    $batch = new CRM_ManualDirectDebit_Batch_BatchHandler($id);
+    $batch->createExportFile();
   }
 
 }

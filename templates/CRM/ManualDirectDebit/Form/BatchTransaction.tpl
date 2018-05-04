@@ -1,6 +1,6 @@
 
 <h3>{ts}Added to batch{/ts}:</h3>
-{if in_array($batchStatus, array('Open', 'Reopened'))} {* Add / remove transactions only allowed for Open/Reopened batches *}
+{if in_array($batchStatus, array('Open', 'Reopened')) && $action eq 2} {* Add / remove transactions only allowed for Open/Reopened batches *}
   <br /><div class="form-layout-compressed">{$form.trans_remove.html}&nbsp;{$form.rSubmit.html}</div><br/>
 {/if}
 <div id="ltype">
@@ -9,7 +9,7 @@
         <table id="crm-transaction-selector-remove-{$entityID}" cellpadding="0" cellspacing="0" border="0">
           <thead>
           <tr>
-            <th class="crm-transaction-checkbox">{if in_array($batchStatus, array('Open', 'Reopened'))}{$form.toggleSelects.html}{/if}</th>
+            {if in_array($batchStatus, array('Open', 'Reopened'))  && $action eq 2}<th class="crm-transaction-checkbox">{$form.toggleSelects.html}</th>{/if}
             <th class="crm-contact-id">{ts}Contact ID{/ts}</th>
             <th class="crm-name">{ts}Account Holder Name{/ts}</th>
             <th class="crm-sort-code">{ts}Sort code{/ts}</th>
@@ -17,6 +17,7 @@
             <th class="crm-amount">{ts}Amount{/ts}</th>
             <th class="crm-reference-number">{ts}Reference Number{/ts}</th>
             <th class="crm-transaction-type">{ts}Transaction Type{/ts}</th>
+            <th class="crm-action">{ts}Action{/ts}</th>
           </tr>
           </thead>
         </table>
@@ -25,7 +26,7 @@
 </div>
 <br/>
 
-{if in_array($batchStatus, array('Open', 'Reopened'))}
+{if in_array($batchStatus, array('Open', 'Reopened')) && $action eq 2}
   <h3>{$tableTitle}:</h3>
   <div class="form-layout-compressed">{$form.trans_assign.html}&nbsp;{$form.submit.html}</div>
   <div id="ltype">
@@ -34,7 +35,7 @@
       <table id="crm-transaction-selector-assign-{$entityID}" cellpadding="0" cellspacing="0" border="0">
         <thead>
         <tr>
-          <th class="crm-transaction-checkbox">{if in_array($batchStatus, array('Open', 'Reopened'))}{$form.toggleSelect.html}{/if}</th>
+          <th class="crm-transaction-checkbox">{$form.toggleSelect.html}</th>
           <th class="crm-contact-id">{ts}Contact ID{/ts}</th>
           <th class="crm-name">{ts}Account Holder Name{/ts}</th>
           <th class="crm-sort-code">{ts}Sort code{/ts}</th>
@@ -42,6 +43,7 @@
           <th class="crm-amount">{ts}Amount{/ts}</th>
           <th class="crm-reference-number">{ts}Reference Number{/ts}</th>
           <th class="crm-transaction-type">{ts}Transaction Type{/ts}</th>
+          <th class="crm-action">{ts}Action{/ts}</th>
         </tr>
         </thead>
       </table>
@@ -132,118 +134,119 @@ function buildTransactionSelectorAssign() {
   var sourceUrl = {/literal}'{crmURL p="civicrm/ajax/rest" h=0 q="className=CRM_ManualDirectDebit_Page_AJAX&fnName=getInstructionTransactionsList&snippet=4&context=instructionBatch&entityID=$entityID&entityTable=$entityTable&notPresent=1&statusID=$statusID"}'{literal};
   var ZeroRecordText = '<div class="status messages">{/literal}{ts escape="js"}None found.{/ts}{literal}</li></ul></div>';
 
-  crmBatchSelector1 = CRM.$('#crm-transaction-selector-assign-{/literal}{$entityID}{literal}').dataTable({
-  "bDestroy"   : true,
-  "bFilter"    : false,
-  "bAutoWidth" : false,
-  "lengthMenu": [ 10, 25, 50, 100, 250, 500, 1000, 2000 ],
-  "aaSorting"  : [],
-  "aoColumns"  : [
-    {sClass:'crm-transaction-checkbox', bSortable:false},
-    {sClass:'crm-contact-id', bSortable:false},
-    {sClass:'crm-name'},
-    {sClass:'crm-sort-code'},
-    {sClass:'crm-account-number'},
-    {sClass:'crm-amount'},
-    {sClass:'crm-reference-number'},
-    {sClass:'crm-transaction-type'}
-  ],
-  "bProcessing": true,
-  "asStripClasses" : [ "odd-row", "even-row" ],
-  "sPaginationType": "full_numbers",
-  "sDom"       : '<"crm-datatable-pager-top"lfp>rt<"crm-datatable-pager-bottom"ip>',
-  "bServerSide": true,
-  "bJQueryUI": true,
-  "sAjaxSource": sourceUrl,
-  "iDisplayLength": 25,
-  "oLanguage": {
-    "sZeroRecords":  ZeroRecordText,
-    "sProcessing":    {/literal}"{ts escape='js'}Processing...{/ts}"{literal},
-    "sLengthMenu":    {/literal}"{ts escape='js'}Show _MENU_ entries{/ts}"{literal},
-    "sInfo":          {/literal}"{ts escape='js'}Showing _START_ to _END_ of _TOTAL_ entries{/ts}"{literal},
-    "sInfoEmpty":     {/literal}"{ts escape='js'}Showing 0 to 0 of 0 entries{/ts}"{literal},
-    "sInfoFiltered":  {/literal}"{ts escape='js'}(filtered from _MAX_ total entries){/ts}"{literal},
-    "sSearch":        {/literal}"{ts escape='js'}Search:{/ts}"{literal},
-    "oPaginate": {
-      "sFirst":    {/literal}"{ts escape='js'}First{/ts}"{literal},
-      "sPrevious": {/literal}"{ts escape='js'}Previous{/ts}"{literal},
-      "sNext":     {/literal}"{ts escape='js'}Next{/ts}"{literal},
-      "sLast":     {/literal}"{ts escape='js'}Last{/ts}"{literal}
-    }
-  },
-  "fnServerData": function ( sSource, aoData, fnCallback ) {
+  var crmBatchSelector = CRM.$('#crm-transaction-selector-assign-{/literal}{$entityID}{literal}').dataTable({
+    "bDestroy"   : true,
+    "bFilter"    : false,
+    "bAutoWidth" : false,
+    "lengthMenu": [ 10, 25, 50, 100, 250, 500, 1000, 2000 ],
+    "aaSorting"  : [],
+    "aoColumns"  : [
+      {sClass:'crm-transaction-checkbox', bSortable:false, mData: "check"},
+      {sClass:'crm-contact-id', bSortable:false, mData: "contact_id"},
+      {sClass:'crm-name', mData: "name"},
+      {sClass:'crm-sort-code', mData: "sort_code"},
+      {sClass:'crm-account-number', mData: "account_number"},
+      {sClass:'crm-amount', mData: "amount"},
+      {sClass:'crm-reference-number', mData: "reference_number"},
+      {sClass:'crm-transaction-type', mData: "transaction_type"},
+      {sClass:'crm-action', mData: "action"}
+    ],
+    "bProcessing": true,
+    "asStripClasses" : [ "odd-row", "even-row" ],
+    "sPaginationType": "full_numbers",
+    "sDom"       : '<"crm-datatable-pager-top"lfp>rt<"crm-datatable-pager-bottom"ip>',
+    "bServerSide": true,
+    "bJQueryUI": true,
+    "sAjaxSource": sourceUrl,
+    "iDisplayLength": 25,
+    "oLanguage": {
+      "sZeroRecords":  ZeroRecordText,
+      "sProcessing":    {/literal}"{ts escape='js'}Processing...{/ts}"{literal},
+      "sLengthMenu":    {/literal}"{ts escape='js'}Show _MENU_ entries{/ts}"{literal},
+      "sInfo":          {/literal}"{ts escape='js'}Showing _START_ to _END_ of _TOTAL_ entries{/ts}"{literal},
+      "sInfoEmpty":     {/literal}"{ts escape='js'}Showing 0 to 0 of 0 entries{/ts}"{literal},
+      "sInfoFiltered":  {/literal}"{ts escape='js'}(filtered from _MAX_ total entries){/ts}"{literal},
+      "sSearch":        {/literal}"{ts escape='js'}Search:{/ts}"{literal},
+      "oPaginate": {
+        "sFirst":    {/literal}"{ts escape='js'}First{/ts}"{literal},
+        "sPrevious": {/literal}"{ts escape='js'}Previous{/ts}"{literal},
+        "sNext":     {/literal}"{ts escape='js'}Next{/ts}"{literal},
+        "sLast":     {/literal}"{ts escape='js'}Last{/ts}"{literal}
+      }
+    },
+    "fnServerData": function ( sSource, aoData, fnCallback ) {
 
-    var searchData = {/literal}{$searchData}{literal};
-    aoData = aoData.concat(searchData);
+      var searchData = {/literal}{$searchData}{literal};
+      aoData = aoData.concat(searchData);
 
-    CRM.$.ajax({
-    "dataType": 'json',
-    "type": "POST",
-    "url": sSource,
-    "data": aoData,
-    "success": function(b) {
-      fnCallback(b);
-      toggleFinancialSelections('#toggleSelect', 'assign');
-    }
-    });
-  }
-});
-	
-}
-
-function buildTransactionSelectorRemove( ) {
-  var sourceUrl = {/literal}'{crmURL p="civicrm/ajax/rest" h=0 q="className=CRM_ManualDirectDebit_Page_AJAX&fnName=getInstructionTransactionsList&snippet=4&context=financialBatch&entityID=$entityID&entityTable=$entityTable&statusID=$statusID"}'{literal};
-
-  crmBatchSelector = CRM.$('#crm-transaction-selector-remove-{/literal}{$entityID}{literal}').dataTable({
-  "bDestroy"   : true,
-  "bFilter"    : false,
-  "bAutoWidth" : false,
-  "aaSorting"  : [],
-  "aoColumns"  : [
-    {sClass:'crm-transaction-checkbox', bSortable:false},
-    {sClass:'crm-contact-id', bSortable:false},
-    {sClass:'crm-name'},
-    {sClass:'crm-sort-code'},
-    {sClass:'crm-account-number'},
-    {sClass:'crm-amount'},
-    {sClass:'crm-reference-number'},
-    {sClass:'crm-transaction-type'}
-  ],
-  "bProcessing": true,
-  "asStripClasses" : [ "odd-row", "even-row" ],
-  "sPaginationType": "full_numbers",
-  "sDom"       : '<"crm-datatable-pager-top"lfp>rt<"crm-datatable-pager-bottom"ip>',
-  "bServerSide": true,
-  "bJQueryUI": true,
-  "sAjaxSource": sourceUrl,
-  "iDisplayLength": 25,
-  "oLanguage": {
-    "sProcessing":    {/literal}"{ts escape='js'}Processing...{/ts}"{literal},
-    "sLengthMenu":    {/literal}"{ts escape='js'}Show _MENU_ entries{/ts}"{literal},
-    "sInfo":          {/literal}"{ts escape='js'}Showing _START_ to _END_ of _TOTAL_ entries{/ts}"{literal},
-    "sInfoEmpty":     {/literal}"{ts escape='js'}Showing 0 to 0 of 0 entries{/ts}"{literal},
-    "sInfoFiltered":  {/literal}"{ts escape='js'}(filtered from _MAX_ total entries){/ts}"{literal},
-    "sSearch":        {/literal}"{ts escape='js'}Search:{/ts}"{literal},
-    "oPaginate": {
-      "sFirst":    {/literal}"{ts escape='js'}First{/ts}"{literal},
-      "sPrevious": {/literal}"{ts escape='js'}Previous{/ts}"{literal},
-      "sNext":     {/literal}"{ts escape='js'}Next{/ts}"{literal},
-      "sLast":     {/literal}"{ts escape='js'}Last{/ts}"{literal}
-    }
-  },
-  "fnServerData": function (sSource, aoData, fnCallback) {
-    CRM.$.ajax({
+      CRM.$.ajax({
       "dataType": 'json',
       "type": "POST",
       "url": sSource,
       "data": aoData,
       "success": function(b) {
         fnCallback(b);
-        toggleFinancialSelections('#toggleSelects', 'remove');
+        toggleFinancialSelections('#toggleSelect', 'assign');
       }
-    });
-  }
-});
+      });
+    }
+  });
+}
+
+function buildTransactionSelectorRemove( ) {
+  var sourceUrl = {/literal}'{crmURL p="civicrm/ajax/rest" h=0 q="className=CRM_ManualDirectDebit_Page_AJAX&fnName=getInstructionTransactionsList&snippet=4&context=financialBatch&entityID=$entityID&entityTable=$entityTable&statusID=$statusID"}'{literal};
+
+  var crmBatchSelector = CRM.$('#crm-transaction-selector-remove-{/literal}{$entityID}{literal}').dataTable({
+    "bDestroy"   : true,
+    "bFilter"    : false,
+    "bAutoWidth" : false,
+    "aaSorting"  : [],
+    "aoColumns"  : [
+      {/literal} {if in_array($batchStatus, array('Open', 'Reopened')) && $action eq 2}{literal} {sClass:'crm-transaction-checkbox', bSortable:false, mData: "check"}, {/literal}{/if}{literal}
+      {sClass:'crm-contact-id', bSortable:false, mData: "contact_id"},
+      {sClass:'crm-name', mData: "name"},
+      {sClass:'crm-sort-code', mData: "sort_code"},
+      {sClass:'crm-account-number', mData: "account_number"},
+      {sClass:'crm-amount', mData: "amount"},
+      {sClass:'crm-reference-number', mData: "reference_number"},
+      {sClass:'crm-transaction-type', mData: "transaction_type"},
+      {sClass:'action', mData: "action"}
+    ],
+    "bProcessing": true,
+    "asStripClasses" : [ "odd-row", "even-row" ],
+    "sPaginationType": "full_numbers",
+    "sDom"       : '<"crm-datatable-pager-top"lfp>rt<"crm-datatable-pager-bottom"ip>',
+    "bServerSide": true,
+    "bJQueryUI": true,
+    "sAjaxSource": sourceUrl,
+    "iDisplayLength": 25,
+    "oLanguage": {
+      "sProcessing":    {/literal}"{ts escape='js'}Processing...{/ts}"{literal},
+      "sLengthMenu":    {/literal}"{ts escape='js'}Show _MENU_ entries{/ts}"{literal},
+      "sInfo":          {/literal}"{ts escape='js'}Showing _START_ to _END_ of _TOTAL_ entries{/ts}"{literal},
+      "sInfoEmpty":     {/literal}"{ts escape='js'}Showing 0 to 0 of 0 entries{/ts}"{literal},
+      "sInfoFiltered":  {/literal}"{ts escape='js'}(filtered from _MAX_ total entries){/ts}"{literal},
+      "sSearch":        {/literal}"{ts escape='js'}Search:{/ts}"{literal},
+      "oPaginate": {
+        "sFirst":    {/literal}"{ts escape='js'}First{/ts}"{literal},
+        "sPrevious": {/literal}"{ts escape='js'}Previous{/ts}"{literal},
+        "sNext":     {/literal}"{ts escape='js'}Next{/ts}"{literal},
+        "sLast":     {/literal}"{ts escape='js'}Last{/ts}"{literal}
+      }
+    },
+    "fnServerData": function (sSource, aoData, fnCallback) {
+      CRM.$.ajax({
+        "dataType": 'json',
+        "type": "POST",
+        "url": sSource,
+        "data": aoData,
+        "success": function(b) {
+          fnCallback(b);
+          toggleFinancialSelections('#toggleSelects', 'remove');
+        }
+      });
+    }
+  });
 }
 
 function selectAction( id, toggleSelectId, checkId ) {
@@ -286,6 +289,36 @@ function bulkAssignRemove( action ) {
       CRM.alert(data.status);
     }
   }, 'json');
+}
+
+function contactMandate(recId, cid) {
+  var url = CRM.url(
+    'civicrm/contact/view/cd',
+    {
+      reset: '1',
+      gid: {/literal}{$customGroup}{literal},
+      cid: cid,
+      recId: recId,
+      multiRecordDisplay: 'single',
+      mode: 'view'
+    }
+  );
+  CRM.loadPage(url);
+  return false;
+}
+
+function contactRecurContribution(recId, cid) {
+  var url = CRM.url(
+    'civicrm/contact/view/contributionrecur',
+    {
+      reset: '1',
+      id: recId,
+      cid: cid,
+      context: 'contribution',
+    }
+  );
+  CRM.loadPage(url);
+  return false;
 }
 </script>
 {/literal}
