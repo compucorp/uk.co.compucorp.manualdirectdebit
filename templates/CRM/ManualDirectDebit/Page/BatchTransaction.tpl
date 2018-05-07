@@ -34,9 +34,16 @@
   </div>
 {/if}
 <div class="crm-submit-buttons">
+  {if $batchInfo}
     <div class="float-left">
-        {$form.export_batch.html}
+      {$form.export_batch.html}
     </div>
+  {else}
+    <div class="float-left">
+      {$form.done_and_export_batch.html}
+    </div>
+  {/if}
+
     {if in_array($batchStatus, array('Open', 'Reopened'))  && $action eq 4}
         <div class="float-right">
             {$form.discard.html}
@@ -63,27 +70,42 @@ CRM.$(function($) {
 });
 
 function assignRemove(recordID, op) {
-  if (op == 'discard' || op == 'submit') {
+  if (op == 'submit') {
     CRM.$("#enableDisableStatusMsg").dialog({
-      title: {/literal}'{ts escape="js"}Close Batch{/ts}'{literal},
+      title: {/literal}'{ts escape="js"}Submit Batch{/ts}'{literal},
       modal: true,
       open: function () {
-        if (op == 'discard') {
-          var msg = {/literal}'{ts escape="js"}Are you sure you want to discard this batch?{/ts}'{literal};
-        }
-        else {
-          var msg = {/literal}{if $submittedMessage}"{$submittedMessage}"{else}"{ts escape="js"}Are you sure you want to submit this batch? This process is not revertable.{/ts}"{/if}{literal};
-        }
+        var msg = {/literal}{if $submittedMessage}"{$submittedMessage}"{else}"{ts escape="js"}Are you sure you want to submit this batch? This process is not revertable.{/ts}"{/if}{literal};
+
         CRM.$('#enableDisableStatusMsg').show().html(msg);
       },
       buttons: {
         {/literal}"{ts escape='js'}Cancel{/ts}"{literal}: function () {
-            CRM.$(this).dialog("close");
+          CRM.$(this).dialog("close");
         },
-        {/literal}"{ts escape='js'}OK{/ts}"{literal}: function () {
-            CRM.$(this).dialog("close");
-            var recordBAO = 'CRM_Batch_BAO_Batch';
-            saveRecord(recordID, op, recordBAO, null);
+        {/literal}"{ts escape='js'}Submit{/ts}"{literal}: function () {
+          CRM.$(this).dialog("close");
+          var recordBAO = 'CRM_Batch_BAO_Batch';
+          saveRecord(recordID, op, recordBAO, null);
+        }
+      }
+    });
+  } else if (op == 'discard') {
+    CRM.$("#enableDisableStatusMsg").dialog({
+      title: {/literal}'{ts escape="js"}Discard Batch{/ts}'{literal},
+      modal: true,
+      open: function () {
+        var msg = {/literal}'{ts escape="js"}Are you sure you want to discard this batch?{/ts}'{literal};
+        CRM.$('#enableDisableStatusMsg').show().html(msg);
+      },
+      buttons: {
+        {/literal}"{ts escape='js'}Cancel{/ts}"{literal}: function () {
+          CRM.$(this).dialog("close");
+        },
+        {/literal}"{ts escape='js'}Discard{/ts}"{literal}: function () {
+          CRM.$(this).dialog("close");
+          var recordBAO = 'CRM_Batch_BAO_Batch';
+          saveRecord(recordID, op, recordBAO, null);
         }
       }
     });
