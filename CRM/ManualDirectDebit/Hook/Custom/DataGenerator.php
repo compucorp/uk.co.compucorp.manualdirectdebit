@@ -87,10 +87,10 @@ class CRM_ManualDirectDebit_Hook_Custom_DataGenerator {
    * Generates and saves the required fields values if they are not supplied by the user.
    */
   public function generate() {
-    $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_MandateDataGenerator($this->entityID, $this->settings, $this->savedFields);
+    $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator($this->entityID, $this->settings, $this->savedFields);
     $mandateDataGenerator->generateMandateFieldsValues();
     $mandateDataGenerator->saveGeneratedMandateValues();
-    $contributionDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_ContributionDataGenerator($this->entityID, $this->settings);
+    $contributionDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_Contribution_ContributionDataGenerator($this->entityID, $this->settings);
     $contributionDataGenerator->setMandateStartDate($mandateDataGenerator->getMandateStartDate());
     $contributionDataGenerator->generateContributionFieldsValues();
     $contributionDataGenerator->saveGeneratedContributionValues();

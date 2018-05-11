@@ -3,14 +3,7 @@
 /**
  * This class Generates the required mandate fields automatically in case they are not submitted by the user
  */
-class CRM_ManualDirectDebit_Hook_Custom_MandateDataGenerator {
-
-  /**
-   * Direct Debit Mandate table name
-   *
-   * @var string
-   */
-  const MANDATE_TABLE_NAME = 'civicrm_value_dd_mandate';
+class CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator {
 
   /**
    * List of the mandate fields to be generated
@@ -43,31 +36,18 @@ class CRM_ManualDirectDebit_Hook_Custom_MandateDataGenerator {
    */
   private $mandateId;
 
-  public function __construct($entityID, $settings, &$params) {
+  /**
+   * Object which manage writing and reading Data from DB
+   *
+   * @var CRM_ManualDirectDebit_Common_MandateStorageManager
+   */
+  private $mandateStorage;
+
+  public function __construct($currentContactId, $settings, &$params) {
     $this->settings = $settings;
     $this->savedFields = $params;
-    $this->mandateId = $this->getLastMandateId($entityID);
-  }
-
-  /**
-   * Gets id of last inserted Direct Debit Mandate
-   *
-   * @param $entityID
-   *
-   * @return int
-   */
-  private function getLastMandateId($entityID) {
-    $sqlSelectedDebitMandateID = "SELECT MAX(`id`) AS id FROM `" . self::MANDATE_TABLE_NAME . "` WHERE `entity_id` = %1";
-    $queryResult = CRM_Core_DAO::executeQuery($sqlSelectedDebitMandateID, [
-      1 => [
-        $entityID,
-        'String',
-      ],
-    ]);
-    $queryResult->fetch();
-    $lastInsertedMandateId = $queryResult->id;
-
-    return $lastInsertedMandateId;
+    $this->mandateStorage = new CRM_ManualDirectDebit_Common_MandateStorageManager();
+    $this->mandateId = $this->mandateStorage->getLastInsertedMandateId($currentContactId);
   }
 
   /**
@@ -89,6 +69,7 @@ class CRM_ManualDirectDebit_Hook_Custom_MandateDataGenerator {
       $this->fieldsToGenerate['start_date'] = $this->generateStartDate();
     } else{
       $date = new DateTime();
+
       $this->fieldsToGenerate['start_date'] = $date->setTimestamp(
         strtotime($this->fieldsToGenerate['start_date'])
       )->format('Y-m-d H:i:s');
@@ -118,22 +99,7 @@ class CRM_ManualDirectDebit_Hook_Custom_MandateDataGenerator {
    * Saves all generated values
    */
   public function saveGeneratedMandateValues() {
-    $setValueTemplateFields = [];
-    $fieldsValues = [];
-    $i = 0;
-    foreach ($this->fieldsToGenerate as $key => $field) {
-      $setValueTemplateFields[] = self::MANDATE_TABLE_NAME . "." . $key . " = %" . ($i);
-      $fieldsValues[$i] = [$field, ucfirst(gettype($field))];
-      $i++;
-    }
-    $setValueTemplate = implode(', ', $setValueTemplateFields);
-
-    $query = "UPDATE " . self::MANDATE_TABLE_NAME . " SET $setValueTemplate WHERE " . self::MANDATE_TABLE_NAME . ".id = $this->mandateId";
-    CRM_Core_DAO::executeQuery($query, $fieldsValues);
-
-    // sets mandate id, for saving dependency between mandate and contribution
-    $mandateContributionConnector = CRM_ManualDirectDebit_Hook_MandateContributionConnector::getInstance();
-    $mandateContributionConnector->setMandateId($this->mandateId);
+    $this->mandateStorage->updateMandateId($this->fieldsToGenerate, $this->mandateId);
   }
 
   /**

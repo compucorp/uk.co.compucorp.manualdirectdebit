@@ -1,7 +1,8 @@
 <?php
 
 /**
- *  This class is responsible for displaying Direct Debit information block on the Contribution page
+ *  This class is responsible for displaying Direct Debit information block on
+ *  the Contribution page
  */
 class CRM_ManualDirectDebit_Hook_PageRun_TabPage {
 

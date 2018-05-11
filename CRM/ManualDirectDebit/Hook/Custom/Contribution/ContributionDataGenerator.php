@@ -3,7 +3,7 @@
 /**
  * This class automatically generates all required fields for contribution
  */
-class CRM_ManualDirectDebit_Hook_Custom_ContributionDataGenerator {
+class CRM_ManualDirectDebit_Hook_Custom_Contribution_ContributionDataGenerator {
 
   /**
    * Recurring contribution cycle day
@@ -102,7 +102,7 @@ class CRM_ManualDirectDebit_Hook_Custom_ContributionDataGenerator {
    * Generates Recurring Contribution `Start date`
    */
   private function generateRecurringContributionStartDate() {
-    $startDateGenerator = new CRM_ManualDirectDebit_Hook_Custom_ContributionRecurStartDateGenerator($this->cycleDay, $this->mandateStartDate);
+    $startDateGenerator = new CRM_ManualDirectDebit_Hook_Custom_Contribution_ContributionRecurStartDateGenerator($this->cycleDay, $this->mandateStartDate);
     $this->start_date = $startDateGenerator->generate();
   }
 

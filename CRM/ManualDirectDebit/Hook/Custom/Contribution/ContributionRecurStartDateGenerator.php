@@ -3,7 +3,7 @@
 /**
  * Generates `Start Date` field if it wasn't filed by user
  */
-class CRM_ManualDirectDebit_Hook_Custom_ContributionRecurStartDateGenerator {
+class CRM_ManualDirectDebit_Hook_Custom_Contribution_ContributionRecurStartDateGenerator {
 
   /**
    * Current year

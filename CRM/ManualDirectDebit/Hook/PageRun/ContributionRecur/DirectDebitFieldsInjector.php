@@ -1,7 +1,8 @@
 <?php
 
 /**
- *  Provides 'Direct Debit Information' integration into 'Recurring Contribution Detail' view
+ *  Provides 'Direct Debit Information' integration into 'Recurring
+ * Contribution Detail' view
  */
 class CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInjector {
 
@@ -25,7 +26,8 @@ class CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInje
     $mandateId = $this->getMandateId();
 
     if ($mandateId) {
-      CRM_Core_Resources::singleton()->addStyleFile('uk.co.compucorp.manualdirectdebit', 'css/directDebitMandate.css');
+      CRM_Core_Resources::singleton()
+        ->addStyleFile('uk.co.compucorp.manualdirectdebit', 'css/directDebitMandate.css');
       CRM_Core_Resources::singleton()
         ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/directDebitInformation.js')
         ->addSetting([
@@ -76,14 +78,15 @@ class CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInje
     $mandateIdCustomFieldId = $this->getCustomFieldIdByName("mandate_id");
     $currentContributionId = CRM_Utils_Request::retrieve('id', 'Integer', $this->page, FALSE);
     try {
-      $mandateId = civicrm_api3('Contribution', 'getvalue', [
+      $mandateId = civicrm_api3('Contribution', 'get', [
+        'sequential' => 1,
+        'options' => ['limit' => 1],
         'return' => "custom_$mandateIdCustomFieldId",
         'contribution_recur_id' => $currentContributionId,
       ]);
 
-      return $mandateId;
-    }
-    catch (CiviCRM_API3_Exception $e) {
+      return $mandateId['values'][0]["custom_$mandateIdCustomFieldId"];
+    } catch (CiviCRM_API3_Exception $e) {
       CRM_Core_Session::setStatus(t("Contribution doesn't exist"), $title = 'Error', $type = 'alert');
 
       return FALSE;
