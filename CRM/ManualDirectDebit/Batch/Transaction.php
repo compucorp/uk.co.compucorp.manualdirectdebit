@@ -325,7 +325,19 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     }
 
     if ($this->notPresent) {
-      $query->where('civicrm_entity_batch.batch_id IS NULL');
+      $batchStatus = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id', ['labelColumn' => 'name']);
+      $excluded = CRM_Utils_SQL_Select::from(self::DD_MANDATE_TABLE);
+      $excluded->select($this->params['entityTable'] . '.id');
+
+      if ($this->params['entityTable'] == 'civicrm_contribution') {
+        $excluded->join('value_dd_information', 'LEFT JOIN civicrm_value_dd_information ON civicrm_value_dd_information.mandate_id = civicrm_value_dd_mandate.id');
+        $excluded->join('contribution', 'LEFT JOIN civicrm_contribution ON civicrm_contribution.id = civicrm_value_dd_information.entity_id');
+      }
+      $excluded->join('entity_batch', 'LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . $this->params['entityTable'] . '.id AND civicrm_entity_batch.entity_table = \'' . $this->params['entityTable'] . '\'');
+      $excluded->join('batch', 'LEFT JOIN civicrm_batch ON civicrm_entity_batch.batch_id = civicrm_batch.id');
+      $excluded->where('civicrm_batch.status_id <> ' . CRM_Utils_Array::key('Discarded', $batchStatus));
+
+      $query->where($this->params['entityTable'] . '.id NOT IN (' . $excluded->toSQL() . ')');
     }
     else {
       $query->where('civicrm_entity_batch.batch_id = !entityID', ['entityID' => $this->batchID]);
@@ -345,6 +357,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         $query->limit((int) $this->params['rowCount'], (int) $this->params['offset']);
       }
     }
+    $query->groupBy('civicrm_contribution . contribution_recur_id');
 
     $mandateItems = CRM_Core_DAO::executeQuery($query->toSQL());
 
@@ -412,6 +425,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'contact_id' => $contactId,
       ]
     );
+
     return $linkToMandate;
   }
 
@@ -443,6 +457,5 @@ class CRM_ManualDirectDebit_Batch_Transaction {
 
     return $linkToRecurringContribution;
   }
-
 
 }

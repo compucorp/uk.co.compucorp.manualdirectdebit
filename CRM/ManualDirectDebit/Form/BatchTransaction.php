@@ -59,10 +59,10 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
       $this->assignSearchProperties($batchType);
     }
 
-    $customGroup = civicrm_api3('CustomGroup', 'getvalue', array(
+    $customGroup = civicrm_api3('CustomGroup', 'getvalue', [
       'return' => "id",
       'name' => "direct_debit_mandate",
-    ));
+    ]);
 
     $this->assign('customGroup', $customGroup);
   }
@@ -227,10 +227,10 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
 
     $this->add('text', 'name', ts('Batch Name'));
 
-    $customGroup = civicrm_api3('CustomGroup', 'getvalue', array(
+    $customGroup = civicrm_api3('CustomGroup', 'getvalue', [
       'return' => "id",
       'name' => "direct_debit_mandate",
-    ));
+    ]);
 
     $this->assign('customGroup', $customGroup);
   }
@@ -241,7 +241,7 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
   public function postProcess() {
     $params = $this->controller->exportValues($this->_name);
 
-    if (isset($params['export_batch'])) {
+    if (isset($params['export_batch']) || isset($params['done_and_export_batch'])) {
       $batch = new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID);
       $batch->createExportFile();
     }

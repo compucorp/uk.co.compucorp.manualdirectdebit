@@ -210,15 +210,12 @@ class CRM_ManualDirectDebit_Page_AJAX {
             ];
             break;
           case 'discard':
-            $dd = new CRM_ManualDirectDebit_Batch_BatchHandler($recordID);
-            if ($dd->discardBatch()) {
-              $batchStatus = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id', ['labelColumn' => 'name']);
-              $params['status_id'] = CRM_Utils_Array::key('Discarded', $batchStatus);
-              $session = CRM_Core_Session::singleton();
-              $params['modified_date'] = date('YmdHis');
-              $params['modified_id'] = $session->get('userID');
-              $params['id'] = $recordID;
-            }
+            $batchStatus = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id', ['labelColumn' => 'name']);
+            $params['status_id'] = CRM_Utils_Array::key('Discarded', $batchStatus);
+            $session = CRM_Core_Session::singleton();
+            $params['modified_date'] = date('YmdHis');
+            $params['modified_id'] = $session->get('userID');
+            $params['id'] = $recordID;
             break;
           case 'submit':
             $dd = new CRM_ManualDirectDebit_Batch_BatchHandler($recordID);

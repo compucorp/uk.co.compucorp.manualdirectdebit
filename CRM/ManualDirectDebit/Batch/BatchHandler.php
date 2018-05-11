@@ -121,10 +121,10 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       'contact_id' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.entity_id as contact_id',
       'name' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.account_holder_name as name',
       'sort_code' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.sort_code as sort_code',
-      'account_number' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.ac_number as account_number',
+      'account_number' => 'CONCAT("\t",' . CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.ac_number) as account_number',
       'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0) as amount',
       'reference_number' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.dd_ref as reference_number',
-      'transaction_type' => 'civicrm_option_value.label as transaction_type',
+      'transaction_type' => 'CONCAT("\t",civicrm_option_value.label) as transaction_type',
     ];
 
     if ($this->getBatchType() == 'instructions_batch') {
@@ -187,11 +187,11 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
   }
 
   /**
-   * Returns max batch id
+   * Returns message which describe submit action
    *
    * @param integer $typeId
    *
-   * @return null|string
+   * @return string
    */
   public static function getSubmitAlertMessage($typeId) {
     $batchTypes = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, NULL, 'name');
@@ -209,7 +209,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       $submittedMessage = '<p>' . ts('You are submitting the batch results:') . '</p>';
       $submittedMessage .= '<p>' . ts('-All mandates in the batch with code %1 will be transite to code %2', [
           1 => '01',
-          2 => '07',
+          2 => '17',
         ]) . '</p>';
       $submittedMessage .= '<p>' . ts('-All contributions in the batch with status \'Pending\' or \'Cancelled\' will be marked as \'Completed\'') . '</p>';
       $submittedMessage .= '<p>' . ts('-The batch will be updated with \'Submitted\' status') . '</p>';
@@ -250,7 +250,12 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
    * @return bool
    */
   private function submitInstructionsBatch() {
-    $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction($this->batchID, ['entityTable' => 'civicrm_value_dd_mandate'], ['mandate_id' => 1], ['mandate_id' => 'GROUP_CONCAT(civicrm_value_dd_mandate.id SEPARATOR \',\') as mandate_id']);
+    $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction(
+      $this->batchID,
+      ['entityTable' => 'civicrm_value_dd_mandate'],
+      ['mandate_id' => 1],
+      ['mandate_id' => 'GROUP_CONCAT(civicrm_value_dd_mandate.id SEPARATOR \',\') as mandate_id']
+    );
     $rows = $batchTransaction->getRows();
     $row = array_shift($rows);
     $ddMandateIDs = $row['mandate_id'];
@@ -279,13 +284,15 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
    * @return bool
    */
   private function submitDDPayments() {
-    $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction($this->batchID, ['entityTable' => 'civicrm_value_dd_mandate'], [
-      'mandate_id' => 1,
-      'contribute_id' => 1,
-    ], [
-      'mandate_id' => 'GROUP_CONCAT(civicrm_value_dd_mandate.id SEPARATOR \',\') as mandate_id',
-      'contribute_id' => 'GROUP_CONCAT(civicrm_contribution.id SEPARATOR \',\') as contribute_id',
-    ]);
+    $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction(
+      $this->batchID,
+      ['entityTable' => 'civicrm_value_dd_mandate'],
+      ['mandate_id' => 1, 'contribute_id' => 1],
+      [
+        'mandate_id' => 'GROUP_CONCAT(civicrm_value_dd_mandate.id SEPARATOR \',\') as mandate_id',
+        'contribute_id' => 'GROUP_CONCAT(civicrm_contribution.id SEPARATOR \',\') as contribute_id',
+      ]
+    );
     $rows = $batchTransaction->getRows();
     $row = array_shift($rows);
     $ddMandateIDs = $row['mandate_id'];
@@ -311,22 +318,6 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
     $ContributeStatuses = CRM_Core_PseudoConstant::get('CRM_Contribute_DAO_Contribution', 'contribution_status_id', ['labelColumn' => 'name']);
     $query = 'UPDATE civicrm_contribution SET contribution_status_id = ' . array_search($status, $ContributeStatuses) . ' WHERE id IN (' . $IDs . ')';
     CRM_Core_DAO::executeQuery($query);
-  }
-
-  /**
-   * Discard batch.
-   * Remove all transaction items from "Entity Batch".
-   *
-   * @return bool
-   */
-  public function discardBatch() {
-    if (!$this->validBatchStatus()) {
-      return FALSE;
-    }
-    $params = ['batch_id' => $this->batchID];
-    $entityBatch = CRM_Batch_BAO_EntityBatch::del($params);
-
-    return !empty($entityBatch);
   }
 
 }
