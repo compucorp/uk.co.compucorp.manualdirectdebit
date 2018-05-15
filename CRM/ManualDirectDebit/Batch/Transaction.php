@@ -289,7 +289,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         }
       }
 
-      $rows[$mandateItems->id] = $row;
+      $rows[$mandateItems->mandate_id] = $row;
     }
 
     return $rows;
@@ -357,7 +357,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         $query->limit((int) $this->params['rowCount'], (int) $this->params['offset']);
       }
     }
-    $query->groupBy('civicrm_contribution . contribution_recur_id');
+    $query->groupBy('civicrm_value_dd_mandate.id');
 
     $mandateItems = CRM_Core_DAO::executeQuery($query->toSQL());
 

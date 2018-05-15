@@ -254,13 +254,13 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       $this->batchID,
       ['entityTable' => 'civicrm_value_dd_mandate'],
       ['mandate_id' => 1],
-      ['mandate_id' => 'GROUP_CONCAT(civicrm_value_dd_mandate.id SEPARATOR \',\') as mandate_id']
+      ['mandate_id' => 'civicrm_value_dd_mandate.id as mandate_id']
     );
     $rows = $batchTransaction->getRows();
-    $row = array_shift($rows);
-    $ddMandateIDs = $row['mandate_id'];
-    if ($ddMandateIDs) {
-      $this->updateDDMandate('first_time_payment', $ddMandateIDs);
+    foreach ($rows as $row) {
+      if (!empty($row['mandate_id'])) {
+        $this->updateDDMandate('first_time_payment', $row['mandate_id']);
+      }
     }
 
     return TRUE;
@@ -274,7 +274,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
    */
   private function updateDDMandate($codeName, $IDs) {
     $ddCodes = CRM_Core_OptionGroup::values('direct_debit_codes', FALSE, FALSE, FALSE, NULL, 'name');
-    $query = 'UPDATE civicrm_value_dd_mandate SET dd_code = "' .  array_search($codeName, $ddCodes) . '" WHERE id IN (' . $IDs . ')';
+    $query = 'UPDATE civicrm_value_dd_mandate SET civicrm_value_dd_mandate.dd_code = "' .  array_search($codeName, $ddCodes) . '" WHERE civicrm_value_dd_mandate.id = ' . $IDs ;
     CRM_Core_DAO::executeQuery($query);
   }
 
@@ -286,23 +286,22 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
   private function submitDDPayments() {
     $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction(
       $this->batchID,
-      ['entityTable' => 'civicrm_value_dd_mandate'],
+      ['entityTable' => 'civicrm_contribution'],
       ['mandate_id' => 1, 'contribute_id' => 1],
       [
-        'mandate_id' => 'GROUP_CONCAT(civicrm_value_dd_mandate.id SEPARATOR \',\') as mandate_id',
-        'contribute_id' => 'GROUP_CONCAT(civicrm_contribution.id SEPARATOR \',\') as contribute_id',
+        'mandate_id' => 'civicrm_value_dd_mandate.id as mandate_id',
+        'contribute_id' => 'civicrm_contribution.id as contribute_id',
       ]
     );
     $rows = $batchTransaction->getRows();
-    $row = array_shift($rows);
-    $ddMandateIDs = $row['mandate_id'];
-    $contributeIDs = $row['contribute_id'];
 
-    if (!empty($ddMandateIDs)) {
-      $this->updateDDMandate('recurring_contribution', $ddMandateIDs);
-    }
-    if (!empty($contributeIDs)) {
-      $this->updateContribute('Completed', $contributeIDs);
+    foreach ($rows as $row) {
+      if (!empty($row['mandate_id'])) {
+        $this->updateDDMandate('recurring_contribution', $row['mandate_id']);
+      }
+      if (!empty($row['contribute_id'])) {
+        $this->updateContribute('Completed', $row['contribute_id']);
+      }
     }
 
     return TRUE;
@@ -315,8 +314,8 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
    * @param string $IDs list of IDs separated by comma
    */
   private function updateContribute($status, $IDs) {
-    $ContributeStatuses = CRM_Core_PseudoConstant::get('CRM_Contribute_DAO_Contribution', 'contribution_status_id', ['labelColumn' => 'name']);
-    $query = 'UPDATE civicrm_contribution SET contribution_status_id = ' . array_search($status, $ContributeStatuses) . ' WHERE id IN (' . $IDs . ')';
+    $contributeStatuses = CRM_Core_PseudoConstant::get('CRM_Contribute_DAO_Contribution', 'contribution_status_id', ['labelColumn' => 'name']);
+    $query = 'UPDATE civicrm_contribution SET civicrm_contribution.contribution_status_id = ' . array_search($status, $contributeStatuses) . ' WHERE civicrm_contribution.id = ' . $IDs;
     CRM_Core_DAO::executeQuery($query);
   }
 
