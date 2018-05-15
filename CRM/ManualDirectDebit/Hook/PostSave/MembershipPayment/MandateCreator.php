@@ -51,7 +51,6 @@ class CRM_ManualDirectDebit_Hook_PostSave_MembershipPayment_MandateCreator {
       'return' => "contact_id",
       'id' => $this->contributionId,
     ]);
-
   }
 
   /**
@@ -68,7 +67,6 @@ class CRM_ManualDirectDebit_Hook_PostSave_MembershipPayment_MandateCreator {
 
   /**
    * Assign mandate for contribution
-   *
    */
   public function assignMandateForContributions() {
 
@@ -100,7 +98,7 @@ class CRM_ManualDirectDebit_Hook_PostSave_MembershipPayment_MandateCreator {
    *
    * @return bool
    */
-  function isCurrentPaymentInstrumentDirectDebit() {
+  private function isCurrentPaymentInstrumentDirectDebit() {
     $currentPaymentInstrument = civicrm_api3('Contribution', 'getvalue', [
       'sequential' => 1,
       'return' => "payment_instrument_id",

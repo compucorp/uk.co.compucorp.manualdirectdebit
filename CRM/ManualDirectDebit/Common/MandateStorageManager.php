@@ -75,7 +75,10 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
    * @return int|null
    */
   public function getMandateForCurrentRecurringContribution($recurContributionId) {
-    $sqlSelectDebitMandateID = "SELECT `mandate_id` AS id FROM " . self::DIRECT_DEBIT_RECURRING_CONTRIBUTION_NAME . " WHERE `recurr_id` = %1";
+    $sqlSelectDebitMandateID = "SELECT `mandate_id` AS id 
+      FROM " . self::DIRECT_DEBIT_RECURRING_CONTRIBUTION_NAME . " 
+      WHERE `recurr_id` = %1";
+
     $queryResult = CRM_Core_DAO::executeQuery($sqlSelectDebitMandateID, [
       1 => [
         $recurContributionId,
@@ -128,7 +131,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
       throw $exception;
     }
 
-    $this->setMandateforCreatingDepandency($mandateId);
+    $this->setMandateForCreatingDependency($mandateId);
   }
 
   /**
@@ -153,7 +156,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
       throw $exception;
     }
 
-    $this->setMandateforCreatingDepandency($mandateId);
+    $this->setMandateForCreatingDependency($mandateId);
   }
 
   /**
@@ -176,10 +179,12 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
     $setValueTemplate = implode(', ', $setValueTemplateFields);
 
     // write into Data Base
-    $query = "UPDATE " . self::DIRECT_DEBIT_TABLE_NAME . " SET $setValueTemplate WHERE " . self::DIRECT_DEBIT_TABLE_NAME . ".id = $mandateId";
+    $query = "UPDATE " . self::DIRECT_DEBIT_TABLE_NAME . " 
+    SET $setValueTemplate 
+    WHERE " . self::DIRECT_DEBIT_TABLE_NAME . ".id = $mandateId";
     CRM_Core_DAO::executeQuery($query, $fieldsValues);
 
-    $this->setMandateforCreatingDepandency($mandateId);
+    $this->setMandateForCreatingDependency($mandateId);
   }
 
   /**
@@ -187,7 +192,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
    *
    * @param $mandateId
    */
-  private function setMandateforCreatingDepandency($mandateId){
+  private function setMandateForCreatingDependency($mandateId){
     $mandateContributionConnector = CRM_ManualDirectDebit_Hook_MandateContributionConnector::getInstance();
     $mandateContributionConnector->setMandateId($mandateId);
   }

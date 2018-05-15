@@ -43,9 +43,9 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate {
   }
 
   /**
-   * Fetches Direct Debit Mandate Data
+   * Saves Direct Debit Mandate Data
    */
-  public function fetchMandateData() {
+  public function saveMandateData() {
     $this->setMandateValues();
 
     $storageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
@@ -77,12 +77,12 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate {
   /**
    * Checks if the `field` is a part of Direct Debit Mandate Custom Group
    *
-   * @param $field
+   * @param string $fieldName
    *
    * @return bool
    */
-  private function isFieldIsPartOfDirectDebitCustomGroup($field) {
-    return in_array($field, $this->listOfDirectDebitMandateCustomGroupFields);
+  private function isFieldIsPartOfDirectDebitCustomGroup($fieldName) {
+    return in_array($fieldName, $this->listOfDirectDebitMandateCustomGroupFields);
   }
 
   /**
@@ -104,9 +104,11 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate {
    * @return string
    */
   private function getColumnName($fieldName) {
-    if (substr($fieldName, 0, strlen(CRM_ManualDirectDebit_Common_DirectDebitDataProvider::PREFIX)) == CRM_ManualDirectDebit_Common_DirectDebitDataProvider::PREFIX) {
+    $fieldNamePrefix = substr($fieldName, 0, strlen(CRM_ManualDirectDebit_Common_DirectDebitDataProvider::PREFIX));
+    if ($fieldNamePrefix == CRM_ManualDirectDebit_Common_DirectDebitDataProvider::PREFIX) {
       $columnName = substr($fieldName, strlen(CRM_ManualDirectDebit_Common_DirectDebitDataProvider::PREFIX));
     }
+
     return $columnName;
   }
 

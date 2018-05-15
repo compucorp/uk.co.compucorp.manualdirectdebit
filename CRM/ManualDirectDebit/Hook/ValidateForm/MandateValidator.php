@@ -12,7 +12,7 @@ class CRM_ManualDirectDebit_Hook_ValidateForm_MandateValidator {
    */
   private $form;
 
-  public function __construct($form) {
+  public function __construct(&$form) {
     $this->form = $form;
   }
 
@@ -24,6 +24,8 @@ class CRM_ManualDirectDebit_Hook_ValidateForm_MandateValidator {
 
     if ( ! CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($currentPaymentInstrumentId)) {
       $this->turnOffDirectDebitValidation();
+    } else{
+      $this->checkSettings();
     }
   }
 
@@ -42,7 +44,7 @@ class CRM_ManualDirectDebit_Hook_ValidateForm_MandateValidator {
   }
 
   /**
-   * Turns off all validation fir direct debit
+   * Turns off all validation for direct debit
    */
   private function turnOffDirectDebitValidation() {
     $mandateDataProvider = new CRM_ManualDirectDebit_Common_DirectDebitDataProvider();
@@ -55,6 +57,19 @@ class CRM_ManualDirectDebit_Hook_ValidateForm_MandateValidator {
       }
     }
     $this->form->setVar('_errors', $currentError);
+  }
+
+  /**
+   * Checks if necessary setting is configured for creating mandate
+   */
+  private function checkSettings() {
+    try {
+      CRM_ManualDirectDebit_Common_SettingsManager::getMinimumDayForFirstPayment();
+    } catch (CiviCRM_API3_Exception $error) {
+      $currentError = $this->form->getVar('_errors');
+      $currentError[] = ['directDebitMandate' => "Please, configure minimum days to first payment"];
+      $this->form->setVar('_errors', $currentError);
+    }
   }
 
 }

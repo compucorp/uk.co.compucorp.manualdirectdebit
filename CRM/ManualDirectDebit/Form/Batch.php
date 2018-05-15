@@ -9,7 +9,6 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
 
   /**
    * PreProcess function.
-   *
    */
   public function preProcess() {
     parent::preProcess();

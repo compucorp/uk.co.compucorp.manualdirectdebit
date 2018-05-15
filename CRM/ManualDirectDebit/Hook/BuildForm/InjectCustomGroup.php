@@ -52,7 +52,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_InjectCustomGroup {
     $minimumDaysToFirstPayment = $this->getMinimumDayForFirstPayment();
     $this->form->assign('minimumDaysToFirstPayment', $minimumDaysToFirstPayment);
 
-    $directDebitPaymentInstrumentId = $this->getDirectDebitPaymentInstrumentId();
+    $directDebitPaymentInstrumentId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getDirectDebitPaymentInstrumentId();
     $this->form->assign('directDebitPaymentInstrumentId', $directDebitPaymentInstrumentId);
 
     CRM_Core_Region::instance('page-body')->add([
@@ -66,33 +66,14 @@ class CRM_ManualDirectDebit_Hook_BuildForm_InjectCustomGroup {
    * @return int
    */
   private function getMinimumDayForFirstPayment() {
-    $settingTitle = 'manualdirectdebit_minimum_days_to_first_payment';
-    $settingValues = civicrm_api3('setting', 'get', [
-      'return' => $settingTitle,
-      'sequential' => 1,
-    ]);
-    $minimumDaysToFirstPayment = $settingValues['values'][0][$settingTitle];
-
-    if (!isset($minimumDaysToFirstPayment) || empty($minimumDaysToFirstPayment)) {
-      CRM_Core_Session::setStatus(t("Please, configure minimum days to first payment"), $title = 'Error', $type = 'alert');
+    try {
+      $minimumDaysToFirstPayment = CRM_ManualDirectDebit_Common_SettingsManager::getMinimumDayForFirstPayment();
+    } catch (CiviCRM_API3_Exception $error) {
+      CRM_Core_Session::setStatus($error->getMessage(), $title = 'Error', $type = 'error');
       $minimumDaysToFirstPayment = 0;
     }
 
     return $minimumDaysToFirstPayment;
-  }
-
-  /**
-   * Gets id od direct debit payment instrument
-   *
-   * @return array
-   */
-  private function getDirectDebitPaymentInstrumentId() {
-    $directDebitPaymentInstrumentId = civicrm_api3('OptionValue', 'getvalue', [
-      'return' => "value",
-      'name' => "direct_debit",
-    ]);
-
-    return $directDebitPaymentInstrumentId;
   }
 
 }

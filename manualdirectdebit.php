@@ -202,7 +202,7 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
         $paymentInstrumentId = $form->getVar('_submitValues') ['payment_instrument_id'];
         if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($paymentInstrumentId)) {
           $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate($form);
-          $manualDirectDebit->fetchMandateData();
+          $manualDirectDebit->saveMandateData();
         }
       }
     break;
@@ -212,7 +212,7 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
         $paymentInstrumentId = $form->getVar('_submitValues') ['payment_instrument_id'];
         if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($paymentInstrumentId)) {
           $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate($form);
-          $manualDirectDebit->fetchMandateData();
+          $manualDirectDebit->saveMandateData();
         }
       }
     break;

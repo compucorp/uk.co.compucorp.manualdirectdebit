@@ -17,13 +17,13 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
    *
    * @var array
    */
-  private $directDebitMandateCustomGroupField;
+  private $directDebitMandateCustomGroupFields;
 
   /**
    * CRM_ManualDirectDebit_Common_DirectDebitDataProvider constructor.
    */
   public function __construct() {
-    $this->directDebitMandateCustomGroupField = $this->getDirectDebitMandateFields();
+    $this->directDebitMandateCustomGroupFields = $this->getDirectDebitMandateFields();
   }
 
   /**
@@ -45,7 +45,7 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
    */
   public function getMandateCustomFieldDataForBuildingForm(){
     $mandateCustomGroupFieldData = [];
-    foreach ($this->directDebitMandateCustomGroupField['values'] as $value) {
+    foreach ($this->directDebitMandateCustomGroupFields['values'] as $value) {
       $params = [];
       $optionGroupId = '';
 
@@ -104,7 +104,7 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
    */
   public function getMandateCustomFieldNames(){
     $mandateCustomGroupFieldNames = [];
-    foreach ($this->directDebitMandateCustomGroupField['values'] as $value) {
+    foreach ($this->directDebitMandateCustomGroupFields['values'] as $value) {
       $mandateCustomGroupFieldNames[] = self::PREFIX . $value['name'];
     }
 
@@ -158,6 +158,20 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
     ]);
 
     return $currentGroupId == $directDebitMandateId;
+  }
+
+  /**
+   * Gets id od direct debit payment instrument
+   *
+   * @return int
+   */
+  public static function getDirectDebitPaymentInstrumentId() {
+    $directDebitPaymentInstrumentId = civicrm_api3('OptionValue', 'getvalue', [
+      'return' => "value",
+      'name' => "direct_debit",
+    ]);
+
+    return $directDebitPaymentInstrumentId;
   }
 
 }
