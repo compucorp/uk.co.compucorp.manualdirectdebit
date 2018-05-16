@@ -270,11 +270,11 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
    * Updates Direct Debits Mandates code.
    *
    * @param string $codeName
-   * @param string $IDs list of IDs separated by comma
+   * @param string $mandateId
    */
-  private function updateDDMandate($codeName, $IDs) {
+  private function updateDDMandate($codeName, $mandateId) {
     $ddCodes = CRM_Core_OptionGroup::values('direct_debit_codes', FALSE, FALSE, FALSE, NULL, 'name');
-    $query = 'UPDATE civicrm_value_dd_mandate SET civicrm_value_dd_mandate.dd_code = "' .  array_search($codeName, $ddCodes) . '" WHERE civicrm_value_dd_mandate.id = ' . $IDs ;
+    $query = 'UPDATE civicrm_value_dd_mandate SET civicrm_value_dd_mandate.dd_code = "' .  array_search($codeName, $ddCodes) . '" WHERE civicrm_value_dd_mandate.id = ' . $mandateId ;
     CRM_Core_DAO::executeQuery($query);
   }
 
@@ -311,11 +311,11 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
    * Updates Contributes status.
    *
    * @param string $status
-   * @param string $IDs list of IDs separated by comma
+   * @param string $mandateId
    */
-  private function updateContribute($status, $IDs) {
+  private function updateContribute($status, $mandateId) {
     $contributeStatuses = CRM_Core_PseudoConstant::get('CRM_Contribute_DAO_Contribution', 'contribution_status_id', ['labelColumn' => 'name']);
-    $query = 'UPDATE civicrm_contribution SET civicrm_contribution.contribution_status_id = ' . array_search($status, $contributeStatuses) . ' WHERE civicrm_contribution.id = ' . $IDs;
+    $query = 'UPDATE civicrm_contribution SET civicrm_contribution.contribution_status_id = ' . array_search($status, $contributeStatuses) . ' WHERE civicrm_contribution.id = ' . $mandateId;
     CRM_Core_DAO::executeQuery($query);
   }
 
