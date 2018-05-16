@@ -174,4 +174,59 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
     return $directDebitPaymentInstrumentId;
   }
 
+  /**
+   * Gets id of custom group by name
+   *
+   * @param $customGroupName
+   *
+   * @return int
+   */
+  public static function getGroupIDByName($customGroupName) {
+    return civicrm_api3('CustomGroup', 'getvalue', [
+      'return' => "id",
+      'name' => $customGroupName,
+    ]);
+  }
+
+  /**
+   * Gets id of custom field by name
+   *
+   * @param $customFieldName
+   *
+   * @return int
+   */
+  public static function getCustomFieldIdByName($customFieldName) {
+    return civicrm_api3('CustomField', 'getvalue', [
+      'return' => "id",
+      'name' => $customFieldName,
+    ]);
+  }
+
+  /**
+   * Gets Id of payment processor for current recurring contribution
+   *
+   * @param $contributionRecurId
+   *
+   * @return int
+   */
+  public static function getCurrentPaymentProcessorId($contributionRecurId) {
+    return civicrm_api3('ContributionRecur', 'getvalue', [
+      'return' => "payment_processor_id",
+      'id' => $contributionRecurId,
+    ]);
+  }
+
+  /**
+   * Gets id of current payment instrument
+   *
+   * @param $currentRecurringContributionId
+   *
+   * @return int
+   */
+  public static function getPaymentInstrumentIdOfRecurrContribution($currentRecurringContributionId) {
+    return civicrm_api3('ContributionRecur', 'getvalue', [
+      'return' => "payment_instrument_id",
+      'id' => $currentRecurringContributionId,
+    ]);
+  }
 }

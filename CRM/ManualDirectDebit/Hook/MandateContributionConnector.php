@@ -113,7 +113,7 @@ class CRM_ManualDirectDebit_Hook_MandateContributionConnector {
 
     if (isset($this->contributionRecurId)) {
 
-      $currentPaymentProcessorId = $this->getCurrentPaymentProcessorId($this->contributionRecurId);
+      $currentPaymentProcessorId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCurrentPaymentProcessorId($this->contributionRecurId);
       if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitPaymentProcessor($currentPaymentProcessorId)) {
         $mandateStorage->assignRecurringContributionMandate($this->contributionRecurId, $this->mandateId);
         $mandateStorage->assignContributionMandate($this->contributionId, $this->mandateId);
@@ -126,20 +126,6 @@ class CRM_ManualDirectDebit_Hook_MandateContributionConnector {
     }
 
     $this->refreshProperties();
-  }
-
-  /**
-   * Gets Id of payment processor for current recurring contribution
-   *
-   * @param $contributionRecurId
-   *
-   * @return int
-   */
-  private function getCurrentPaymentProcessorId($contributionRecurId) {
-    return civicrm_api3('ContributionRecur', 'getvalue', [
-      'return' => "payment_processor_id",
-      'id' => $contributionRecurId,
-    ]);
   }
 
   /**
