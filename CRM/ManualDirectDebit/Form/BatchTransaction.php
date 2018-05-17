@@ -21,6 +21,13 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
   protected $batchID;
 
   /**
+   * Batch.
+   *
+   * @var object
+   */
+  protected $batch;
+
+  /**
    * PreProcess function.
    */
   public function preProcess() {
@@ -28,6 +35,7 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
     $this->assign('entityID', $this->batchID);
     if (isset($this->batchID)) {
       $batch = new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID);
+      $this->batch = $batch->getBatch();
       $this->assign('statusID', $batch->getBatchStatusId());
       $this->assign('batchStatus', $batch->getBatchStatus());
       $this->assign('validStatus', $batch->validBatchStatus());
@@ -50,6 +58,13 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
 
       $this->assignSearchProperties($batchType);
     }
+
+    $customGroup = civicrm_api3('CustomGroup', 'getvalue', [
+      'return' => "id",
+      'name' => "direct_debit_mandate",
+    ]);
+
+    $this->assign('customGroup', $customGroup);
   }
 
   /**
@@ -108,8 +123,7 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
   private function assignDDPaymentsSearchProperties() {
     $ddCodes = CRM_Core_OptionGroup::values('direct_debit_codes');
     $paymentInstrument = CRM_Core_OptionGroup::values('payment_instrument', FALSE, FALSE, FALSE, NULL, 'name');
-    $contributionStatus = CRM_Core_OptionGroup::values('contribution_status', FALSE, FALSE, FALSE, NULL, 'name');
-    $recurStatus = $contributionStatus;
+    $recurStatus = $contributionStatus = CRM_Core_OptionGroup::values('contribution_status', FALSE, FALSE, FALSE, NULL, 'name');
     unset($recurStatus[array_search('Cancelled', $contributionStatus)]);
 
     $batchData = json_decode($this->_values['data'], TRUE);
@@ -140,7 +154,7 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
       ],
       [
         'name' => 'recur_status',
-        'value' => array_values(array_flip($recurStatus)),
+        'value' => array_keys($recurStatus),
       ],
       [
         'name' => 'contribution_status',
@@ -164,7 +178,10 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
     parent::buildQuickForm();
     if (CRM_Batch_BAO_Batch::checkBatchPermission('close', $this->_values['created_id'])) {
       if (CRM_Batch_BAO_Batch::checkBatchPermission('export', $this->_values['created_id'])) {
-        $this->add('submit', 'export_batch', ts('Done and Export Batch'), ['formtarget' => '_blank']);
+        $this->add('submit', 'export_batch', ts('Export Batch'), ['formtarget' => '_blank']);
+        $this->add('submit', 'done_and_export_batch', ts('Done and Export Batch'), ['formtarget' => '_blank']);
+        $this->add('submit', 'submitted', ts('Submit'));
+        $this->add('submit', 'discard', ts('Discard'));
       }
     }
 
@@ -209,6 +226,13 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
     $this->addElement('hidden', 'batch_id', $this->batchID);
 
     $this->add('text', 'name', ts('Batch Name'));
+
+    $customGroup = civicrm_api3('CustomGroup', 'getvalue', [
+      'return' => "id",
+      'name' => "direct_debit_mandate",
+    ]);
+
+    $this->assign('customGroup', $customGroup);
   }
 
   /**
@@ -217,9 +241,9 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
   public function postProcess() {
     $params = $this->controller->exportValues($this->_name);
 
-    if (isset($params['export_batch'])) {
+    if (isset($params['export_batch']) || isset($params['done_and_export_batch'])) {
       $batch = new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID);
-      $batch->createExportFile($params);
+      $batch->createExportFile();
     }
   }
 
@@ -248,5 +272,4 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
 
     return $this->links;
   }
-
 }

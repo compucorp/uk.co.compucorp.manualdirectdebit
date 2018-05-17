@@ -250,7 +250,6 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $mandateItems = $this->getDDMandateInstructions();
 
     $batch = new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID);
-    $ddCodes = CRM_Core_OptionGroup::values('direct_debit_codes');
 
     $rows = [];
     while ($mandateItems->fetch()) {
@@ -278,7 +277,19 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         $row['check'] = NULL;
       }
 
-      $rows[$mandateItems->id] = $row;
+      if (!empty($mandateItems->contact_id)) {
+        switch ($batch->getBatchType()) {
+          case "instructions_batch":
+            $row['action'] = $this->getLinkToMandate($mandateItems->mandate_id, $mandateItems->contact_id);
+            break;
+
+          case "dd_payments":
+            $row['action'] = $this->getLinkToRecurringContribution($mandateItems->id, $mandateItems->contact_id);
+            break;
+        }
+      }
+
+      $rows[$mandateItems->mandate_id] = $row;
     }
 
     return $rows;
@@ -314,7 +325,19 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     }
 
     if ($this->notPresent) {
-      $query->where('civicrm_entity_batch.batch_id IS NULL');
+      $batchStatus = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id', ['labelColumn' => 'name']);
+      $excluded = CRM_Utils_SQL_Select::from(self::DD_MANDATE_TABLE);
+      $excluded->select($this->params['entityTable'] . '.id');
+
+      if ($this->params['entityTable'] == 'civicrm_contribution') {
+        $excluded->join('value_dd_information', 'LEFT JOIN civicrm_value_dd_information ON civicrm_value_dd_information.mandate_id = civicrm_value_dd_mandate.id');
+        $excluded->join('contribution', 'LEFT JOIN civicrm_contribution ON civicrm_contribution.id = civicrm_value_dd_information.entity_id');
+      }
+      $excluded->join('entity_batch', 'LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . $this->params['entityTable'] . '.id AND civicrm_entity_batch.entity_table = \'' . $this->params['entityTable'] . '\'');
+      $excluded->join('batch', 'LEFT JOIN civicrm_batch ON civicrm_entity_batch.batch_id = civicrm_batch.id');
+      $excluded->where('civicrm_batch.status_id <> ' . CRM_Utils_Array::key('Discarded', $batchStatus));
+
+      $query->where($this->params['entityTable'] . '.id NOT IN (' . $excluded->toSQL() . ')');
     }
     else {
       $query->where('civicrm_entity_batch.batch_id = !entityID', ['entityID' => $this->batchID]);
@@ -334,6 +357,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         $query->limit((int) $this->params['rowCount'], (int) $this->params['offset']);
       }
     }
+    $query->groupBy('civicrm_value_dd_mandate.id');
 
     $mandateItems = CRM_Core_DAO::executeQuery($query->toSQL());
 
@@ -379,6 +403,59 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $this->columnHeader = array_merge($this->columnHeader, $columnHeader);
 
     return $this->columnHeader;
+  }
+
+  /**
+   * Gets link to mandate
+   *
+   * @return string
+   */
+  private function getLinkToMandate($mandateId, $contactId) {
+    $linkToMandate = CRM_Core_Action::formLink(
+      [
+        'view' => [
+          'name' => ts('View'),
+          'title' => ts('View Mandate'),
+          'extra' => 'onclick = "contactMandate( %%mandate_id%%, %%contact_id%% );"',
+        ],
+      ],
+      NULL,
+      [
+        'mandate_id' => $mandateId,
+        'contact_id' => $contactId,
+      ]
+    );
+
+    return $linkToMandate;
+  }
+
+  /**
+   * Gets link to contribution
+   *
+   * @return string
+   */
+  private function getLinkToRecurringContribution($contributionId, $contactId) {
+    $recContributionId = civicrm_api3('Contribution', 'getvalue', [
+      'return' => "contribution_recur_id",
+      'id' => $contributionId,
+    ]);
+
+    $linkToRecurringContribution = CRM_Core_Action::formLink(
+      [
+        'view' => [
+          'name' => ts('View'),
+          'title' => ts('View Contribution'),
+          'extra' => 'onclick = "contactRecurContribution( %%recur_contribution_id%%, %%contact_id%% );"',
+        ],
+      ],
+      NULL,
+      [
+        'recur_contribution_id' => $recContributionId,
+        'contact_id' => $contactId,
+      ]
+    );
+
+    return $linkToRecurringContribution;
   }
 
 }

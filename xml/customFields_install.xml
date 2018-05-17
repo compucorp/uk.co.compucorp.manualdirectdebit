@@ -144,7 +144,7 @@
         <CustomField>
             <name>ac_number</name>
             <label>A/C Number</label>
-            <data_type>Int</data_type>
+            <data_type>String</data_type>
             <html_type>Text</html_type>
             <is_required>1</is_required>
             <is_searchable>1</is_searchable>
@@ -162,7 +162,7 @@
         <CustomField>
             <name>sort_code</name>
             <label>Sort Code</label>
-            <data_type>Int</data_type>
+            <data_type>String</data_type>
             <html_type>Text</html_type>
             <is_required>1</is_required>
             <is_searchable>1</is_searchable>
@@ -375,7 +375,6 @@
         <OptionValue>
             <label>New Direct Debit Instructions</label>
             <name>instructions_batch</name>
-            <is_reserved>1</is_reserved>
             <is_active>1</is_active>
             <description>New Direct Debit Instructions</description>
             <option_group_name>batch_type</option_group_name>
@@ -383,10 +382,23 @@
         <OptionValue>
             <label>Direct Debit Payments</label>
             <name>dd_payments</name>
-            <is_reserved>1</is_reserved>
             <is_active>1</is_active>
             <description>Direct Debit Payments</description>
             <option_group_name>batch_type</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Submitted</label>
+            <name>Submitted</name>
+            <is_active>1</is_active>
+            <description>Submitted</description>
+            <option_group_name>batch_status</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Discarded</label>
+            <name>Discarded</name>
+            <is_active>1</is_active>
+            <description>Discarded</description>
+            <option_group_name>batch_status</option_group_name>
         </OptionValue>
     </OptionValues>
     <ProfileGroups>

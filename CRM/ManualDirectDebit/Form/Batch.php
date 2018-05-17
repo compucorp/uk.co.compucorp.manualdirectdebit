@@ -9,7 +9,6 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
 
   /**
    * PreProcess function.
-   *
    */
   public function preProcess() {
     parent::preProcess();
@@ -39,7 +38,6 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
 
     $attributes = CRM_Core_DAO::getAttribute('CRM_Batch_DAO_Batch');
     $this->add('text', 'title', ts('Batch Name'), $attributes['name'], TRUE);
-
     $this->add('select', 'originator_number', ts('Originator number'),
       ['' => ts('- select -')] + CRM_Core_OptionGroup::values('direct_debit_originator_number'),
       TRUE
@@ -90,7 +88,6 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
    * Sets defaults for form.
    *
    * @see CRM_Core_Form::setDefaultValues()
-   *
    */
   public function setDefaultValues() {
     $defaults = parent::setDefaultValues();
@@ -140,7 +137,7 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     }
 
     $session->replaceUserContext(CRM_Utils_System::url('civicrm/direct_debit/batch-transaction',
-      "reset=1&bid={$batch->id}"));
+      "reset=1&bid={$batch->id}&action=update"));
   }
 
   /**

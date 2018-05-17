@@ -19,11 +19,34 @@ class CRM_ManualDirectDebit_Page_BatchTransaction extends CRM_Core_Page_Basic {
 
   /**
    * Runs the page.
-   *
    */
   public function run() {
     // get the requested action
     $action = CRM_Utils_Request::retrieve('action', 'String', $this, FALSE, 'browse'); // default to 'browse'
+
+    if ($action == CRM_Core_Action::VIEW) {
+      $batchID = CRM_Utils_Request::retrieve('bid', 'Positive') ?: CRM_Utils_Array::value('batch_id', $_POST);
+      $batchTypes = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, NULL, 'name');
+      $param = ['id' => $batchID, 'context' => ''];
+      $batch = CRM_Batch_BAO_Batch::getBatchList($param);
+      $batch = $batch[$batchID];
+      $param['entityTable'] = $batchTypes[$batch['type_id']] == 'instructions_batch' ? 'civicrm_value_dd_mandate' : 'civicrm_contribution';
+      $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction($batch['id'], $param);
+
+      $batchInfo = [
+        'name' => $batch['name'],
+        'transaction_count' => $batchTransaction->getTotalNumber(),
+        'batch_status' => $batch['batch_status'],
+        'created_date' => $batch['created_date'],
+        'created_by' => $batch['created_by'],
+      ];
+      $type = 'dd_payments' == $batchTypes[$batch['type_id']] ? 'Payment' : 'Instruction';
+      $submittedMessage = CRM_ManualDirectDebit_Batch_BatchHandler::getSubmitAlertMessage($batch['type_id']);
+
+      $this->assign('batchInfo', $batchInfo);
+      $this->assign('submittedMessage', $submittedMessage);
+      $this->assign('type', $type);
+    }
 
     // assign vars to templates
     $this->assign('action', $action);

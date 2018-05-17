@@ -174,6 +174,19 @@ function manualdirectdebit_civicrm_navigationMenu(&$menu) {
       'permission' => 'administer CiviCRM',
       'operator' => NULL,
     ],
+    [
+      'name' => ts('View New Instruction Batches'),
+      'url' => 'civicrm/direct_debit/batch-list?reset=1&type_id=' . array_search('instructions_batch', $batchTypes),
+      'permission' => 'administer CiviCRM',
+      'operator' => NULL,
+      'separator' => 2,
+    ],
+    [
+      'name' => ts('View Payment Batches'),
+      'url' => 'civicrm/direct_debit/batch-list?reset=1&type_id=' . array_search('dd_payments', $batchTypes),
+      'permission' => 'administer CiviCRM',
+      'operator' => NULL,
+    ],
   ];
 
   foreach ($subMenuItems as $menuItem) {
