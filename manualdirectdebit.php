@@ -125,6 +125,16 @@ function manualdirectdebit_civicrm_alterSettingsFolders(&$metaDataFolders = NULL
 }
 
 /**
+ * Implements hook_civicrm_permission().
+ *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_permission/
+ */
+function manualdirectdebit_civicrm_permission(&$permissions) {
+  $permissionsPrefix = 'CiviCRM : ';
+  $permissions['can manage direct debit batches'] = $permissionsPrefix . ts('Can manage Direct Debit Batches');
+}
+
+/**
  * Implements hook_civicrm_navigationMenu().
  *
  */
