@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Class provide reading and writing 'Direct Debit Mandate' and it`s dependency into Data Base
+ * Class provide reading and writing 'Direct Debit Mandate' and it`s dependency
+ * into Data Base
  */
 class CRM_ManualDirectDebit_Common_MandateStorageManager {
 
@@ -11,7 +12,8 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
   const DIRECT_DEBIT_TABLE_NAME = 'civicrm_value_dd_mandate';
 
   /**
-   * Name of table which save dependency between recurring contribution and mandate
+   * Name of table which save dependency between recurring contribution and
+   * mandate
    */
   const DIRECT_DEBIT_RECURRING_CONTRIBUTION_NAME = 'dd_contribution_recurr_mandate_ref';
 
@@ -23,10 +25,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
    *
    */
   public function assignContributionMandate($contributionId, $mandateID) {
-    $mandateIdCustomFieldId = civicrm_api3('CustomField', 'getvalue', [
-      'return' => "id",
-      'name' => "mandate_id",
-    ]);
+    $mandateIdCustomFieldId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName("mandate_id");
 
     civicrm_api3('Contribution', 'create', [
       'id' => $contributionId,
@@ -87,7 +86,11 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
     ]);
     $queryResult->fetch();
 
-    return $queryResult->id;
+    if (isset($queryResult->id) && !empty($queryResult->id)) {
+      return $queryResult->id;
+    } else {
+      return NULL;
+    }
   }
 
   /**
@@ -131,7 +134,8 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
       throw $exception;
     }
 
-    $this->setMandateForCreatingDependency($mandateId);
+    $this->assignMandate($mandateId);
+
   }
 
   /**
@@ -192,9 +196,92 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
    *
    * @param $mandateId
    */
-  private function setMandateForCreatingDependency($mandateId){
+  private function setMandateForCreatingDependency($mandateId) {
     $mandateContributionConnector = CRM_ManualDirectDebit_Hook_MandateContributionConnector::getInstance();
     $mandateContributionConnector->setMandateId($mandateId);
+  }
+
+  private function assignMandate($mandateId) {
+    $sqlSelectDebitMandateID = "SELECT MAX(`id`) AS id FROM civicrm_contribution_recur WHERE `contact_id` = %1";
+    $queryResult = CRM_Core_DAO::executeQuery($sqlSelectDebitMandateID, [
+      1 => [
+        2,
+        'String',
+      ],
+    ]);
+    $queryResult->fetch();
+    $lastInsertedRecurrContribution = $queryResult->id;
+
+    /**
+     *
+     *
+     * If DirectDebit was installed first, at this moment Membership extension did`t have time to
+     * divide contributions in correct amount of instalments.
+     * At this time we have only one contribution and one recurring contribution,
+     * so we assign them to currently created mandate,
+     * and all next contributions we will assign in manualdirectdebit_civicrm_postSave_civicrm_membership_payment hook
+     *
+     *
+     */
+    if ($this->isDirectDebitInstalledFirst()) {
+      $sqlContributionID = "SELECT MAX(`id`) AS id FROM civicrm_contribution WHERE `contact_id` = %1";
+      $queryResult = CRM_Core_DAO::executeQuery($sqlContributionID, [
+        1 => [
+          2,
+          'String',
+        ],
+      ]);
+      $queryResult->fetch();
+      $lastContributionID = $queryResult->id;
+
+      $this->assignRecurringContributionMandate($lastInsertedRecurrContribution, $mandateId);
+      $this->assignContributionMandate($lastContributionID, $mandateId);
+    }
+    else {
+
+      /**
+       *
+       *
+       * If Membership was installed first, at this moment it already divide contributions in correct amount of instalments.
+       * And assign all this contributions to 'civicrm_membership_payment'
+       * So at this time we have all necessary data, and manualdirectdebit_civicrm_postSave_civicrm_membership_payment hook
+       * will no longer execute
+       * so we assign last inserted recurr contribution to currently created mandate,
+       * and to all contributions which was assign to this recurr contribution
+       *
+       *
+       */
+      $allContributionIdsForRecurr = civicrm_api3('Contribution', 'get', [
+        'sequential' => 1,
+        'return' => ["id"],
+        'contribution_recur_id' => $lastInsertedRecurrContribution,
+      ]);
+
+      $contributionIds = [];
+      foreach ($allContributionIdsForRecurr['values'] as $value) {
+        $contributionIds[] = $value['contribution_id'];
+      }
+
+      foreach ($contributionIds as $contributionId) {
+        $this->assignContributionMandate($contributionId, $mandateId);
+      }
+
+      $this->assignRecurringContributionMandate($lastInsertedRecurrContribution, $mandateId);
+    }
+  }
+
+  private function isDirectDebitInstalledFirst() {
+    $sqlManualdirectdebitId3 = "SELECT id FROM civicrm_extension WHERE `full_name` = 'uk.co.compucorp.manualdirectdebit'";
+    $manualdirectdebitIdQueryResult = CRM_Core_DAO::executeQuery($sqlManualdirectdebitId3);
+    $manualdirectdebitIdQueryResult->fetch();
+    $manualdirectdebitId = $manualdirectdebitIdQueryResult->id;
+
+    $sqlManualdirectdebitId4 = "SELECT id FROM civicrm_extension WHERE `full_name` = 'uk.co.compucorp.membershipextras'";
+    $membershipQueryResult = CRM_Core_DAO::executeQuery($sqlManualdirectdebitId4);
+    $membershipQueryResult->fetch();
+    $membershipId = $membershipQueryResult->id;
+
+    return $manualdirectdebitId < $membershipId;
   }
 
 }

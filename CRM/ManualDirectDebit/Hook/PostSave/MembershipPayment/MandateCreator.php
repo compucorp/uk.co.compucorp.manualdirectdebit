@@ -79,9 +79,6 @@ class CRM_ManualDirectDebit_Hook_PostSave_MembershipPayment_MandateCreator {
     if (isset($mandateId) && !empty($mandateId)) {
       $this->mandateStorage->assignContributionMandate($this->contributionId, $mandateId);
     }
-    else {
-      $this->findMandateForContributions();
-    }
   }
 
   /**
@@ -107,18 +104,6 @@ class CRM_ManualDirectDebit_Hook_PostSave_MembershipPayment_MandateCreator {
     ]);
 
     return CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($currentPaymentInstrument);
-  }
-
-  /**
-   * Finds appropriate mandate for current contributions
-   */
-  private function findMandateForContributions() {
-    $lastInsertedMandateId = $this->mandateStorage->getLastInsertedMandateId($this->contactId);
-
-    if (isset($lastInsertedMandateId)) {
-      $this->mandateStorage->assignRecurringContributionMandate($this->recurContributionId, $lastInsertedMandateId);
-      $this->mandateStorage->assignContributionMandate($this->contributionId, $lastInsertedMandateId);
-    }
   }
 
 }

@@ -22,16 +22,16 @@ class CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInje
   private $currentContributionId;
 
   /**
-   * Current payment processor Id
+   * Current payment method Id
    *
    * @var int
    */
-  private $currentPaymentProcessorId;
+  private $currentPaymentMethodId;
 
   public function __construct(&$page) {
     $this->page = $page;
     $this->currentContributionId = CRM_Utils_Request::retrieve('id', 'Integer', $this->page, FALSE);
-    $this->currentPaymentProcessorId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getPaymentInstrumentIdOfRecurrContribution($this->currentContributionId);
+    $this->currentPaymentMethodId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getPaymentInstrumentIdOfRecurrContribution($this->currentContributionId);
   }
 
   /**
@@ -41,7 +41,7 @@ class CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInje
    * @return bool
    */
   public function inject() {
-    if(! CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitPaymentProcessor($this->currentPaymentProcessorId)){
+    if(! CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($this->currentPaymentMethodId)){
       return FALSE;
     }
 

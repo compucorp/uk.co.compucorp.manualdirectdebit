@@ -69,6 +69,7 @@ class CRM_ManualDirectDebit_Hook_ValidateForm_MandateValidator {
       $currentError = $this->form->getVar('_errors');
       $currentError[] = ['directDebitMandate' => "Please, configure minimum days to first payment"];
       $this->form->setVar('_errors', $currentError);
+      CRM_Core_Session::setStatus($error->getMessage(), $title = 'Error', $type = 'error');
     }
   }
 
