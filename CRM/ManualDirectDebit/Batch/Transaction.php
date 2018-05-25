@@ -246,10 +246,66 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @return array
    */
   public function getRows() {
+    $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID));
+    $mandateData = $batch->getBatchValues();
 
+    if (isset($mandateData['values']['mandates']) && !empty($mandateData['values']['mandates']) && $this->notPresent != 1) {
+      $rows = $this->getSavedRows($mandateData, $batch);
+    }
+    else {
+      $rows = $this->getBatchRows($batch);
+    }
+
+    return $rows;
+  }
+
+
+  /**
+   * Gets prepared data about previously serialized mandates
+   *
+   * @param $mandateData
+   * @param $batch
+   *
+   * @return array
+   */
+   private function getSavedRows($mandateData, $batch) {
+    $rows = [];
+
+    foreach ($mandateData['values']['mandates'] as $mandateId => $mandateValue) {
+      $row = [];
+      foreach ($mandateValue as $key => $value) {
+        $row[$key] = $value;
+      }
+
+      $row['check'] = $this->getCheckRow($batch, $mandateId);
+
+      if (!empty($mandateValue['contact_id'])) {
+        switch ($batch->getBatchType()) {
+          case "instructions_batch":
+            $row['action'] = $this->getLinkToMandate($mandateId, $mandateValue['contact_id']);
+            break;
+
+          case "dd_payments":
+            $row['action'] = $this->getLinkToRecurringContribution($mandateId, $mandateValue['contact_id']);
+            break;
+        }
+      }
+
+      $rows[$mandateId] = $row;
+    }
+
+    return $rows;
+  }
+
+  /**
+   * Gets prepared data about appropriate mandates
+   *
+   * @param $batch
+   *
+   * @return array
+   */
+  private function getBatchRows($batch) {
     $mandateItems = $this->getDDMandateInstructions();
-
-    $batch = new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID);
 
     $rows = [];
     while ($mandateItems->fetch()) {
@@ -263,19 +319,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         }
       }
 
-      if ($batch->validBatchStatus()) {
-        if ($this->notPresent) {
-          $js = "enableActions('x')";
-          $row['check'] = "<input type='checkbox' id='mark_x_" . $mandateItems->id . "' name='mark_x_" . $mandateItems->id . "' value='1' onclick={$js}></input>";
-        }
-        else {
-          $js = "enableActions('y')";
-          $row['check'] = "<input type='checkbox' id='mark_y_" . $mandateItems->id . "' name='mark_y_" . $mandateItems->id . "' value='1' onclick={$js}></input>";
-        }
-      }
-      else {
-        $row['check'] = NULL;
-      }
+      $row['check'] = $this->getCheckRow($batch, $mandateItems->id);
 
       if (!empty($mandateItems->contact_id)) {
         switch ($batch->getBatchType()) {
@@ -293,6 +337,31 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     }
 
     return $rows;
+  }
+
+  /**
+   * Gets check row
+   *
+   * @param $batch
+   * @param $mandateId
+   *
+   * @return string|null
+   */
+  private function getCheckRow($batch, $mandateId) {
+    $rowCheck = NULL;
+
+    if ($batch->validBatchStatus()) {
+      if ($this->notPresent) {
+        $js = "enableActions('x')";
+        $rowCheck = "<input type='checkbox' id='mark_x_" . $mandateId . "' name='mark_x_" . $mandateId . "' value='1' onclick={$js}></input>";
+      }
+      else {
+        $js = "enableActions('y')";
+        $rowCheck = "<input type='checkbox' id='mark_y_" . $mandateId . "' name='mark_y_" . $mandateId . "' value='1' onclick={$js}></input>";
+      }
+    }
+
+    return $rowCheck;
   }
 
   /**
@@ -411,18 +480,20 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @return string
    */
   private function getLinkToMandate($mandateId, $contactId) {
+    $mandateCustomGroupId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getGroupIDByName('direct_debit_mandate');
     $linkToMandate = CRM_Core_Action::formLink(
       [
         'view' => [
           'name' => ts('View'),
           'title' => ts('View Mandate'),
-          'extra' => 'onclick = "contactMandate( %%mandate_id%%, %%contact_id%% );"',
+          'url' => "civicrm/contact/view",
+          'qs' => "reset=1&cid=%%contact_id%%&selectedChild=custom_%%mandate_custom_group_id%%"
         ],
       ],
       NULL,
       [
-        'mandate_id' => $mandateId,
         'contact_id' => $contactId,
+        'mandate_custom_group_id' => $mandateCustomGroupId,
       ]
     );
 
@@ -435,22 +506,18 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @return string
    */
   private function getLinkToRecurringContribution($contributionId, $contactId) {
-    $recContributionId = civicrm_api3('Contribution', 'getvalue', [
-      'return' => "contribution_recur_id",
-      'id' => $contributionId,
-    ]);
 
     $linkToRecurringContribution = CRM_Core_Action::formLink(
       [
         'view' => [
           'name' => ts('View'),
           'title' => ts('View Contribution'),
-          'extra' => 'onclick = "contactRecurContribution( %%recur_contribution_id%%, %%contact_id%% );"',
+          'url' => "civicrm/contact/view",
+          'qs' => "reset=1&cid=%%contact_id%%&selectedChild=contribute",
         ],
       ],
       NULL,
       [
-        'recur_contribution_id' => $recContributionId,
         'contact_id' => $contactId,
       ]
     );

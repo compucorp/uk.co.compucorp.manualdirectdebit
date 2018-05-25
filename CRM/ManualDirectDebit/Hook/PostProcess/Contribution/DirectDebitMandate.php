@@ -47,7 +47,7 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
     } else {
       $selectedPaymentInstrument = $this->form->getVar('_params')['payment_instrument_id'];
 
-      if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitPaymentProcessor($selectedPaymentInstrument)){
+      if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($selectedPaymentInstrument)){
         $this->mandateStorage->createEmptyMandate($this->currentContactId);
       }
     }

@@ -25,10 +25,6 @@ class CRM_ManualDirectDebit_Hook_PageRun_TabPage {
           ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/hideEmptyMandate.js');
       }
     }
-    else {
-      CRM_Core_Resources::singleton()
-        ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/hideEmptyMandate.js');
-    }
   }
 
   /**
