@@ -109,76 +109,23 @@ class CRM_ManualDirectDebit_Hook_MandateContributionConnector {
    *
    */
   public function createDependency() {
+    $mandateStorage = new CRM_ManualDirectDebit_Common_MandateStorageManager();
+
     if (isset($this->contributionRecurId)) {
-      if ($this->isDirectDebitPaymentProcessor()) {
-        $this->assignRecurringContributionMandate();
-        $this->assignContributionMandate();
+
+      $currentPaymentProcessorId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCurrentPaymentProcessorId($this->contributionRecurId);
+      if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitPaymentProcessor($currentPaymentProcessorId)) {
+        $mandateStorage->assignRecurringContributionMandate($this->contributionRecurId, $this->mandateId);
+        $mandateStorage->assignContributionMandate($this->contributionId, $this->mandateId);
       }
     }
     else {
-      if ($this->isPaymentInstrumentDirectDebit()) {
-        $this->assignContributionMandate();
+      if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($this->currentPaymentInstrumentId)) {
+        $mandateStorage->assignContributionMandate($this->contributionId, $this->mandateId);
       }
     }
 
     $this->refreshProperties();
-  }
-
-  /**
-   * Checks if current contribution has Direct Debit Payment Processor
-   *
-   * @return bool
-   */
-  private function isDirectDebitPaymentProcessor() {
-    $currentPaymentProcessorId = civicrm_api3('ContributionRecur', 'getvalue', [
-      'return' => "payment_processor_id",
-      'id' => $this->contributionRecurId,
-    ]);
-
-    $directDebitPaymentProcessorId = civicrm_api3('PaymentProcessor', 'getvalue', [
-      'return' => "id",
-      'name' => "Direct Debit",
-    ]);
-    return $directDebitPaymentProcessorId == $currentPaymentProcessorId;
-  }
-
-  /**
-   * Assigns a mandate into recurring contribution
-   */
-  private function assignRecurringContributionMandate() {
-    $rows = [
-      'recurr_id' => $this->contributionRecurId,
-      'mandate_id' => $this->mandateId,
-    ];
-    CRM_ManualDirectDebit_BAO_RecurrMandateRef::create($rows);
-  }
-
-  /**
-   * Assigns a mandate into contribution
-   */
-  private function assignContributionMandate() {
-    $mandateIdCustomFieldId = civicrm_api3('CustomField', 'getvalue', [
-      'return' => "id",
-      'name' => "mandate_id",
-    ]);
-    civicrm_api3('Contribution', 'create', [
-      "custom_$mandateIdCustomFieldId" => $this->mandateId,
-      'id' => $this->contributionId,
-    ]);
-  }
-
-  /**
-   * Checks if current contribution has Direct Debit Payment Instrument
-   *
-   * @return bool
-   */
-  private function isPaymentInstrumentDirectDebit() {
-    $paymentInstrumentId = civicrm_api3('OptionValue', 'getvalue', [
-      'return' => "value",
-      'label' => "Direct Debit",
-    ]);
-
-    return $paymentInstrumentId == $this->currentPaymentInstrumentId;
   }
 
   /**

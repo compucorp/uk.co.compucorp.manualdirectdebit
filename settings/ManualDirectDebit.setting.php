@@ -49,7 +49,7 @@ return [
     'default' => 1,
     'is_required' => TRUE,
     'is_help' => FALSE,
-    'html_attributes' => generateSequenceNumbers(30),
+    'html_attributes' => generateSequenceNumbers(31),
     'extra_data' => [
       'class' => 'crm-select2',
       'multiple' => 'multiple',

@@ -1,7 +1,7 @@
 <?php
 
 /**
- *  Create an empty mandate and connect it to a new contribution
+ *  Check condition for creating empty mandate for Contribution
  */
 class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
 
@@ -12,8 +12,24 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
    */
   private $form;
 
+  /**
+   * Object which manage writing and reading Data from DB
+   *
+   * @var CRM_ManualDirectDebit_Common_MandateStorageManager
+   */
+  private $mandateStorage;
+
+  /**
+   * Id of current contact
+   *
+   * @var int
+   */
+  private $currentContactId;
+
   public function __construct(&$form) {
+    $this->mandateStorage = new CRM_ManualDirectDebit_Common_MandateStorageManager();
     $this->form = $form;
+    $this->currentContactId = $this->form->getVar('_contactID');
   }
 
   /**
@@ -24,60 +40,17 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
 
     if ($isRecurring){
       $selectedPaymentProcessor = $this->form->getVar('_params')['payment_processor_id'];
-      $directDebitPaymentProcessor = civicrm_api3('PaymentProcessor', 'getvalue', array(
-        'return' => "id",
-        'name' => "direct debit",
-      ));
 
-      if($selectedPaymentProcessor == $directDebitPaymentProcessor){
-        $this->createMandate();
+      if(CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitPaymentProcessor($selectedPaymentProcessor)){
+        $this->mandateStorage->createEmptyMandate($this->currentContactId);
       }
     } else {
       $selectedPaymentInstrument = $this->form->getVar('_params')['payment_instrument_id'];
-      $directDebitPaymentInstrument = civicrm_api3('OptionValue', 'getvalue', array(
-        'return' => "value",
-        'name' => "direct_debit",
-      ));
 
-      if ($selectedPaymentInstrument == $directDebitPaymentInstrument){
-        $this->createMandate();
+      if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitPaymentProcessor($selectedPaymentInstrument)){
+        $this->mandateStorage->createEmptyMandate($this->currentContactId);
       }
     }
-  }
-
-  /**
-   * Creates a new direct debit mandate and returns id of the last inserted one
-   */
-  private function createMandate() {
-    $tableName = 'civicrm_value_dd_mandate';
-
-    $transaction = new CRM_Core_Transaction();
-    try {
-      $sqlInsertedInDirectDebitMandate = "INSERT INTO `$tableName` (`entity_id`) VALUES (%1)";
-      CRM_Core_DAO::executeQuery($sqlInsertedInDirectDebitMandate, [
-        1 => [
-          $this->form->getVar('_contactID'),
-          'String',
-        ],
-      ]);
-
-      $sqlSelectedDebitMandateID = "SELECT MAX(`id`) AS id FROM `$tableName` WHERE `entity_id` = %1";
-      $queryResult = CRM_Core_DAO::executeQuery($sqlSelectedDebitMandateID, [
-        1 => [
-          $this->form->getVar('_contactID'),
-          'String',
-        ],
-      ]);
-      $queryResult->fetch();
-      $generatedMandateId = $queryResult->id;
-    } catch (Exception $exception) {
-      $transaction->rollback();
-      throw $exception;
-    }
-
-    // sets mandate id, for saving dependency between mandate and contribution
-    $mandateContributionConnector = CRM_ManualDirectDebit_Hook_MandateContributionConnector::getInstance();
-    $mandateContributionConnector->setMandateId($generatedMandateId);
   }
 
 }
