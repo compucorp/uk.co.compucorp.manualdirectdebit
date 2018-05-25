@@ -232,18 +232,33 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
    * Gets contribution ids, which must be assigned to mandate depending on
    * which extensions are installed first
    *
-   * @param $lastInsertedRecurrContribution
+   * @param $recurContribution
    * @param $contactId
    *
    * @return array
    */
-  private function getContributionsForMandate($lastInsertedRecurrContribution, $contactId) {
+  private function getContributionsForMandate($recurContribution, $contactId) {
     $contributionIds = [];
 
-    /**
-     * If DirectDebit was installed first, it gets last created contribution id for current user
-     */
-    if ($this->isDirectDebitInstalledBeforeMembershipExtras()) {
+    if ($this->isMembershipExtrasInstalled() && $this->isAmountOfInstallmentsEqualAmountOfContributions($recurContribution)) {
+      /**
+       * If Membership was installed first, it gets all contributions for last inserted recurring contribution
+       * for current contact
+       */
+      $allContributionIdsForRecurr = civicrm_api3('Contribution', 'get', [
+        'sequential' => 1,
+        'return' => ["id"],
+        'contribution_recur_id' => $recurContribution,
+      ]);
+
+      foreach ($allContributionIdsForRecurr['values'] as $value) {
+        $contributionIds[] = $value['contribution_id'];
+      }
+    }
+    else {
+      /**
+       * If DirectDebit was installed first, it gets last created contribution id for current user
+       */
       $sqlContributionID = "SELECT MAX(`id`) AS id FROM civicrm_contribution WHERE `contact_id` = %1";
       $queryResult = CRM_Core_DAO::executeQuery($sqlContributionID, [
         1 => [
@@ -253,45 +268,42 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
       ]);
       $queryResult->fetch();
       $contributionIds[] = $queryResult->id;
-    } else {
-
-      /**
-       * If Membership was installed first, it gets all contributions for last inserted recurring contribution
-       * for current contact
-       */
-      $allContributionIdsForRecurr = civicrm_api3('Contribution', 'get', [
-        'sequential' => 1,
-        'return' => ["id"],
-        'contribution_recur_id' => $lastInsertedRecurrContribution,
-      ]);
-
-      foreach ($allContributionIdsForRecurr['values'] as $value) {
-        $contributionIds[] = $value['contribution_id'];
-      }
-
     }
+
     return $contributionIds;
   }
 
   /**
-   * Checks if 'Manual Direct Debit' extension was installed before 'Membership
-   * Exras'
+   * Checks if extension 'membershipextras' is installed
+   *
+   * @return bool
    */
-  private function isDirectDebitInstalledBeforeMembershipExtras() {
-    $sqlManualDirectDebitId = "SELECT id FROM civicrm_extension WHERE `full_name` = 'uk.co.compucorp.manualdirectdebit'";
-    $manualdirectdebitIdQueryResult = CRM_Core_DAO::executeQuery($sqlManualDirectDebitId);
-    $manualdirectdebitIdQueryResult->fetch();
-    $manualdirectdebitId = $manualdirectdebitIdQueryResult->id;
+  private function isMembershipExtrasInstalled() {
+    $membershipExtension = new CRM_Core_DAO_Extension();
+    $membershipExtension->full_name = 'uk.co.compucorp.membershipextras';
+    $membershipExtension->find(TRUE);
 
-    $sqlMembershipExtrasId = "SELECT id FROM civicrm_extension WHERE `full_name` = 'uk.co.compucorp.membershipextras'";
-    $membershipQueryResult = CRM_Core_DAO::executeQuery($sqlMembershipExtrasId);
-    if ($membershipQueryResult->N > 0) {
-      $membershipQueryResult->fetch();
-      $membershipId = $membershipQueryResult->id;
-      return $manualdirectdebitId < $membershipId;
-    }
+    $isMembershipExist = $membershipExtension->id && $membershipExtension->is_active == 1;
 
-    return TRUE;
+    return $isMembershipExist ? TRUE : FALSE;
+  }
+
+  /**
+   * Checks if amount of installments equal to amount of contributions
+   *
+   * @param $recurContribution
+   *
+   * @return bool
+   */
+  private function isAmountOfInstallmentsEqualAmountOfContributions($recurContribution) {
+    $contributionRecurDao = CRM_Contribute_BAO_ContributionRecur::findById($recurContribution);
+    $amountOfInstallments = $contributionRecurDao->installments;
+
+    $amountOfContributions = civicrm_api3('Contribution', 'getcount', [
+      'contribution_recur_id' => $recurContribution,
+    ]);
+
+    return $amountOfInstallments == $amountOfContributions ? TRUE : FALSE;
   }
 
 }
