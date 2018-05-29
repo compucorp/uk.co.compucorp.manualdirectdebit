@@ -2,7 +2,7 @@
 <div class="batch-list">
   {include file="CRM/common/pager.tpl" location="top"}
     {strip}
-  <table id="crm-transaction-selector-assign-{$entityID}" cellpadding="0" cellspacing="0" border="0">
+  <table class="batchPaginator" id="crm-transaction-selector-assign-{$entityID}" cellpadding="0" cellspacing="0" border="0">
     <thead>
     <tr>
       <th class="crm-batch-name">{ts}Batch Name{/ts}</th>
@@ -45,6 +45,18 @@
 
 {literal}
 <script type="text/javascript">
+
+  CRM.$('.batchPaginator').dataTable({
+    destroy: true,
+    bFilter: false,
+    bAutoWidth: false,
+    bProcessing: false,
+    bLengthChange: true,
+    sPaginationType: "full_numbers",
+    sDom: '<"crm-datatable-pager-top"lfp>rt<"crm-datatable-pager-bottom"ip>',
+    bJQueryUI: true,
+    order: []
+  });
 
   function assignRemove(recordID, op) {
     if (op == 'submit') {

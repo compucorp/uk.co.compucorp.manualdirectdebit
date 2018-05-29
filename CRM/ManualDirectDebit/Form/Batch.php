@@ -117,6 +117,7 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     $session = CRM_Core_Session::singleton();
     $batchStatus = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id');
     $params = $this->controller->exportValues($this->_name);
+
     $params['data'] = json_encode(['values' => ['originator_number' => $params['originator_number']]]);
     $params['modified_date'] = date('YmdHis');
     $params['modified_id'] = $session->get('userID');

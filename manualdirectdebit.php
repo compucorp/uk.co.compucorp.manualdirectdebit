@@ -147,7 +147,7 @@ function manualdirectdebit_civicrm_navigationMenu(&$menu) {
     'separator' => NULL,
   ];
   _manualdirectdebit_civix_insert_navigation_menu($menu, 'Administer/', $directDebitMenuItem);
-  $batchTypes = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, NULL, 'name');
+
 
   $subMenuItems = [
     [
@@ -171,32 +171,6 @@ function manualdirectdebit_civicrm_navigationMenu(&$menu) {
       'operator' => NULL,
       'separator' => NULL,
     ],
-    [
-      'name' => ts('Create New Instructions Batch'),
-      'url' => 'civicrm/direct_debit/batch?reset=1&action=add&type_id=' . array_search('instructions_batch', $batchTypes),
-      'permission' => 'administer CiviCRM',
-      'operator' => NULL,
-      'separator' => 2,
-    ],
-    [
-      'name' => ts('Export Direct Debit Payments'),
-      'url' => 'civicrm/direct_debit/batch?reset=1&action=add&type_id=' . array_search('dd_payments', $batchTypes),
-      'permission' => 'administer CiviCRM',
-      'operator' => NULL,
-    ],
-    [
-      'name' => ts('View New Instruction Batches'),
-      'url' => 'civicrm/direct_debit/batch-list?reset=1&type_id=' . array_search('instructions_batch', $batchTypes),
-      'permission' => 'administer CiviCRM',
-      'operator' => NULL,
-      'separator' => 2,
-    ],
-    [
-      'name' => ts('View Payment Batches'),
-      'url' => 'civicrm/direct_debit/batch-list?reset=1&type_id=' . array_search('dd_payments', $batchTypes),
-      'permission' => 'administer CiviCRM',
-      'operator' => NULL,
-    ],
   ];
 
   foreach ($subMenuItems as $menuItem) {
@@ -212,33 +186,33 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
 
   $action = $form->getAction();
 
-  switch ($formName){
+  switch ($formName) {
     case "CRM_Contribute_Form_Contribution":
-      if($action == CRM_Core_Action::ADD){
+      if ($action == CRM_Core_Action::ADD) {
         $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
         $manualDirectDebit->checkPaymentOptionToCreateMandate();
       }
-    break;
+      break;
 
     case "CRM_Member_Form_Membership":
-      if($action == CRM_Core_Action::ADD){
+      if ($action == CRM_Core_Action::ADD) {
         $paymentInstrumentId = $form->getVar('_submitValues') ['payment_instrument_id'];
         if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($paymentInstrumentId)) {
           $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate($form);
           $manualDirectDebit->saveMandateData();
         }
       }
-    break;
+      break;
 
     case "CRM_Member_Form_MembershipRenewal":
-      if($action == CRM_Core_Action::RENEW){
+      if ($action == CRM_Core_Action::RENEW) {
         $paymentInstrumentId = $form->getVar('_submitValues') ['payment_instrument_id'];
         if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($paymentInstrumentId)) {
           $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate($form);
           $manualDirectDebit->saveMandateData();
         }
       }
-    break;
+      break;
   }
 }
 
@@ -283,6 +257,20 @@ function manualdirectdebit_civicrm_postSave_civicrm_contribution($dao) {
  * Implements hook_civicrm_buildForm()
  */
 function manualdirectdebit_civicrm_buildForm($formName, &$form) {
+  if ($formName == 'CRM_Custom_Form_CustomDataByType') {
+    $directDebitInformationId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getGroupIDByName("direct_debit_information");
+    $customFieldId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName("mandate_id");
+    $customGroupTree = $form->getVar('_groupTree');
+
+    $isCustomGroupDirectDebitInformation = array_key_exists($directDebitInformationId, $customGroupTree);
+    if (isset($isCustomGroupDirectDebitInformation) && !empty($isCustomGroupDirectDebitInformation)) {
+      $mandateIdValue = $customGroupTree[$directDebitInformationId]['fields'][$customFieldId]['element_value'];
+      if (!isset($mandateIdValue) || empty($mandateIdValue)) {
+        $form->setVar('_groupTree')[$directDebitInformationId]['fields'][$customFieldId] = [];
+      }
+    }
+  }
+
   if ($formName === 'CRM_Member_Form_Membership' || $formName === 'CRM_Member_Form_MembershipRenewal') {
     $customGroupInjector = new CRM_ManualDirectDebit_Hook_BuildForm_InjectCustomGroup($form);
     $customGroupInjector->buildForm();
@@ -299,12 +287,13 @@ function manualdirectdebit_civicrm_validateForm($formName, &$fields, &$files, &$
     $directDebitValidator->checkValidation();
   }
 }
+
 /**
  * Implements hook_civicrm_postSave_civicrm_membership_payment().
  */
 function manualdirectdebit_civicrm_postSave_civicrm_membership_payment($dao) {
-    $mandateCreator = new CRM_ManualDirectDebit_Hook_PostSave_MembershipPayment_MandateCreator($dao);
-    $mandateCreator->assignMandateForContributions();
+  $mandateCreator = new CRM_ManualDirectDebit_Hook_PostSave_MembershipPayment_MandateCreator($dao);
+  $mandateCreator->assignMandateForContributions();
 }
 
 /**

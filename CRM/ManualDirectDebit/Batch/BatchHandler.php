@@ -117,24 +117,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
    * Creates Export File
    */
   public function createExportFile() {
-    $returnValues = [
-      'contact_id' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.entity_id as contact_id',
-      'name' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.account_holder_name as name',
-      'sort_code' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.sort_code as sort_code',
-      'account_number' => 'CONCAT("\t",' . CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.ac_number) as account_number',
-      'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0) as amount',
-      'reference_number' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.dd_ref as reference_number',
-      'transaction_type' => 'CONCAT("\t",civicrm_option_value.label) as transaction_type',
-    ];
-
-    if ($this->getBatchType() == 'instructions_batch') {
-      $entityTable = 'civicrm_value_dd_mandate';
-    }
-    if ($this->getBatchType() == 'dd_payments') {
-      $entityTable = 'civicrm_contribution';
-    }
-    $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction($this->batchID, ['entityTable' => $entityTable], [], $returnValues);
-    $mandateItems = $batchTransaction->getDDMandateInstructions();
+    $dataForSaving = $this->getDataForSaving();
 
     $headers = [
       ts('Contact ID'),
@@ -152,7 +135,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
     CRM_Utils_File::cleanFileName(basename($fileName));
     ob_clean();
     flush();
-    $this->outputCSVFile($headers, $mandateItems);
+    $this->outputCSVFile($headers, $dataForSaving);
     CRM_Utils_System::civiExit();
   }
 
@@ -161,14 +144,14 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
    *
    * @param array $headers
    *
-   * @param \CRM_Core_DAO $export
+   * @param array
    */
   private function outputCSVFile($headers, $export) {
-    $out = fopen('php://temp/maxmemory:'. (12*1024*1024), 'r+');
+    $out = fopen('php://temp/maxmemory:' . (12 * 1024 * 1024), 'r+');
     fputcsv($out, $headers);
 
-    while ($export->fetch()) {
-      fputcsv($out, $export->toArray());
+    foreach ($export as $value) {
+      fputcsv($out, $value);
     }
     rewind($out);
     fpassthru($out);
@@ -224,8 +207,8 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
   }
 
   /**
-   * Submits batches with types "New Direct Debit Instructions" and "Direct Debit Payments".
-   * Updates Direct Debits Mandate code and Contribute status.
+   * Submits batches with types "New Direct Debit Instructions" and "Direct
+   * Debit Payments". Updates Direct Debits Mandate code and Contribute status.
    *
    * @return bool
    */
@@ -274,7 +257,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
    */
   private function updateDDMandate($codeName, $mandateId) {
     $ddCodes = CRM_Core_OptionGroup::values('direct_debit_codes', FALSE, FALSE, FALSE, NULL, 'name');
-    $query = 'UPDATE civicrm_value_dd_mandate SET civicrm_value_dd_mandate.dd_code = "' .  array_search($codeName, $ddCodes) . '" WHERE civicrm_value_dd_mandate.id = ' . $mandateId ;
+    $query = 'UPDATE civicrm_value_dd_mandate SET civicrm_value_dd_mandate.dd_code = "' . array_search($codeName, $ddCodes) . '" WHERE civicrm_value_dd_mandate.id = ' . $mandateId;
     CRM_Core_DAO::executeQuery($query);
   }
 
@@ -317,6 +300,89 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
     $contributeStatuses = CRM_Core_PseudoConstant::get('CRM_Contribute_DAO_Contribution', 'contribution_status_id', ['labelColumn' => 'name']);
     $query = 'UPDATE civicrm_contribution SET civicrm_contribution.contribution_status_id = ' . array_search($status, $contributeStatuses) . ' WHERE civicrm_contribution.id = ' . $mandateId;
     CRM_Core_DAO::executeQuery($query);
+  }
+
+  /**
+   * Gets data for saving
+   *
+   * @return array
+   */
+  private function getDataForSaving() {
+    $dataForExport = [];
+    $mandateData = $this->getBatchValues();
+
+    if (!empty($mandateData['values']['mandates'])) {
+      foreach ($mandateData['values']['mandates'] as $mandateId => $mandateValues) {
+        unset($mandateValues['mandate_id']);
+        unset($mandateValues['contribute_id']);
+        $dataForExport[$mandateId] = $mandateValues;
+      }
+    }
+    else {
+      $returnValues = [
+        'contact_id' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.entity_id as contact_id',
+        'name' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.account_holder_name as name',
+        'sort_code' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.sort_code as sort_code',
+        'account_number' => 'CONCAT("\t",' . CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.ac_number) as account_number',
+        'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0) as amount',
+        'reference_number' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.dd_ref as reference_number',
+        'transaction_type' => 'CONCAT("\t",civicrm_option_value.label) as transaction_type',
+      ];
+
+      $dataForExport = $this->getMandateCurrentState($returnValues);
+    }
+
+    return $dataForExport;
+  }
+
+  /**
+   * Gets batch serialized value
+   *
+   * @return array
+   */
+  public function getBatchValues() {
+    $mandateData = civicrm_api3('Batch', 'getvalue', [
+      'return' => "data",
+      'id' => $this->batchID,
+    ]);
+
+    $mandateData = json_decode($mandateData, TRUE);
+
+    return $mandateData;
+  }
+
+  /**
+   * Gets snapshoot of current state about mandates in batch
+   *
+   * @param $returnValues
+   *
+   * @return array
+   */
+  public function getMandateCurrentState($returnValues) {
+    $dataForExport = [];
+    switch ($this->getBatchType()) {
+      case 'instructions_batch':
+        $entityTable = 'civicrm_value_dd_mandate';
+        break;
+
+      case 'dd_payments':
+        $entityTable = 'civicrm_contribution';
+        break;
+    }
+
+    $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction(
+      $this->batchID,
+      ['entityTable' => $entityTable],
+      [],
+      $returnValues
+    );
+
+    $mandateItems = $batchTransaction->getDDMandateInstructions();
+    while ($mandateItems->fetch()) {
+      $dataForExport[$mandateItems->mandate_id] = $mandateItems->toArray();
+    }
+
+    return $dataForExport;
   }
 
 }

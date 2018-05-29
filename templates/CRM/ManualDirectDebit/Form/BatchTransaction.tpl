@@ -290,35 +290,5 @@ function bulkAssignRemove( action ) {
     }
   }, 'json');
 }
-
-function contactMandate(recId, cid) {
-  var url = CRM.url(
-    'civicrm/contact/view/cd',
-    {
-      reset: '1',
-      gid: {/literal}{$customGroup}{literal},
-      cid: cid,
-      recId: recId,
-      multiRecordDisplay: 'single',
-      mode: 'view'
-    }
-  );
-  CRM.loadPage(url);
-  return false;
-}
-
-function contactRecurContribution(recId, cid) {
-  var url = CRM.url(
-    'civicrm/contact/view/contributionrecur',
-    {
-      reset: '1',
-      id: recId,
-      cid: cid,
-      context: 'contribution',
-    }
-  );
-  CRM.loadPage(url);
-  return false;
-}
 </script>
 {/literal}
