@@ -257,18 +257,14 @@ function manualdirectdebit_civicrm_postSave_civicrm_contribution($dao) {
  * Implements hook_civicrm_buildForm()
  */
 function manualdirectdebit_civicrm_buildForm($formName, &$form) {
-  if ($formName == 'CRM_Custom_Form_CustomDataByType') {
-    $directDebitInformationId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getGroupIDByName("direct_debit_information");
-    $customFieldId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName("mandate_id");
-    $customGroupTree = $form->getVar('_groupTree');
+  if ($formName == 'CRM_Contact_Form_CustomData') {
+    $customData = new CRM_ManualDirectDebit_Hook_BuildForm_CustomData($form);
+    $customData->run();
+  }
 
-    $isCustomGroupDirectDebitInformation = array_key_exists($directDebitInformationId, $customGroupTree);
-    if (isset($isCustomGroupDirectDebitInformation) && !empty($isCustomGroupDirectDebitInformation)) {
-      $mandateIdValue = $customGroupTree[$directDebitInformationId]['fields'][$customFieldId]['element_value'];
-      if (!isset($mandateIdValue) || empty($mandateIdValue)) {
-        $form->setVar('_groupTree')[$directDebitInformationId]['fields'][$customFieldId] = [];
-      }
-    }
+  if ($formName == 'CRM_Custom_Form_CustomDataByType') {
+    $customDataByType = new CRM_ManualDirectDebit_Hook_BuildForm_CustomDataByType($form);
+    $customDataByType->run();
   }
 
   if ($formName === 'CRM_Member_Form_Membership' || $formName === 'CRM_Member_Form_MembershipRenewal') {
@@ -298,7 +294,6 @@ function manualdirectdebit_civicrm_postSave_civicrm_membership_payment($dao) {
 
 /**
  * Implements hook_civicrm_links().
- *
  */
 function manualdirectdebit_civicrm_links($op, $objectName, $objectId, &$links, &$mask, &$values) {
 
@@ -314,6 +309,19 @@ function manualdirectdebit_civicrm_links($op, $objectName, $objectId, &$links, &
             break;
         }
       }
+    }
+  }
+}
+
+/**
+ * Implements hook_civicrm_alterContent().
+ */
+function manualdirectdebit_civicrm_alterContent(&$content, $context, $tplName, &$object) {
+  if ($tplName == 'CRM/Contact/Page/View/CustomData.tpl' && $context == "page") {
+    $path = CRM_ManualDirectDebit_ExtensionUtil::path() . '/js/mandateEdit.js';
+    if (file_exists($path)) {
+      $js = file_get_contents($path);
+      $content .= "<script type='text/javascript'>" . $js . "</script>";
     }
   }
 }
