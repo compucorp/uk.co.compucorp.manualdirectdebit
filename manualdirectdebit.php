@@ -232,6 +232,10 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
     $injectCustomGroup = new CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInjector($page);
     $injectCustomGroup->inject();
   }
+
+  if (get_class($page) == 'CRM_Contact_Page_View_CustomData') {
+    CRM_Core_Resources::singleton()->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/mandateEdit.js');
+  }
 }
 
 /**
@@ -309,19 +313,6 @@ function manualdirectdebit_civicrm_links($op, $objectName, $objectId, &$links, &
             break;
         }
       }
-    }
-  }
-}
-
-/**
- * Implements hook_civicrm_alterContent().
- */
-function manualdirectdebit_civicrm_alterContent(&$content, $context, $tplName, &$object) {
-  if ($tplName == 'CRM/Contact/Page/View/CustomData.tpl' && $context == "page") {
-    $path = CRM_ManualDirectDebit_ExtensionUtil::path() . '/js/mandateEdit.js';
-    if (file_exists($path)) {
-      $js = file_get_contents($path);
-      $content .= "<script type='text/javascript'>" . $js . "</script>";
     }
   }
 }
