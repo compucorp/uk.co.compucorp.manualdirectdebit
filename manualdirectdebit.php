@@ -232,6 +232,10 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
     $injectCustomGroup = new CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInjector($page);
     $injectCustomGroup->inject();
   }
+
+  if (get_class($page) == 'CRM_Contact_Page_View_CustomData') {
+    CRM_Core_Resources::singleton()->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/mandateEdit.js');
+  }
 }
 
 /**
@@ -257,18 +261,14 @@ function manualdirectdebit_civicrm_postSave_civicrm_contribution($dao) {
  * Implements hook_civicrm_buildForm()
  */
 function manualdirectdebit_civicrm_buildForm($formName, &$form) {
-  if ($formName == 'CRM_Custom_Form_CustomDataByType') {
-    $directDebitInformationId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getGroupIDByName("direct_debit_information");
-    $customFieldId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName("mandate_id");
-    $customGroupTree = $form->getVar('_groupTree');
+  if ($formName == 'CRM_Contact_Form_CustomData') {
+    $customData = new CRM_ManualDirectDebit_Hook_BuildForm_CustomData($form);
+    $customData->run();
+  }
 
-    $isCustomGroupDirectDebitInformation = array_key_exists($directDebitInformationId, $customGroupTree);
-    if (isset($isCustomGroupDirectDebitInformation) && !empty($isCustomGroupDirectDebitInformation)) {
-      $mandateIdValue = $customGroupTree[$directDebitInformationId]['fields'][$customFieldId]['element_value'];
-      if (!isset($mandateIdValue) || empty($mandateIdValue)) {
-        $form->setVar('_groupTree')[$directDebitInformationId]['fields'][$customFieldId] = [];
-      }
-    }
+  if ($formName == 'CRM_Custom_Form_CustomDataByType') {
+    $customDataByType = new CRM_ManualDirectDebit_Hook_BuildForm_CustomDataByType($form);
+    $customDataByType->run();
   }
 
   if ($formName === 'CRM_Member_Form_Membership' || $formName === 'CRM_Member_Form_MembershipRenewal') {
@@ -298,7 +298,6 @@ function manualdirectdebit_civicrm_postSave_civicrm_membership_payment($dao) {
 
 /**
  * Implements hook_civicrm_links().
- *
  */
 function manualdirectdebit_civicrm_links($op, $objectName, $objectId, &$links, &$mask, &$values) {
 
