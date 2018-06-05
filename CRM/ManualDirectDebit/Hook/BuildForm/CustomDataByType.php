@@ -58,7 +58,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomDataByType {
     $mandateIdValue = $this->customGroupTree[$this->directDebitInformationId]['fields'][$customFieldId]['element_value'];
 
     if (!isset($mandateIdValue) || empty($mandateIdValue)) {
-      $this->form->setVar('_groupTree')[$this->directDebitInformationId]['fields'][$customFieldId] = [];
+      unset($this->form->_groupTree[$this->directDebitInformationId]);
     }
   }
 
