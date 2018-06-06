@@ -8,7 +8,7 @@ class CRM_ManualDirectDebit_Hook_Post_RecurContribution_Activity extends CRM_Man
   /**
    * Operation being performed with CiviCRM object
    *
-   * @var object
+   * @var string
    */
   protected $operation;
 
