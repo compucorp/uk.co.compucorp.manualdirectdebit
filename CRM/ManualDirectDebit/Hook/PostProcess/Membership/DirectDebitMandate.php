@@ -56,6 +56,13 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate {
    * Sets direct debit mandate values
    */
   private function setMandateValues() {
+    $submitFiles = $this->form->getVar('_submitFiles');
+    $authorisationFileName = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::PREFIX . 'authorisation_file';
+    $authorisationFile = $submitFiles[$authorisationFileName];
+    if ($this->isFileAttached($authorisationFile)) {
+      $this->setMandateFile($authorisationFile);
+    }
+
     $this->setMandateContacId();
 
     $submitValues = $this->form->getVar('_submitValues');
@@ -64,6 +71,51 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate {
       if ($this->isFieldIsPartOfDirectDebitCustomGroup($field) && $this->isValueNotEmpty($value)) {
         $this->mandateValues[$this->getColumnName($field)] = $value;
       }
+    }
+  }
+
+  /**
+   * Checks if 'directDebitMandate_authorisation_file' was added in mandate
+   *
+   * @param $submitFiles
+   *
+   * @return bool
+   */
+  private function isFileAttached($submitFiles) {
+    return !empty($submitFiles['tmp_name']);
+  }
+
+  /**
+   * Save file and assign it Id to mandate
+   *
+   * @param $file
+   */
+  private function setMandateFile($file) {
+    $transaction = new CRM_Core_Transaction();
+
+    try {
+      CRM_Core_BAO_File::filePostProcess(
+        $file['tmp_name'],
+        NULL,
+        CRM_ManualDirectDebit_Common_MandateStorageManager::DIRECT_DEBIT_TABLE_NAME,
+        $this->currentContactId,
+        NULL,
+        TRUE,
+        NULL,
+        'uploadedMandateFile',
+        $file['type']
+      );
+
+      $sqlSelectDebitMandateID = "SELECT MAX(id) as id FROM `civicrm_file`";
+      $queryResult = CRM_Core_DAO::executeQuery($sqlSelectDebitMandateID);
+      $queryResult->fetch();
+
+      if (isset($queryResult->id) && !empty($queryResult->id)) {
+        $this->mandateValues['authorisation_file'] = $queryResult->id;
+      }
+    } catch (Exception $exception) {
+      $transaction->rollback();
+      throw $exception;
     }
   }
 

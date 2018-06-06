@@ -22,9 +22,9 @@ class CRM_ManualDirectDebit_Hook_ValidateForm_MandateValidator {
   public function checkValidation() {
     $currentPaymentInstrumentId = $this->getCurrentPaymentInstrumentId();
 
-    if ( ! CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($currentPaymentInstrumentId)) {
+    if ( ! CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($currentPaymentInstrumentId) || $this->isEditForm()) {
       $this->turnOffDirectDebitValidation();
-    } else{
+    } else {
       $this->checkSettings();
     }
   }
@@ -71,6 +71,13 @@ class CRM_ManualDirectDebit_Hook_ValidateForm_MandateValidator {
       $this->form->setVar('_errors', $currentError);
       CRM_Core_Session::setStatus($error->getMessage(), $title = 'Error', $type = 'error');
     }
+  }
+
+  /**
+   * Checks if form is updated
+   */
+  private function isEditForm() {
+    return $this->form->getAction() == CRM_Core_Action::UPDATE;
   }
 
 }
