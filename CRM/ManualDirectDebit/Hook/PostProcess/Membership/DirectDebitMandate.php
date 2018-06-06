@@ -57,8 +57,10 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate {
    */
   private function setMandateValues() {
     $submitFiles = $this->form->getVar('_submitFiles');
-    if($this->isFileAttached($submitFiles[CRM_ManualDirectDebit_Common_DirectDebitDataProvider::PREFIX . 'authorisation_file'])){
-      $this->setMandateFile($submitFiles[CRM_ManualDirectDebit_Common_DirectDebitDataProvider::PREFIX . 'authorisation_file']);
+    $authorisationFileName = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::PREFIX . 'authorisation_file';
+    $authorisationFile = $submitFiles[$authorisationFileName];
+    if ($this->isFileAttached($authorisationFile)) {
+      $this->setMandateFile($authorisationFile);
     }
 
     $this->setMandateContacId();
@@ -89,24 +91,31 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate {
    * @param $file
    */
   private function setMandateFile($file) {
-    CRM_Core_BAO_File::filePostProcess(
-      $file['tmp_name'],
-      NULL,
-      CRM_ManualDirectDebit_Common_MandateStorageManager::DIRECT_DEBIT_TABLE_NAME,
-      $this->currentContactId,
-      NULL,
-      TRUE,
-      NULL,
-      'uploadedMandateFile',
-      $file['type']
-    );
+    $transaction = new CRM_Core_Transaction();
 
-    $sqlSelectDebitMandateID = "SELECT MAX(id) as id FROM `civicrm_file`";
+    try {
+      CRM_Core_BAO_File::filePostProcess(
+        $file['tmp_name'],
+        NULL,
+        CRM_ManualDirectDebit_Common_MandateStorageManager::DIRECT_DEBIT_TABLE_NAME,
+        $this->currentContactId,
+        NULL,
+        TRUE,
+        NULL,
+        'uploadedMandateFile',
+        $file['type']
+      );
 
-    $queryResult = CRM_Core_DAO::executeQuery($sqlSelectDebitMandateID);
-    $queryResult->fetch();
-    if (isset($queryResult->id) && !empty($queryResult->id)){
-      $this->mandateValues['authorisation_file'] = $queryResult->id;
+      $sqlSelectDebitMandateID = "SELECT MAX(id) as id FROM `civicrm_file`";
+      $queryResult = CRM_Core_DAO::executeQuery($sqlSelectDebitMandateID);
+      $queryResult->fetch();
+
+      if (isset($queryResult->id) && !empty($queryResult->id)) {
+        $this->mandateValues['authorisation_file'] = $queryResult->id;
+      }
+    } catch (Exception $exception) {
+      $transaction->rollback();
+      throw $exception;
     }
   }
 
