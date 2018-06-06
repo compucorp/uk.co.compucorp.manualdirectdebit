@@ -188,7 +188,7 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
 
   switch ($formName) {
     case "CRM_Contribute_Form_Contribution":
-      if ($action == CRM_Core_Action::ADD) {
+      if($action == CRM_Core_Action::ADD){
         $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
         $manualDirectDebit->checkPaymentOptionToCreateMandate();
       }
@@ -316,3 +316,22 @@ function manualdirectdebit_civicrm_links($op, $objectName, $objectId, &$links, &
     }
   }
 }
+
+/**
+ * Implements hook_membershipextras_postOfflineAutoRenewal()
+ */
+function manualdirectdebit_membershipextras_postOfflineAutoRenewal($membershipId, $recurContributionId) {
+  $activity = new CRM_ManualDirectDebit_Hook_PostOfflineAutoRenewal_Activity($recurContributionId);
+  $activity->process();
+}
+
+/**
+ * Implements hook_civicrm_post()
+ */
+function manualdirectdebit_civicrm_post($op, $objectName, $objectId, &$objectRef) {
+  if ($objectName == "ContributionRecur" && ($op == "create" || $op == "edit")) {
+    $activity = new CRM_ManualDirectDebit_Hook_Post_RecurContribution_Activity($objectId, $op);
+    $activity->process();
+  }
+}
+

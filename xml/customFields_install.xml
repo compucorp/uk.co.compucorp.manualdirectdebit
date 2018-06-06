@@ -400,6 +400,46 @@
             <description>Discarded</description>
             <option_group_name>batch_status</option_group_name>
         </OptionValue>
+        <OptionValue>
+            <label>New Direct Debit Recurring Payment</label>
+            <name>new_direct_debit_recurring_payment</name>
+            <is_active>1</is_active>
+            <is_default>0</is_default>
+            <description>New Direct Debit Recurring Payment</description>
+            <option_group_name>activity_type</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Update Direct Debit Recurring Payment</label>
+            <name>update_direct_debit_recurring_payment</name>
+            <is_active>1</is_active>
+            <is_default>0</is_default>
+            <description>Update Direct Debit Recurring Payment</description>
+            <option_group_name>activity_type</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Direct Debit Payment Reminder</label>
+            <name>direct_debit_payment_reminder</name>
+            <is_active>1</is_active>
+            <is_default>0</is_default>
+            <description>Direct Debit Payment Reminder</description>
+            <option_group_name>activity_type</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Offline Direct Debit Auto-renewal</label>
+            <name>offline_direct_debit_auto_renewal</name>
+            <is_active>1</is_active>
+            <is_default>0</is_default>
+            <description>Offline Direct Debit Auto-renewal</description>
+            <option_group_name>activity_type</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Direct Debit Mandate Update</label>
+            <name>direct_debit_mandate_update</name>
+            <is_active>1</is_active>
+            <is_default>0</is_default>
+            <description>Direct Debit Mandate Update</description>
+            <option_group_name>activity_type</option_group_name>
+        </OptionValue>
     </OptionValues>
     <ProfileGroups>
         <ProfileGroup>
