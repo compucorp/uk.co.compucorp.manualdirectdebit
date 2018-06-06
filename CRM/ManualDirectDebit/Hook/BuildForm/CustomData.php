@@ -23,6 +23,8 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomData {
     if ($this->checkIfDirectDebitMandateInGroupTree()) {
       $this->hideButton();
     }
+
+    $this->checkRecurringContribution();
   }
 
   /**
@@ -46,6 +48,17 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomData {
       if ($button->_attributes['value'] == "Save and New") {
         unset($buttonsGroup->_elements[$key]);
       }
+    }
+  }
+
+  /**
+   *  Adds hidden recurring contribution id if it was updated
+   */
+  private function checkRecurringContribution() {
+    $recurrForUpdate = CRM_Utils_Request::retrieve('updatedRecId', 'Integer', $this->form, FALSE);
+
+    if (isset($recurrForUpdate) && !empty($recurrForUpdate)) {
+      $this->form->add('hidden', 'recurrId', $recurrForUpdate);
     }
   }
 

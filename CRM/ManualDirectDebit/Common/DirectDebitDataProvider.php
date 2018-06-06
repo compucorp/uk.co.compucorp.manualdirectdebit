@@ -230,4 +230,17 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
       'id' => $currentRecurringContributionId,
     ]);
   }
+
+  /**
+   * Gets max mandate id
+   *
+   * @return mixed
+   */
+  public static function getMaxMandateId() {
+    $sqlSelectDebitMandateID = "SELECT MAX(`id`) as id FROM `civicrm_value_dd_mandate`";
+    $queryResult = CRM_Core_DAO::executeQuery($sqlSelectDebitMandateID);
+    $queryResult->fetch();
+
+    return $queryResult->id;
+  }
 }

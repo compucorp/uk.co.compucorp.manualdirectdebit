@@ -12,12 +12,6 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
   const DIRECT_DEBIT_TABLE_NAME = 'civicrm_value_dd_mandate';
 
   /**
-   * Name of table which save dependency between recurring contribution and
-   * mandate
-   */
-  const DIRECT_DEBIT_RECURRING_CONTRIBUTION_NAME = 'dd_contribution_recurr_mandate_ref';
-
-  /**
    * Assigns depandency between contribution and mandate
    *
    * @param $contributionId
@@ -66,31 +60,6 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
     $queryResult->fetch();
 
     return $queryResult->id;
-  }
-
-  /**
-   * Gets id of recurring contribution
-   *
-   * @return int|null
-   */
-  public function getMandateForCurrentRecurringContribution($recurContributionId) {
-    $sqlSelectDebitMandateID = "SELECT `mandate_id` AS id 
-      FROM " . self::DIRECT_DEBIT_RECURRING_CONTRIBUTION_NAME . " 
-      WHERE `recurr_id` = %1";
-
-    $queryResult = CRM_Core_DAO::executeQuery($sqlSelectDebitMandateID, [
-      1 => [
-        $recurContributionId,
-        'String',
-      ],
-    ]);
-    $queryResult->fetch();
-
-    if (isset($queryResult->id) && !empty($queryResult->id)) {
-      return $queryResult->id;
-    } else {
-      return NULL;
-    }
   }
 
   /**
@@ -304,6 +273,18 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
     ]);
 
     return $amountOfInstallments == $amountOfContributions ? TRUE : FALSE;
+  }
+
+
+  /**
+   * Changes mandate id for contribution
+   *
+   * @param $mandateId
+   * @param $oldMandateId
+   */
+  public function changeMandateForContribution($mandateId, $oldMandateId) {
+    $query = "UPDATE `civicrm_value_dd_information` SET mandate_id = $mandateId WHERE mandate_id = $oldMandateId";
+    CRM_Core_DAO::executeQuery($query);
   }
 
 }

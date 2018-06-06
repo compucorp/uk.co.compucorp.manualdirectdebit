@@ -187,6 +187,13 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
   $action = $form->getAction();
 
   switch ($formName) {
+    case "CRM_Contact_Form_CustomData":
+        if (isset($form->getVar('_submitValues')['recurrId']) && !empty($form->getVar('_submitValues')['recurrId'])){
+          $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
+          $manualDirectDebit->changeMandateForRecurringContribution();
+        };
+      break;
+
     case "CRM_Contribute_Form_Contribution":
       if($action == CRM_Core_Action::ADD){
         $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
@@ -226,6 +233,7 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
     $pageProcessor = new CRM_ManualDirectDebit_Hook_PageRun_TabPage();
     $pageProcessor->setContributionId($contributionId);
     $pageProcessor->hideDirectDebitFields();
+    $pageProcessor->changeRecurringContributionButtons();
   }
 
   if (get_class($page) == 'CRM_Contribute_Page_ContributionRecur') {
