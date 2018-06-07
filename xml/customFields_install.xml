@@ -1,0 +1,678 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<CustomData>
+    <CustomGroups>
+        <CustomGroup>
+            <name>direct_debit_mandate</name>
+            <title>Direct Debit Mandate</title>
+            <extends>Contact</extends>
+            <style>Tab</style>
+            <collapse_display>0</collapse_display>
+            <help_pre></help_pre>
+            <help_post></help_post>
+            <weight>10</weight>
+            <is_active>1</is_active>
+            <table_name>civicrm_value_dd_mandate</table_name>
+            <is_multiple>1</is_multiple>
+            <collapse_adv_display>0</collapse_adv_display>
+            <is_reserved>0</is_reserved>
+        </CustomGroup>
+        <CustomGroup>
+            <name>direct_debit_information</name>
+            <title>Direct Debit Information</title>
+            <extends>Contribution</extends>
+            <style>Inline</style>
+            <collapse_display>0</collapse_display>
+            <help_pre></help_pre>
+            <help_post></help_post>
+            <weight>11</weight>
+            <is_active>1</is_active>
+            <table_name>civicrm_value_dd_information</table_name>
+            <is_multiple>0</is_multiple>
+            <collapse_adv_display>0</collapse_adv_display>
+            <is_reserved>1</is_reserved>
+        </CustomGroup>
+    </CustomGroups>
+    <CustomFields>
+        <CustomField>
+            <name>bank_name</name>
+            <label>Bank Name</label>
+            <data_type>String</data_type>
+            <html_type>Text</html_type>
+            <is_required>1</is_required>
+            <is_searchable>1</is_searchable>
+            <is_search_range>0</is_search_range>
+            <weight>17</weight>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <text_length>255</text_length>
+            <note_columns>60</note_columns>
+            <note_rows>4</note_rows>
+            <column_name>bank_name</column_name>
+            <custom_group_name>direct_debit_mandate</custom_group_name>
+            <in_selector>1</in_selector>
+        </CustomField>
+        <CustomField>
+            <name>bank_street_address</name>
+            <label>Bank Street Address</label>
+            <data_type>String</data_type>
+            <html_type>Text</html_type>
+            <is_required>0</is_required>
+            <is_searchable>1</is_searchable>
+            <is_search_range>0</is_search_range>
+            <weight>18</weight>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <text_length>255</text_length>
+            <note_columns>60</note_columns>
+            <note_rows>4</note_rows>
+            <column_name>bank_street_address</column_name>
+            <custom_group_name>direct_debit_mandate</custom_group_name>
+            <in_selector>1</in_selector>
+        </CustomField>
+        <CustomField>
+            <name>bank_city</name>
+            <label>Bank City</label>
+            <data_type>String</data_type>
+            <html_type>Text</html_type>
+            <is_required>0</is_required>
+            <is_searchable>1</is_searchable>
+            <is_search_range>0</is_search_range>
+            <weight>19</weight>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <text_length>255</text_length>
+            <note_columns>60</note_columns>
+            <note_rows>4</note_rows>
+            <column_name>bank_city</column_name>
+            <custom_group_name>direct_debit_mandate</custom_group_name>
+            <in_selector>1</in_selector>
+        </CustomField>
+        <CustomField>
+            <name>bank_county</name>
+            <label>Bank County</label>
+            <data_type>String</data_type>
+            <html_type>Text</html_type>
+            <is_required>0</is_required>
+            <is_searchable>1</is_searchable>
+            <is_search_range>0</is_search_range>
+            <weight>20</weight>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <text_length>64</text_length>
+            <note_columns>60</note_columns>
+            <note_rows>4</note_rows>
+            <column_name>bank_county</column_name>
+            <custom_group_name>direct_debit_mandate</custom_group_name>
+            <in_selector>1</in_selector>
+        </CustomField>
+        <CustomField>
+            <name>bank_postcode</name>
+            <label>Bank Postcode</label>
+            <data_type>String</data_type>
+            <html_type>Text</html_type>
+            <is_required>0</is_required>
+            <is_searchable>1</is_searchable>
+            <is_search_range>0</is_search_range>
+            <weight>21</weight>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <text_length>255</text_length>
+            <note_columns>60</note_columns>
+            <note_rows>4</note_rows>
+            <column_name>bank_postcode</column_name>
+            <custom_group_name>direct_debit_mandate</custom_group_name>
+            <in_selector>1</in_selector>
+        </CustomField>
+        <CustomField>
+            <name>account_holder_name</name>
+            <label>Account Holder Name</label>
+            <data_type>String</data_type>
+            <html_type>Text</html_type>
+            <is_required>1</is_required>
+            <is_searchable>1</is_searchable>
+            <is_search_range>0</is_search_range>
+            <weight>22</weight>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <text_length>64</text_length>
+            <note_columns>60</note_columns>
+            <note_rows>4</note_rows>
+            <column_name>account_holder_name</column_name>
+            <custom_group_name>direct_debit_mandate</custom_group_name>
+            <in_selector>1</in_selector>
+        </CustomField>
+        <CustomField>
+            <name>ac_number</name>
+            <label>A/C Number</label>
+            <data_type>String</data_type>
+            <html_type>Text</html_type>
+            <is_required>1</is_required>
+            <is_searchable>1</is_searchable>
+            <is_search_range>0</is_search_range>
+            <weight>23</weight>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <text_length>64</text_length>
+            <note_columns>60</note_columns>
+            <note_rows>4</note_rows>
+            <column_name>ac_number</column_name>
+            <custom_group_name>direct_debit_mandate</custom_group_name>
+            <in_selector>1</in_selector>
+        </CustomField>
+        <CustomField>
+            <name>sort_code</name>
+            <label>Sort Code</label>
+            <data_type>String</data_type>
+            <html_type>Text</html_type>
+            <is_required>1</is_required>
+            <is_searchable>1</is_searchable>
+            <is_search_range>0</is_search_range>
+            <weight>24</weight>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <text_length>64</text_length>
+            <note_columns>60</note_columns>
+            <note_rows>4</note_rows>
+            <column_name>sort_code</column_name>
+            <custom_group_name>direct_debit_mandate</custom_group_name>
+            <in_selector>1</in_selector>
+        </CustomField>
+        <CustomField>
+            <name>dd_code</name>
+            <label>DD Code</label>
+            <data_type>String</data_type>
+            <html_type>Select</html_type>
+            <is_required>1</is_required>
+            <is_searchable>1</is_searchable>
+            <is_search_range>0</is_search_range>
+            <weight>25</weight>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <text_length>64</text_length>
+            <note_columns>60</note_columns>
+            <note_rows>4</note_rows>
+            <column_name>dd_code</column_name>
+            <option_group_name>direct_debit_codes</option_group_name>
+            <custom_group_name>direct_debit_mandate</custom_group_name>
+            <in_selector>1</in_selector>
+        </CustomField>
+        <CustomField>
+            <name>dd_ref</name>
+            <label>DD Ref</label>
+            <data_type>String</data_type>
+            <html_type>Text</html_type>
+            <is_required>1</is_required>
+            <is_searchable>1</is_searchable>
+            <is_search_range>0</is_search_range>
+            <weight>27</weight>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <text_length>64</text_length>
+            <note_columns>60</note_columns>
+            <note_rows>4</note_rows>
+            <column_name>dd_ref</column_name>
+            <custom_group_name>direct_debit_mandate</custom_group_name>
+            <in_selector>1</in_selector>
+        </CustomField>
+        <CustomField>
+            <name>start_date</name>
+            <label>Start Date</label>
+            <data_type>Date</data_type>
+            <html_type>Select Date</html_type>
+            <is_required>1</is_required>
+            <is_searchable>1</is_searchable>
+            <is_search_range>0</is_search_range>
+            <weight>28</weight>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <text_length>255</text_length>
+            <date_format>d M yy</date_format>
+            <note_columns>60</note_columns>
+            <note_rows>4</note_rows>
+            <column_name>start_date</column_name>
+            <custom_group_name>direct_debit_mandate</custom_group_name>
+            <in_selector>1</in_selector>
+        </CustomField>
+        <CustomField>
+            <name>authorisation_date</name>
+            <label>Authorisation Date</label>
+            <data_type>Date</data_type>
+            <html_type>Select Date</html_type>
+            <is_required>0</is_required>
+            <is_searchable>1</is_searchable>
+            <is_search_range>0</is_search_range>
+            <weight>29</weight>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <text_length>255</text_length>
+            <date_format>d M yy</date_format>
+            <note_columns>60</note_columns>
+            <note_rows>4</note_rows>
+            <column_name>authorisation_date</column_name>
+            <custom_group_name>direct_debit_mandate</custom_group_name>
+            <in_selector>1</in_selector>
+        </CustomField>
+        <CustomField>
+            <name>authorisation_file</name>
+            <label>Authorisation File</label>
+            <data_type>File</data_type>
+            <html_type>File</html_type>
+            <is_required>0</is_required>
+            <is_searchable>0</is_searchable>
+            <is_search_range>0</is_search_range>
+            <weight>30</weight>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <text_length>255</text_length>
+            <note_columns>60</note_columns>
+            <note_rows>4</note_rows>
+            <column_name>authorisation_file</column_name>
+            <custom_group_name>direct_debit_mandate</custom_group_name>
+            <in_selector>1</in_selector>
+        </CustomField>
+        <CustomField>
+            <name>mandate_id</name>
+            <label>Mandate ID</label>
+            <data_type>String</data_type>
+            <html_type>Text</html_type>
+            <is_required>0</is_required>
+            <is_searchable>1</is_searchable>
+            <is_search_range>0</is_search_range>
+            <weight>36</weight>
+            <is_active>1</is_active>
+            <is_view>1</is_view>
+            <text_length>64</text_length>
+            <note_columns>60</note_columns>
+            <note_rows>4</note_rows>
+            <column_name>mandate_id</column_name>
+            <custom_group_name>direct_debit_information</custom_group_name>
+            <in_selector>1</in_selector>
+            <is_reserved>1</is_reserved>
+        </CustomField>
+        <CustomField>
+          <name>originator_number</name>
+          <label>Originator Number</label>
+          <data_type>String</data_type>
+          <html_type>Select</html_type>
+          <is_required>1</is_required>
+          <is_searchable>1</is_searchable>
+          <is_search_range>0</is_search_range>
+          <weight>32</weight>
+          <is_active>1</is_active>
+          <is_view>0</is_view>
+          <text_length>64</text_length>
+          <note_columns>60</note_columns>
+          <note_rows>4</note_rows>
+          <column_name>originator_number</column_name>
+          <option_group_name>direct_debit_originator_number</option_group_name>
+          <custom_group_name>direct_debit_mandate</custom_group_name>
+          <in_selector>1</in_selector>
+        </CustomField>
+    </CustomFields>
+    <OptionGroups>
+        <OptionGroup>
+            <name>direct_debit_codes</name>
+            <title>Direct Debit Codes</title>
+            <is_reserved>1</is_reserved>
+            <is_active>1</is_active>
+        </OptionGroup>
+        <OptionGroup>
+          <name>direct_debit_originator_number</name>
+          <title>Direct Debit Originator Number</title>
+          <is_reserved>0</is_reserved>
+          <is_active>1</is_active>
+        </OptionGroup>
+    </OptionGroups>
+    <OptionValues>
+        <OptionValue>
+            <label>0N</label>
+            <value>1</value>
+            <name>new_direct_debit_i_setup</name>
+            <is_default>0</is_default>
+            <weight>1</weight>
+            <is_optgroup>0</is_optgroup>
+            <is_reserved>1</is_reserved>
+            <is_active>1</is_active>
+            <description>New Direct Debit Setup</description>
+            <option_group_name>direct_debit_codes</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>01</label>
+            <value>2</value>
+            <name>first_time_payment</name>
+            <is_default>0</is_default>
+            <weight>2</weight>
+            <is_optgroup>0</is_optgroup>
+            <is_reserved>1</is_reserved>
+            <is_active>1</is_active>
+            <description>First time payment</description>
+            <option_group_name>direct_debit_codes</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>17</label>
+            <value>3</value>
+            <name>recurring_contribution</name>
+            <is_default>0</is_default>
+            <weight>3</weight>
+            <is_optgroup>0</is_optgroup>
+            <is_reserved>1</is_reserved>
+            <is_active>1</is_active>
+            <description>Recurring contribution</description>
+            <option_group_name>direct_debit_codes</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>0C</label>
+            <value>4</value>
+            <name>cancel_a_direct_debit</name>
+            <is_default>0</is_default>
+            <weight>4</weight>
+            <is_optgroup>0</is_optgroup>
+            <is_reserved>1</is_reserved>
+            <is_active>1</is_active>
+            <description>To cancel a Direct Debit</description>
+            <option_group_name>direct_debit_codes</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>New Direct Debit Instructions</label>
+            <name>instructions_batch</name>
+            <is_active>1</is_active>
+            <description>New Direct Debit Instructions</description>
+            <option_group_name>batch_type</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Direct Debit Payments</label>
+            <name>dd_payments</name>
+            <is_active>1</is_active>
+            <description>Direct Debit Payments</description>
+            <option_group_name>batch_type</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Submitted</label>
+            <name>Submitted</name>
+            <is_active>1</is_active>
+            <description>Submitted</description>
+            <option_group_name>batch_status</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Discarded</label>
+            <name>Discarded</name>
+            <is_active>1</is_active>
+            <description>Discarded</description>
+            <option_group_name>batch_status</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>New Direct Debit Recurring Payment</label>
+            <name>new_direct_debit_recurring_payment</name>
+            <is_active>1</is_active>
+            <is_default>0</is_default>
+            <description>New Direct Debit Recurring Payment</description>
+            <option_group_name>activity_type</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Update Direct Debit Recurring Payment</label>
+            <name>update_direct_debit_recurring_payment</name>
+            <is_active>1</is_active>
+            <is_default>0</is_default>
+            <description>Update Direct Debit Recurring Payment</description>
+            <option_group_name>activity_type</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Direct Debit Payment Reminder</label>
+            <name>direct_debit_payment_reminder</name>
+            <is_active>1</is_active>
+            <is_default>0</is_default>
+            <description>Direct Debit Payment Reminder</description>
+            <option_group_name>activity_type</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Offline Direct Debit Auto-renewal</label>
+            <name>offline_direct_debit_auto_renewal</name>
+            <is_active>1</is_active>
+            <is_default>0</is_default>
+            <description>Offline Direct Debit Auto-renewal</description>
+            <option_group_name>activity_type</option_group_name>
+        </OptionValue>
+        <OptionValue>
+            <label>Direct Debit Mandate Update</label>
+            <name>direct_debit_mandate_update</name>
+            <is_active>1</is_active>
+            <is_default>0</is_default>
+            <description>Direct Debit Mandate Update</description>
+            <option_group_name>activity_type</option_group_name>
+        </OptionValue>
+    </OptionValues>
+    <ProfileGroups>
+        <ProfileGroup>
+            <is_active>1</is_active>
+            <group_type>Contact</group_type>
+            <title>Direct Debit Information</title>
+            <add_captcha>0</add_captcha>
+            <is_map>0</is_map>
+            <is_edit_link>0</is_edit_link>
+            <is_uf_link>0</is_uf_link>
+            <is_update_dupe>0</is_update_dupe>
+            <is_cms_user>0</is_cms_user>
+            <is_reserved>1</is_reserved>
+            <name>direct_debit_mandate</name>
+            <is_proximity_search>0</is_proximity_search>
+        </ProfileGroup>
+    </ProfileGroups>
+    <ProfileFields>
+        <ProfileField>
+            <field_name>custom.civicrm_value_dd_mandate.bank_name</field_name>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <is_required>1</is_required>
+            <weight>2</weight>
+            <help_post></help_post>
+            <help_pre></help_pre>
+            <visibility>User and User Admin Only</visibility>
+            <in_selector>0</in_selector>
+            <is_searchable>0</is_searchable>
+            <label>Bank Name</label>
+            <field_type>Contact</field_type>
+            <is_multi_summary>1</is_multi_summary>
+            <profile_group_name>direct_debit_mandate</profile_group_name>
+        </ProfileField>
+        <ProfileField>
+            <field_name>custom.civicrm_value_dd_mandate.bank_street_address</field_name>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <is_required>0</is_required>
+            <weight>3</weight>
+            <help_post></help_post>
+            <help_pre></help_pre>
+            <visibility>User and User Admin Only</visibility>
+            <in_selector>0</in_selector>
+            <is_searchable>0</is_searchable>
+            <label>Bank Street Address</label>
+            <field_type>Contact</field_type>
+            <is_multi_summary>1</is_multi_summary>
+            <profile_group_name>direct_debit_mandate</profile_group_name>
+        </ProfileField>
+        <ProfileField>
+            <field_name>custom.civicrm_value_dd_mandate.bank_city</field_name>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <is_required>0</is_required>
+            <weight>4</weight>
+            <help_post></help_post>
+            <help_pre></help_pre>
+            <visibility>User and User Admin Only</visibility>
+            <in_selector>0</in_selector>
+            <is_searchable>0</is_searchable>
+            <label>Bank City</label>
+            <field_type>Contact</field_type>
+            <is_multi_summary>1</is_multi_summary>
+            <profile_group_name>direct_debit_mandate</profile_group_name>
+        </ProfileField>
+        <ProfileField>
+            <field_name>custom.civicrm_value_dd_mandate.bank_county</field_name>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <is_required>0</is_required>
+            <weight>5</weight>
+            <help_post></help_post>
+            <help_pre></help_pre>
+            <visibility>User and User Admin Only</visibility>
+            <in_selector>0</in_selector>
+            <is_searchable>0</is_searchable>
+            <label>Bank County</label>
+            <field_type>Contact</field_type>
+            <is_multi_summary>1</is_multi_summary>
+            <profile_group_name>direct_debit_mandate</profile_group_name>
+        </ProfileField>
+        <ProfileField>
+            <field_name>custom.civicrm_value_dd_mandate.bank_postcode</field_name>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <is_required>0</is_required>
+            <weight>6</weight>
+            <help_post></help_post>
+            <help_pre></help_pre>
+            <visibility>User and User Admin Only</visibility>
+            <in_selector>0</in_selector>
+            <is_searchable>0</is_searchable>
+            <label>Bank Postcode</label>
+            <field_type>Contact</field_type>
+            <is_multi_summary>1</is_multi_summary>
+            <profile_group_name>direct_debit_mandate</profile_group_name>
+        </ProfileField>
+        <ProfileField>
+            <field_name>custom.civicrm_value_dd_mandate.account_holder_name</field_name>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <is_required>1</is_required>
+            <weight>7</weight>
+            <help_post></help_post>
+            <help_pre></help_pre>
+            <visibility>User and User Admin Only</visibility>
+            <in_selector>0</in_selector>
+            <is_searchable>0</is_searchable>
+            <label>Account Holder Name</label>
+            <field_type>Contact</field_type>
+            <is_multi_summary>1</is_multi_summary>
+            <profile_group_name>direct_debit_mandate</profile_group_name>
+        </ProfileField>
+        <ProfileField>
+            <field_name>custom.civicrm_value_dd_mandate.ac_number</field_name>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <is_required>1</is_required>
+            <weight>8</weight>
+            <help_post></help_post>
+            <help_pre></help_pre>
+            <visibility>User and User Admin Only</visibility>
+            <in_selector>0</in_selector>
+            <is_searchable>0</is_searchable>
+            <label>A/C Number</label>
+            <field_type>Contact</field_type>
+            <is_multi_summary>1</is_multi_summary>
+            <profile_group_name>direct_debit_mandate</profile_group_name>
+        </ProfileField>
+        <ProfileField>
+            <field_name>custom.civicrm_value_dd_mandate.sort_code</field_name>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <is_required>1</is_required>
+            <weight>9</weight>
+            <help_post></help_post>
+            <help_pre></help_pre>
+            <visibility>User and User Admin Only</visibility>
+            <in_selector>0</in_selector>
+            <is_searchable>0</is_searchable>
+            <label>Sort Code</label>
+            <field_type>Contact</field_type>
+            <is_multi_summary>1</is_multi_summary>
+            <profile_group_name>direct_debit_mandate</profile_group_name>
+        </ProfileField>
+        <ProfileField>
+            <field_name>custom.civicrm_value_dd_mandate.dd_code</field_name>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <is_required>1</is_required>
+            <weight>10</weight>
+            <help_post></help_post>
+            <help_pre></help_pre>
+            <visibility>User and User Admin Only</visibility>
+            <in_selector>0</in_selector>
+            <is_searchable>0</is_searchable>
+            <label>DD Code</label>
+            <field_type>Contact</field_type>
+            <is_multi_summary>1</is_multi_summary>
+            <profile_group_name>direct_debit_mandate</profile_group_name>
+        </ProfileField>
+        <ProfileField>
+            <field_name>custom.civicrm_value_dd_mandate.dd_ref</field_name>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <is_required>1</is_required>
+            <weight>12</weight>
+            <help_post></help_post>
+            <help_pre></help_pre>
+            <visibility>User and User Admin Only</visibility>
+            <in_selector>0</in_selector>
+            <is_searchable>0</is_searchable>
+            <label>DD Ref</label>
+            <field_type>Contact</field_type>
+            <is_multi_summary>1</is_multi_summary>
+            <profile_group_name>direct_debit_mandate</profile_group_name>
+        </ProfileField>
+        <ProfileField>
+            <field_name>custom.civicrm_value_dd_mandate.start_date</field_name>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <is_required>1</is_required>
+            <weight>13</weight>
+            <help_post></help_post>
+            <help_pre></help_pre>
+            <visibility>User and User Admin Only</visibility>
+            <in_selector>0</in_selector>
+            <is_searchable>0</is_searchable>
+            <label>Start Date</label>
+            <field_type>Contact</field_type>
+            <is_multi_summary>1</is_multi_summary>
+            <profile_group_name>direct_debit_mandate</profile_group_name>
+        </ProfileField>
+        <ProfileField>
+            <field_name>custom.civicrm_value_dd_mandate.authorisation_date</field_name>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <is_required>0</is_required>
+            <weight>14</weight>
+            <help_post></help_post>
+            <help_pre></help_pre>
+            <visibility>User and User Admin Only</visibility>
+            <in_selector>0</in_selector>
+            <is_searchable>0</is_searchable>
+            <label>Authorisation Date</label>
+            <field_type>Contact</field_type>
+            <is_multi_summary>1</is_multi_summary>
+            <profile_group_name>direct_debit_mandate</profile_group_name>
+        </ProfileField>
+        <ProfileField>
+            <field_name>custom.civicrm_value_dd_mandate.authorisation_file</field_name>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <is_required>0</is_required>
+            <weight>15</weight>
+            <help_post></help_post>
+            <help_pre></help_pre>
+            <visibility>User and User Admin Only</visibility>
+            <in_selector>0</in_selector>
+            <is_searchable>0</is_searchable>
+            <label>Authorisation File</label>
+            <field_type>Contact</field_type>
+            <is_multi_summary>1</is_multi_summary>
+            <profile_group_name>direct_debit_mandate</profile_group_name>
+        </ProfileField>
+    </ProfileFields>
+    <ProfileJoins>
+        <ProfileJoin>
+            <is_active>1</is_active>
+            <module>Profile</module>
+            <weight>15</weight>
+            <profile_group_name>direct_debit_mandate</profile_group_name>
+        </ProfileJoin>
+    </ProfileJoins>
+</CustomData>
