@@ -376,6 +376,7 @@
             <label>New Direct Debit Instructions</label>
             <name>instructions_batch</name>
             <is_active>1</is_active>
+            <weight>4</weight>
             <description>New Direct Debit Instructions</description>
             <option_group_name>batch_type</option_group_name>
         </OptionValue>
@@ -383,6 +384,7 @@
             <label>Direct Debit Payments</label>
             <name>dd_payments</name>
             <is_active>1</is_active>
+            <weight>5</weight>
             <description>Direct Debit Payments</description>
             <option_group_name>batch_type</option_group_name>
         </OptionValue>
@@ -390,6 +392,7 @@
             <label>Submitted</label>
             <name>Submitted</name>
             <is_active>1</is_active>
+            <weight>6</weight>
             <description>Submitted</description>
             <option_group_name>batch_status</option_group_name>
         </OptionValue>
@@ -397,6 +400,7 @@
             <label>Discarded</label>
             <name>Discarded</name>
             <is_active>1</is_active>
+            <weight>7</weight>
             <description>Discarded</description>
             <option_group_name>batch_status</option_group_name>
         </OptionValue>
