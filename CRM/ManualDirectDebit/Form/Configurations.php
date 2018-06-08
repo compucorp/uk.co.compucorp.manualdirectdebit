@@ -10,14 +10,6 @@ use CRM_ManualDirectDebit_ExtensionUtil as E;
 class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
 
   /**
-   * Contains array of fields, which config Manual Direct Debit Expansion
-   *
-   * @var string[]
-   */
-
-  private $allowedConfigFields = [];
-
-  /**
    * Contains array of names, which must be displayed
    * in Mandate configuration section
    *
@@ -88,15 +80,28 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
    * @return array
    */
   private function getAllowedConfigFields() {
-    if (!empty($this->allowedConfigFields )) {
-      return $this->allowedConfigFields;
+
+    $allowedConfigFields = $this->fetchSettingFields();
+    if (!isset($allowedConfigFields) || empty($allowedConfigFields)) {
+      $result = civicrm_api3('System', 'flush');
+
+      if ($result['is_error'] == 0){
+        $allowedConfigFields =  $this->fetchSettingFields();
+      }
     }
 
-    $this->allowedConfigFields =  civicrm_api3('setting', 'getfields',[
+    return $allowedConfigFields;
+  }
+
+  /**
+   * Gets the settings fields
+   *
+   * @return array|null
+   */
+  private function fetchSettingFields() {
+    return civicrm_api3('setting', 'getfields',[
       'filters' =>[ 'group' => 'manualdirectdebit'],
     ])['values'];
-
-    return $this->allowedConfigFields;
   }
 
   /**
