@@ -74,7 +74,7 @@ class CRM_ManualDirectDebit_Hook_PostSave_MembershipPayment_MandateCreator {
       return FALSE;
     }
 
-    $mandateId = $this->mandateStorage->getMandateForCurrentRecurringContribution($this->recurContributionId);
+    $mandateId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($this->recurContributionId);
 
     if (isset($mandateId) && !empty($mandateId)) {
       $this->mandateStorage->assignContributionMandate($this->contributionId, $mandateId);

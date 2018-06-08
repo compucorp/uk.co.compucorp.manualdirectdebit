@@ -21,6 +21,7 @@ class CRM_ManualDirectDebit_Hook_PageRun_TabPage {
     if (isset($this->contributionId) && !empty($this->contributionId)) {
 
       if ($this->isCustomFieldNeedToHide($this->contributionId)) {
+
         CRM_Core_Resources::singleton()
           ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/hideEmptyMandate.js');
       }

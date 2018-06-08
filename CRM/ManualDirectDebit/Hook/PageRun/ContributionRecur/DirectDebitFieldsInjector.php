@@ -28,10 +28,17 @@ class CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInje
    */
   private $currentPaymentMethodId;
 
+  /**
+   * @var string
+   *   Path where the template for the auto renew section is soted.
+   */
+  private $templatePath;
+
   public function __construct(&$page) {
     $this->page = $page;
     $this->currentContributionId = CRM_Utils_Request::retrieve('id', 'Integer', $this->page, FALSE);
     $this->currentPaymentMethodId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getPaymentInstrumentIdOfRecurrContribution($this->currentContributionId);
+    $this->templatePath = CRM_ManualDirectDebit_ExtensionUtil::path() . '/templates';
   }
 
   /**
@@ -45,46 +52,43 @@ class CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInje
       return FALSE;
     }
 
-    $mandateId = $this->getMandateId();
+    $mandateId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($this->currentContributionId);
+
+    if (is_null($mandateId)){
+      CRM_Core_Session::setStatus(t("Mandate doesn't exist"), $title = 'Error', $type = 'alert');
+
+      return FALSE;
+    }
 
     if ($mandateId) {
+      CRM_Core_Region::instance('page-body')->add([
+        'template' => "{$this->templatePath}/CRM/ManualDirectDebit/Form/InjectDirectDebitInformation.tpl",
+      ]);
+
       CRM_Core_Resources::singleton()
-        ->addStyleFile('uk.co.compucorp.manualdirectdebit', 'css/directDebitMandate.css');
-      CRM_Core_Resources::singleton()
-        ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/directDebitInformation.js')
+        ->addStyleFile('uk.co.compucorp.manualdirectdebit', 'css/directDebitMandate.css')
         ->addSetting([
           'urlData' => [
             'gid' => CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getGroupIDByName("direct_debit_mandate"),
             'cid' => CRM_Utils_Request::retrieve('cid', 'Integer', $this->page, FALSE),
             'recId' => $mandateId,
             'mandateId' => $mandateId,
+            'cgcount' => $this->getCgCount(),
+            'recurringContribution' => $this->currentContributionId,
           ],
         ]);
     }
   }
 
+
   /**
-   * Gets id of mandate for recurrent contribution
+   * Gets mandate cgcount
    *
    * @return int
    */
-  private function getMandateId() {
-    $mandateIdCustomFieldId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName("mandate_id");
-
-    try {
-      $mandateId = civicrm_api3('Contribution', 'get', [
-        'sequential' => 1,
-        'options' => ['limit' => 1],
-        'return' => "custom_$mandateIdCustomFieldId",
-        'contribution_recur_id' => $this->currentContributionId,
-      ]);
-
-      return $mandateId['values'][0]["custom_$mandateIdCustomFieldId"];
-    } catch (CiviCRM_API3_Exception $e) {
-      CRM_Core_Session::setStatus(t("Contribution doesn't exist"), $title = 'Error', $type = 'alert');
-
-      return FALSE;
-    }
+  private function getCgCount() {
+    $maxMandateId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getMaxMandateId();
+    return $maxMandateId + 1;
   }
 
 }
