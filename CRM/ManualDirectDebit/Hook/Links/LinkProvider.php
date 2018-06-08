@@ -3,7 +3,7 @@
 class CRM_ManualDirectDebit_Hook_Links_LinkProvider {
 
   /**
-   * Array
+   * List of links
    *
    * @var array
    */
@@ -17,20 +17,21 @@ class CRM_ManualDirectDebit_Hook_Links_LinkProvider {
    * Alters recurring contribution links
    *
    * @param $values
+   * @param $recurringContributionId
    */
-  public function alterRecurContributionLinks(&$values) {
+  public function alterRecurContributionLinks(&$values, $recurringContributionId) {
     $this->links[] = [
       'name' => ts('Use a new mandate'),
       'url' => 'civicrm/contact/view/cd/edit',
       'title' => 'Use a new mandate',
-      'qs' => 'reset=1&type=Individual&groupID=%%groupID%%&entityID=%%cid%%&cgcount=%%cgcount%%&multiRecordDisplay=single&mode=add&updatedRecId=%%recurContributionId%%',
+      'qs' => 'reset=1&type=Individual&groupID=%%groupID%%&entityID=%%cid%%&cgcount=%%cgcount%%&multiRecordDisplay=single&mode=add&updatedRecId=%%updatedRecId%%',
       'class' => 'no-popup',
     ];
 
     $values['groupID'] = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getGroupIDByName("direct_debit_mandate");
-    $values['entityID'] = CRM_Utils_Request::retrieve('cid', 'Integer');
+    $values['cid'] = CRM_Utils_Request::retrieve('cid', 'Integer');
     $values['cgcount'] = $this->getCgCount();
-    $values['updatedRecId'] = $this->getRecurrContributionIds();
+    $values['updatedRecId'] = $recurringContributionId;
   }
 
   /**
@@ -41,26 +42,6 @@ class CRM_ManualDirectDebit_Hook_Links_LinkProvider {
   private function getCgCount() {
     $maxMandateId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getMaxMandateId();
     return $maxMandateId + 1;
-  }
-
-  /**
-   * Gets id`s of all recurring contribution with 'direct debit' payment instrument
-   *
-   * @return array
-   */
-  private function getRecurrContributionIds() {
-    $contribution = civicrm_api3('ContributionRecur', 'get', [
-      'sequential' => 1,
-      'return' => ["id"],
-      'payment_instrument_id' => "direct_debit",
-    ]);
-
-    $ids = [];
-    foreach ($contribution['values'] as $recurr) {
-      $ids[] = $recurr['id'];
-    }
-
-    return $ids;
   }
 
   /**

@@ -311,7 +311,7 @@ function manualdirectdebit_civicrm_links($op, $objectName, $objectId, &$links, &
   $linkProvider = new CRM_ManualDirectDebit_Hook_Links_LinkProvider($links);
 
   if ($objectName == 'Contribution' && $op == 'contribution.selector.recurring') {
-    $linkProvider->alterRecurContributionLinks($values);
+    $linkProvider->alterRecurContributionLinks($values, $objectId);
   }
 
   if ($objectName == 'Batch') {
