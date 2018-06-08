@@ -13,16 +13,7 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
    * @return array
    */
   public function getManualDirectDebitSettings() {
-    $settingFields = [
-      'manualdirectdebit_default_reference_prefix',
-      'manualdirectdebit_new_instruction_run_dates',
-      'manualdirectdebit_payment_collection_run_dates',
-      'manualdirectdebit_minimum_days_to_first_payment',
-    ];
-    $settingValues = civicrm_api3('setting', 'get', [
-      'return' => $settingFields,
-      'sequential' => 1,
-    ]);
+    $settingValues = $this->getSettingsValues();
 
     $settings = [];
     $settings['default_reference_prefix'] = $settingValues['values'][0]['manualdirectdebit_default_reference_prefix'];
@@ -70,9 +61,45 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
     if(isset($settingValues[$settingTitle]) && !empty($settingValues[$settingTitle])){
       self::$minimumDaysToFirstPayment = $settingValues[$settingTitle];
       return self::$minimumDaysToFirstPayment;
-    } else{
+    } else {
       throw new CiviCRM_API3_Exception(t("Please, configure minimum days to first payment"),'required_setting_not_configured');
     }
+  }
+
+  /**
+   * Gets setting values
+   *
+   * @return array
+   */
+  private function getSettingsValues() {
+    $settingValues = $this->fetchSettingsValues();
+
+    if (!isset($settingValues) || empty($settingValues)) {
+      $result = civicrm_api3('System', 'flush');
+      if ($result['is_error'] == 0){
+        $settingValues =  $this->fetchSettingsValues();
+      }
+    }
+    return $settingValues;
+  }
+
+  /**
+   * Fetches setting values
+   *
+   * @return array
+   */
+  private function fetchSettingsValues() {
+    $settingFields = [
+      'manualdirectdebit_default_reference_prefix',
+      'manualdirectdebit_new_instruction_run_dates',
+      'manualdirectdebit_payment_collection_run_dates',
+      'manualdirectdebit_minimum_days_to_first_payment',
+    ];
+
+    return civicrm_api3('setting', 'get', [
+      'return' => $settingFields,
+      'sequential' => 1,
+    ]);
   }
 
 }
