@@ -188,14 +188,14 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
 
   switch ($formName) {
     case "CRM_Contact_Form_CustomData":
-        if (isset($form->getVar('_submitValues')['recurrId']) && !empty($form->getVar('_submitValues')['recurrId'])){
-          $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
-          $manualDirectDebit->changeMandateForRecurringContribution();
-        };
+      if (isset($form->getVar('_submitValues')['recurrId']) && !empty($form->getVar('_submitValues')['recurrId'])) {
+        $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
+        $manualDirectDebit->changeMandateForRecurringContribution();
+      };
       break;
 
     case "CRM_Contribute_Form_Contribution":
-      if($action == CRM_Core_Action::ADD){
+      if ($action == CRM_Core_Action::ADD) {
         $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
         $manualDirectDebit->checkPaymentOptionToCreateMandate();
       }
@@ -233,7 +233,6 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
     $pageProcessor = new CRM_ManualDirectDebit_Hook_PageRun_TabPage();
     $pageProcessor->setContributionId($contributionId);
     $pageProcessor->hideDirectDebitFields();
-    $pageProcessor->changeRecurringContributionButtons();
   }
 
   if (get_class($page) == 'CRM_Contribute_Page_ContributionRecur') {
@@ -242,7 +241,8 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
   }
 
   if (get_class($page) == 'CRM_Contact_Page_View_CustomData') {
-    CRM_Core_Resources::singleton()->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/mandateEdit.js');
+    CRM_Core_Resources::singleton()
+      ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/mandateEdit.js');
   }
 }
 
@@ -308,20 +308,14 @@ function manualdirectdebit_civicrm_postSave_civicrm_membership_payment($dao) {
  * Implements hook_civicrm_links().
  */
 function manualdirectdebit_civicrm_links($op, $objectName, $objectId, &$links, &$mask, &$values) {
+  $linkProvider = new CRM_ManualDirectDebit_Hook_Links_LinkProvider($links);
+
+  if ($objectName == 'Contribution' && $op == 'contribution.selector.recurring') {
+    $linkProvider->alterRecurContributionLinks($values);
+  }
 
   if ($objectName == 'Batch') {
-    $batch = CRM_Batch_BAO_Batch::findById($objectId);
-
-    $instructionsBatchTypeId = CRM_Core_OptionGroup::getRowValues('batch_type', 'instructions_batch', 'name', 'String', FALSE);
-    if ($batch->type_id == $instructionsBatchTypeId['value']) {
-      foreach ($links as &$link) {
-        switch ($link['name']) {
-          case 'Transactions':
-            $link['url'] = 'civicrm/direct_debit/batch-transaction';
-            break;
-        }
-      }
-    }
+    $linkProvider->alterBatchLinks($objectId);
   }
 }
 
