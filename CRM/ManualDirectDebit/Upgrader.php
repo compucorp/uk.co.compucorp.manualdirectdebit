@@ -7,15 +7,122 @@ use CRM_ManualDirectDebit_ExtensionUtil as E;
  */
 class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base {
 
+  /**
+   * Message template param list
+   *
+   * @var array
+   */
+  public $messageTemplateParamList = [];
+
   public function install() {
+    $this->createMessageTemplates();
     $this->createDirectDebitNavigationMenu();
     $this->createDirectDebitPaymentInstrument();
     $this->createDirectDebitPaymentProcessorType();
     $this->createDirectDebitPaymentProcessor();
+
+    /**
+     *  ONLY FOR DEVELOPMENT PURPOSE
+     */
+    $development = new CRM_ManualDirectDebit_Common_DEVELOPMENT();
+    $development->installExtraDataForTesting();
+  }
+
+  /**
+   * Sets message template param list
+   */
+  public function setMessageTemplateParamList() {
+    $this->messageTemplateParamList = [
+      [
+        'filePath' => $this->extensionDir . "/templates/CRM/ManualDirectDebit/MessageTemplate/PaymentSignUpNotification.tpl",
+        'title' => 'Direct Debit Payment Sign Up Notification',
+        'subject' => ts('Direct Debit Payment Sign Up Notification')
+      ],
+      [
+        'filePath' => $this->extensionDir . "/templates/CRM/ManualDirectDebit/MessageTemplate/PaymentUpdateNotification.tpl",
+        'title' => 'Direct Debit Payment Update Notification',
+        'subject' => ts('Direct Debit Payment Update Notification')
+      ],
+      [
+        'filePath' => $this->extensionDir . "/templates/CRM/ManualDirectDebit/MessageTemplate/PaymentCollectionReminder.tpl",
+        'title' => 'Direct Debit Payment Collection Reminder',
+        'subject' => ts('Direct Debit Payment Collection Reminder')
+      ],
+      [
+        'filePath' => $this->extensionDir . "/templates/CRM/ManualDirectDebit/MessageTemplate/AutoRenewNotification.tpl",
+        'title' => 'Direct Debit Auto-renew Notification',
+        'subject' => ts('Direct Debit Auto-renew Notification')
+      ],
+      [
+        'filePath' => $this->extensionDir . "/templates/CRM/ManualDirectDebit/MessageTemplate/MandateUpdateNotification.tpl",
+        'title' => 'Direct Debit Mandate Update Notification',
+        'subject' => ts('Direct Debit Mandate Update Notification')
+      ],
+    ];
+  }
+
+  /**
+   * Creates message templates
+   *
+   * @throws \CiviCRM_API3_Exception
+   */
+  private function createMessageTemplates() {
+    $this->setMessageTemplateParamList();
+
+    foreach ($this->messageTemplateParamList as $messageTemplateParam) {
+      $this->createMessageTemplate($messageTemplateParam);
+    }
+  }
+
+  /**
+   * Creates message template
+   *
+   * @param $params
+   *
+   * @throws \CiviCRM_API3_Exception
+   */
+  private function createMessageTemplate($params) {
+    $messageHtml = '';
+    if (file_exists($params['filePath'])) {
+      $messageHtml = file_get_contents($params['filePath']);
+    }
+    else {
+      CRM_Core_Session::setStatus(
+        ts('Creating message template'),
+        ts("Couldn't find default template at '". $params['filePath'] . "'"),
+        'alert'
+      );
+    }
+
+    civicrm_api3('MessageTemplate', 'create', [
+      'msg_title' => $params['title'],
+      'msg_subject' => $params['subject'],
+      'is_reserved' => 0,
+      'msg_html' => $messageHtml,
+      'is_active' => 1,
+      'msg_text' => 'N/A'
+    ]);
   }
 
   public function uninstall() {
+    $this->deleteMessageTemplates();
     $this->uninstallCustomInformation();
+  }
+
+  /**
+   * Deletes 'CiviCRM Direct Debit' message template
+   *
+   * @throws \CiviCRM_API3_Exception
+   */
+  private function deleteMessageTemplates() {
+    $this->setMessageTemplateParamList();
+
+    foreach ($this->messageTemplateParamList as $messageTemplateParam) {
+      civicrm_api3('MessageTemplate', 'get', [
+        'msg_title' => $messageTemplateParam['title'],
+        'api.MessageTemplate.delete' => ['id' => '$value.id'],
+      ]);
+    }
   }
 
   /**
