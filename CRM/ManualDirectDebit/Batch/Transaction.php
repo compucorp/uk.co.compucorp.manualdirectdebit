@@ -268,7 +268,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    *
    * @return array
    */
-   private function getSavedRows($mandateData, $batch) {
+  private function getSavedRows($mandateData, $batch) {
     $rows = [];
 
     foreach ($mandateData['values']['mandates'] as $mandateId => $mandateValue) {
@@ -282,11 +282,11 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       if (!empty($mandateValue['contact_id'])) {
         switch ($batch->getBatchType()) {
           case "instructions_batch":
-            $row['action'] = $this->getLinkToMandate($mandateId, $mandateValue['contact_id']);
+            $row['action'] = $this->getLinkToMandate($mandateValue['contact_id']);
             break;
 
           case "dd_payments":
-            $row['action'] = $this->getLinkToRecurringContribution($mandateId, $mandateValue['contact_id']);
+            $row['action'] = $this->getLinkToContribution($mandateValue['contribute_id'], $mandateValue['contact_id']);
             break;
         }
       }
@@ -321,19 +321,24 @@ class CRM_ManualDirectDebit_Batch_Transaction {
 
       $row['check'] = $this->getCheckRow($batch, $mandateItems->id);
 
-      if (!empty($mandateItems->contact_id)) {
-        switch ($batch->getBatchType()) {
-          case "instructions_batch":
-            $row['action'] = $this->getLinkToMandate($mandateItems->mandate_id, $mandateItems->contact_id);
-            break;
+      switch ($batch->getBatchType()) {
+        case "instructions_batch":
+          if (!empty($mandateItems->contact_id)) {
+            $row['action'] = $this->getLinkToMandate($mandateItems->contact_id);
+          }
 
-          case "dd_payments":
-            $row['action'] = $this->getLinkToRecurringContribution($mandateItems->id, $mandateItems->contact_id);
-            break;
-        }
+          $rows[$mandateItems->mandate_id] = $row;
+          break;
+
+        case "dd_payments":
+          if (!empty($mandateItems->contact_id)) {
+            $row['action'] = $this->getLinkToContribution($mandateItems->id, $mandateItems->contact_id);
+          }
+
+          $rows[$mandateItems->id] = $row;
+          break;
       }
 
-      $rows[$mandateItems->mandate_id] = $row;
     }
 
     return $rows;
@@ -426,7 +431,6 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         $query->limit((int) $this->params['rowCount'], (int) $this->params['offset']);
       }
     }
-    $query->groupBy('civicrm_value_dd_mandate.id');
 
     $mandateItems = CRM_Core_DAO::executeQuery($query->toSQL());
 
@@ -477,9 +481,11 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   /**
    * Gets link to mandate
    *
+   * @param $contactId
+   *
    * @return string
    */
-  private function getLinkToMandate($mandateId, $contactId) {
+  private function getLinkToMandate($contactId) {
     $mandateCustomGroupId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getGroupIDByName('direct_debit_mandate');
     $linkToMandate = CRM_Core_Action::formLink(
       [
@@ -487,7 +493,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
           'name' => ts('View'),
           'title' => ts('View Mandate'),
           'url' => "civicrm/contact/view",
-          'qs' => "reset=1&cid=%%contact_id%%&selectedChild=custom_%%mandate_custom_group_id%%"
+          'qs' => "reset=1&cid=%%contact_id%%&selectedChild=custom_%%mandate_custom_group_id%%",
         ],
       ],
       NULL,
@@ -503,21 +509,24 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   /**
    * Gets link to contribution
    *
+   * @param $contributionId
+   * @param $contactId
+   *
    * @return string
    */
-  private function getLinkToRecurringContribution($contributionId, $contactId) {
+  private function getLinkToContribution($contributionId, $contactId) {
 
     $linkToRecurringContribution = CRM_Core_Action::formLink(
       [
         'view' => [
           'name' => ts('View'),
           'title' => ts('View Contribution'),
-          'url' => "civicrm/contact/view",
-          'qs' => "reset=1&cid=%%contact_id%%&selectedChild=contribute",
+          'extra' => 'onclick = "contactRecurContribution( %%contribution_id%%, %%contact_id%% );"',
         ],
       ],
       NULL,
       [
+        'contribution_id' => $contributionId,
         'contact_id' => $contactId,
       ]
     );
