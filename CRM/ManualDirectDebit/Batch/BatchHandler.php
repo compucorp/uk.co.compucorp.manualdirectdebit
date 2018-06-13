@@ -379,7 +379,16 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
 
     $mandateItems = $batchTransaction->getDDMandateInstructions();
     while ($mandateItems->fetch()) {
-      $dataForExport[$mandateItems->mandate_id] = $mandateItems->toArray();
+
+      switch ($this->getBatchType()) {
+        case 'instructions_batch':
+        $dataForExport[$mandateItems->mandate_id] = $mandateItems->toArray();
+          break;
+
+        case 'dd_payments':
+        $dataForExport[$mandateItems->contribute_id] = $mandateItems->toArray();
+          break;
+      }
     }
 
     return $dataForExport;
