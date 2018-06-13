@@ -54,6 +54,8 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $this->collectRecurringContributionData();
     $this->collectMandateData();
     $this->collectMembershipData();
+    $this->collectImageSrc();
+
     return $this->tplParams;
   }
 
@@ -76,17 +78,17 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
    */
   private function setEmail() {
     $query = "
-    SELECT
-      (
-        SELECT email.email
-        FROM civicrm_email AS email
-        WHERE email.contact_id = contribution.contact_id
-        LIMIT 1
-      ) AS email
-    FROM civicrm_contribution AS contribution
-    WHERE contribution.id = %1
-    LIMIT 1
-  ";
+      SELECT
+        (
+          SELECT email.email
+          FROM civicrm_email AS email
+          WHERE email.contact_id = contribution.contact_id
+          LIMIT 1
+        ) AS email
+      FROM civicrm_contribution AS contribution
+      WHERE contribution.id = %1
+      LIMIT 1
+    ";
 
     $dao = CRM_Core_DAO::executeQuery($query, [
       1 => [$this->contributionId, 'Integer']
@@ -210,8 +212,35 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
       'recurringContributionRows' => $recurringContributionRows,
       'total' => $total,
       'installments' => $recurringContributionBao->installments,
-      'installments_paid' => $recurringContributionBao->amount,
+      'installments_paid' => $recurringContributionBao->amount
     ];
+
+    $this->tplParams['currency'] = $this->getCurrencySymbol($recurringContributionBao->currency);
+  }
+
+  /**
+   * Gets currency symbol
+   *
+   * @param $currencyString
+   *
+   * @return mixed
+   */
+  private function getCurrencySymbol($currencyString) {
+    $query = "
+      SELECT currency.symbol AS symbol
+      FROM civicrm_currency AS currency
+      WHERE currency.name = %1
+    ";
+
+    $dao = CRM_Core_DAO::executeQuery($query, [
+      1 => [$currencyString, 'String']
+    ]);
+
+    while ($dao->fetch()) {
+      return $dao->symbol;
+    }
+
+    return '(' . $currencyString . ')';
   }
 
   /**
@@ -288,17 +317,17 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $completedStatus = CRM_ManualDirectDebit_Common_OptionValue::getOptionValueID('contribution_status', 'Completed');
 
     $query = "
-    SELECT 
-      contribution.receive_date AS next_payment_date, 
-      contribution.total_amount AS next_payment_amount
-    FROM civicrm_membership_payment AS membership_payment
-    LEFT JOIN civicrm_contribution AS contribution
-      ON membership_payment.contribution_id = contribution.id
-    WHERE membership_payment.membership_id = 4
-      AND contribution.receive_date >= NOW()
-      AND contribution.contribution_status_id NOT IN (%2, %3)
-    ORDER BY contribution.receive_date ASC
-    LIMIT 1
+      SELECT 
+        contribution.receive_date AS next_payment_date, 
+        contribution.total_amount AS next_payment_amount
+      FROM civicrm_membership_payment AS membership_payment
+      LEFT JOIN civicrm_contribution AS contribution
+        ON membership_payment.contribution_id = contribution.id
+      WHERE membership_payment.membership_id = %1
+        AND contribution.receive_date >= NOW()
+        AND contribution.contribution_status_id NOT IN (%2, %3)
+      ORDER BY contribution.receive_date ASC
+      LIMIT 1
     ";
 
     $dao = CRM_Core_DAO::executeQuery($query, [
@@ -308,11 +337,18 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     ]);
 
     while ($dao->fetch()) {
-      $this->tplParams['membershipData']['nextPayment'] = [
+      $this->tplParams['nextMembershipPayment'] = [
         'date' => $dao->next_payment_date,
         'amount' => round($dao->next_payment_amount, 2)
       ];
     }
+  }
+
+  /**
+   * Gets direct debit image src
+   */
+  private function collectImageSrc() {
+    $this->tplParams['directDebitImageSrc'] = CRM_ManualDirectDebit_ExtensionUtil::url() . '/Images/debit.ico';
   }
 
 }

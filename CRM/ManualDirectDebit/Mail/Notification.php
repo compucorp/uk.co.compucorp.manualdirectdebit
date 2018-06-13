@@ -72,12 +72,15 @@ class CRM_ManualDirectDebit_Mail_Notification {
    *
    * @return bool
    */
-  public function paymentSignUpNotification($recurringContributionId) {
+  public function sendPaymentSignUpNotify($recurringContributionId) {
     try {
       $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution($recurringContributionId);
       $tplParams = $dataCollector->retrieve();
       $email = $dataCollector->retrieveEmail();
-      $messageTemplateId = CRM_ManualDirectDebit_Common_MessageTemplate::getMessageTemplateId("Direct Debit Payment Sign Up Notification");
+      $messageTemplateId = CRM_ManualDirectDebit_Common_MessageTemplate::getMessageTemplateId(
+        CRM_ManualDirectDebit_Common_MessageTemplate::SING_UP
+      );
+
       return $this->sendEmail($email, $messageTemplateId, $tplParams);
     }
     catch (CiviCRM_API3_Exception $e) {
@@ -92,12 +95,15 @@ class CRM_ManualDirectDebit_Mail_Notification {
    *
    * @return bool
    */
-  public function paymentUpdateNotification($recurringContributionId) {
+  public function sendPaymentUpdateNotification($recurringContributionId) {
     try {
       $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution($recurringContributionId);
       $tplParams = $dataCollector->retrieve();
       $email = $dataCollector->retrieveEmail();
-      $messageTemplateId = CRM_ManualDirectDebit_Common_MessageTemplate::getMessageTemplateId("Direct Debit Payment Update Notification");
+      $messageTemplateId = CRM_ManualDirectDebit_Common_MessageTemplate::getMessageTemplateId(
+        CRM_ManualDirectDebit_Common_MessageTemplate::PAYMENT_UPDATE
+      );
+
       return $this->sendEmail($email, $messageTemplateId, $tplParams);
     }
     catch (CiviCRM_API3_Exception $e) {
@@ -112,12 +118,15 @@ class CRM_ManualDirectDebit_Mail_Notification {
    *
    * @return bool
    */
-  public function paymentCollectionReminder($contributionId) {
+  public function sendPaymentCollectionReminder($contributionId) {
     try {
       $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Contribution($contributionId);
       $tplParams = $dataCollector->retrieve();
       $email = $dataCollector->retrieveEmail();
-      $messageTemplateId = CRM_ManualDirectDebit_Common_MessageTemplate::getMessageTemplateId("Direct Debit Payment Collection Reminder");
+      $messageTemplateId = CRM_ManualDirectDebit_Common_MessageTemplate::getMessageTemplateId(
+        CRM_ManualDirectDebit_Common_MessageTemplate::COLLECTION_REMINDER
+      );
+
       return $this->sendEmail($email, $messageTemplateId, $tplParams);
     }
     catch (CiviCRM_API3_Exception $e) {
@@ -132,12 +141,15 @@ class CRM_ManualDirectDebit_Mail_Notification {
    *
    * @return bool
    */
-  public function autoRenewNotification($recurringContributionId) {
+  public function sendAutoRenewNotification($recurringContributionId) {
     try {
       $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution($recurringContributionId);
       $tplParams = $dataCollector->retrieve();
       $email = $dataCollector->retrieveEmail();
-      $messageTemplateId = CRM_ManualDirectDebit_Common_MessageTemplate::getMessageTemplateId("Direct Debit Auto-renew Notification");
+      $messageTemplateId = CRM_ManualDirectDebit_Common_MessageTemplate::getMessageTemplateId(
+        CRM_ManualDirectDebit_Common_MessageTemplate::AUTO_RENEW
+      );
+
       return $this->sendEmail($email, $messageTemplateId, $tplParams);
     }
     catch (CiviCRM_API3_Exception $e) {
@@ -152,12 +164,15 @@ class CRM_ManualDirectDebit_Mail_Notification {
    *
    * @return bool
    */
-  public function mandateUpdateNotification($mandateId) {
+  public function sendMandateUpdateNotification($mandateId) {
     try {
       $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Mandate($mandateId);
       $tplParams = $dataCollector->retrieve();
       $email = $dataCollector->retrieveEmail();
-      $messageTemplateId = CRM_ManualDirectDebit_Common_MessageTemplate::getMessageTemplateId("Direct Debit Mandate Update Notification");
+      $messageTemplateId = CRM_ManualDirectDebit_Common_MessageTemplate::getMessageTemplateId(
+        CRM_ManualDirectDebit_Common_MessageTemplate::MANDATE_UPDATE
+      );
+
       return $this->sendEmail($email, $messageTemplateId, $tplParams);
     }
     catch (CiviCRM_API3_Exception $e) {
@@ -173,11 +188,12 @@ class CRM_ManualDirectDebit_Mail_Notification {
    *
    * @return bool
    */
-  public function notificationByContributionId($contributionId, $messageTemplateId) {
+  public function notifyByContributionId($contributionId, $messageTemplateId) {
     try {
       $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Contribution($contributionId);
       $tplParams = $dataCollector->retrieve();
       $email = $dataCollector->retrieveEmail();
+
       return $this->sendEmail($email, $messageTemplateId, $tplParams);
     }
     catch (CiviCRM_API3_Exception $e) {
@@ -193,11 +209,12 @@ class CRM_ManualDirectDebit_Mail_Notification {
    *
    * @return bool
    */
-  public function notificationByMembershipId($membershipId, $messageTemplateId) {
+  public function notifyByMembershipId($membershipId, $messageTemplateId) {
     try {
       $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Membership($membershipId);
       $tplParams = $dataCollector->retrieve();
       $email = $dataCollector->retrieveEmail();
+
       return $this->sendEmail($email, $messageTemplateId, $tplParams);
     }
     catch (CiviCRM_API3_Exception $e) {
@@ -213,11 +230,12 @@ class CRM_ManualDirectDebit_Mail_Notification {
    *
    * @return bool
    */
-  public function notificationByRecurContributionId($recurContributionId, $messageTemplateId) {
+  public function notifyByRecurContributionId($recurContributionId, $messageTemplateId) {
     try {
       $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution($recurContributionId);
       $tplParams = $dataCollector->retrieve();
       $email = $dataCollector->retrieveEmail();
+
       return $this->sendEmail($email, $messageTemplateId, $tplParams);
     }
     catch (CiviCRM_API3_Exception $e) {
@@ -233,11 +251,12 @@ class CRM_ManualDirectDebit_Mail_Notification {
    *
    * @return bool
    */
-  public function notificationByMandateId($mandateId, $messageTemplateId) {
+  public function notifyByMandateId($mandateId, $messageTemplateId) {
     try {
       $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Mandate($mandateId);
       $tplParams = $dataCollector->retrieve();
       $email = $dataCollector->retrieveEmail();
+
       return $this->sendEmail($email, $messageTemplateId, $tplParams);
     }
     catch (CiviCRM_API3_Exception $e) {
@@ -267,6 +286,7 @@ class CRM_ManualDirectDebit_Mail_Notification {
         'from' => $this->senderEmailName . " <" . $this->senderEmailAddress . ">",
         'to_email' => $email,
       ]);
+
       return TRUE;
     }
     catch (CiviCRM_API3_Exception $e) {

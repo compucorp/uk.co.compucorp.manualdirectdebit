@@ -20,45 +20,31 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->createDirectDebitPaymentInstrument();
     $this->createDirectDebitPaymentProcessorType();
     $this->createDirectDebitPaymentProcessor();
+  }
 
-    /**
-     *  ONLY FOR DEVELOPMENT PURPOSE
-     */
-    $development = new CRM_ManualDirectDebit_Common_DEVELOPMENT();
-    $development->installExtraDataForTesting();
+  public function upgrade_0001() {
+    $this->createMessageTemplates();
   }
 
   /**
    * Sets message template param list
    */
   public function setMessageTemplateParamList() {
-    $this->messageTemplateParamList = [
-      [
-        'filePath' => $this->extensionDir . "/templates/CRM/ManualDirectDebit/MessageTemplate/PaymentSignUpNotification.tpl",
-        'title' => 'Direct Debit Payment Sign Up Notification',
-        'subject' => ts('Direct Debit Payment Sign Up Notification')
-      ],
-      [
-        'filePath' => $this->extensionDir . "/templates/CRM/ManualDirectDebit/MessageTemplate/PaymentUpdateNotification.tpl",
-        'title' => 'Direct Debit Payment Update Notification',
-        'subject' => ts('Direct Debit Payment Update Notification')
-      ],
-      [
-        'filePath' => $this->extensionDir . "/templates/CRM/ManualDirectDebit/MessageTemplate/PaymentCollectionReminder.tpl",
-        'title' => 'Direct Debit Payment Collection Reminder',
-        'subject' => ts('Direct Debit Payment Collection Reminder')
-      ],
-      [
-        'filePath' => $this->extensionDir . "/templates/CRM/ManualDirectDebit/MessageTemplate/AutoRenewNotification.tpl",
-        'title' => 'Direct Debit Auto-renew Notification',
-        'subject' => ts('Direct Debit Auto-renew Notification')
-      ],
-      [
-        'filePath' => $this->extensionDir . "/templates/CRM/ManualDirectDebit/MessageTemplate/MandateUpdateNotification.tpl",
-        'title' => 'Direct Debit Mandate Update Notification',
-        'subject' => ts('Direct Debit Mandate Update Notification')
-      ],
+    $templates = [
+      CRM_ManualDirectDebit_Common_MessageTemplate::SING_UP => 'PaymentSignUpNotification.tpl',
+      CRM_ManualDirectDebit_Common_MessageTemplate::PAYMENT_UPDATE => 'PaymentUpdateNotification.tpl',
+      CRM_ManualDirectDebit_Common_MessageTemplate::COLLECTION_REMINDER => 'PaymentCollectionReminder.tpl',
+      CRM_ManualDirectDebit_Common_MessageTemplate::AUTO_RENEW => 'AutoRenewNotification.tpl',
+      CRM_ManualDirectDebit_Common_MessageTemplate::MANDATE_UPDATE => 'MandateUpdateNotification.tpl',
     ];
+
+    foreach ($templates as $title => $fileName) {
+      $this->messageTemplateParamList[] = [
+        'filePath' => $this->extensionDir . "/templates/CRM/ManualDirectDebit/MessageTemplate/$fileName",
+        'title' => $title,
+        'subject' => ts($title),
+      ];
+    }
   }
 
   /**

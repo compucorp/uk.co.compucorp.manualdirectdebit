@@ -90,13 +90,13 @@ class CRM_Activity_Form_Task_Email extends CRM_Activity_Form_Task {
           case "direct_debit_mandate_update":
             $mandateId = CRM_ManualDirectDebit_Common_Activity::getActivityRecordId($activityId);
             if (!$mandateId) {break;}
-            $notification->notificationByMandateId($mandateId, $messageTemplateId);
+            $notification->notifyByMandateId($mandateId, $messageTemplateId);
             break;
 
           case "direct_debit_payment_reminder":
             $contributionId = CRM_ManualDirectDebit_Common_Activity::getActivityRecordId($activityId);
             if (!$contributionId) {break;}
-            $notification->notificationByContributionId($contributionId, $messageTemplateId);
+            $notification->notifyByContributionId($contributionId, $messageTemplateId);
             break;
 
           case "update_direct_debit_recurring_payment":
@@ -104,7 +104,7 @@ class CRM_Activity_Form_Task_Email extends CRM_Activity_Form_Task {
           case "new_direct_debit_recurring_payment":
             $recurContributionId = CRM_ManualDirectDebit_Common_Activity::getActivityRecordId($activityId);
             if (!$recurContributionId) {break;}
-            $notification->notificationByRecurContributionId($recurContributionId, $messageTemplateId);
+            $notification->notifyByRecurContributionId($recurContributionId, $messageTemplateId);
             break;
 
           default:

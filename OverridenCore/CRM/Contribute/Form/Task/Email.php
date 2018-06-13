@@ -86,7 +86,7 @@ class CRM_Contribute_Form_Task_Email extends CRM_Contribute_Form_Task {
     if (CRM_ManualDirectDebit_Common_MessageTemplate::isDirectDebitTemplate($messageTemplateId) && !empty($this->_contributionIds)) {
       $notification = new CRM_ManualDirectDebit_Mail_Notification();
       foreach ($this->_contributionIds as $contributionId) {
-        $notification->notificationByContributionId($contributionId, $messageTemplateId);
+        $notification->notifyByContributionId($contributionId, $messageTemplateId);
       }
 
       return;

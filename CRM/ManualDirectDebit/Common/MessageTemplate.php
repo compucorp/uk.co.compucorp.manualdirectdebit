@@ -5,6 +5,12 @@
  */
 class CRM_ManualDirectDebit_Common_MessageTemplate {
 
+  const SING_UP = 'Direct Debit Payment Sign Up Notification';
+  const PAYMENT_UPDATE = 'Direct Debit Payment Update Notification';
+  const COLLECTION_REMINDER = 'Direct Debit Payment Collection Reminder';
+  const AUTO_RENEW = 'Direct Debit Auto-renew Notification';
+  const MANDATE_UPDATE = 'Direct Debit Mandate Update Notification';
+
   /**
    * Checks if template is direct debit template
    *

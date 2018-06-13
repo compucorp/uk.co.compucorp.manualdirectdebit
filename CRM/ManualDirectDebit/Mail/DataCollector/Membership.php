@@ -59,8 +59,4 @@ class CRM_ManualDirectDebit_Mail_DataCollector_Membership extends CRM_ManualDire
     return FALSE;
   }
 
-
-
-
-
 }

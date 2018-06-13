@@ -101,7 +101,7 @@ class CRM_Member_Form_Task_Email extends CRM_Member_Form_Task {
     if (CRM_ManualDirectDebit_Common_MessageTemplate::isDirectDebitTemplate($messageTemplateId) && !empty($this->_memberIds)) {
       $notification = new CRM_ManualDirectDebit_Mail_Notification();
       foreach ($this->_memberIds as $membershipId) {
-        $notification->notificationByMembershipId($membershipId, $messageTemplateId);
+        $notification->notifyByMembershipId($membershipId, $messageTemplateId);
       }
 
       return;
