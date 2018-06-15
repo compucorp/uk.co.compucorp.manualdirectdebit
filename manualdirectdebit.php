@@ -166,7 +166,7 @@ function manualdirectdebit_civicrm_navigationMenu(&$menu) {
     ],
     [
       'name' => ts('Direct Debit Originator Number'),
-      'url' => 'civicrm/admin/options/direct_debit_originator_number',
+      'url' => 'civicrm/admin/options/direct_debit_originator_number?reset=1',
       'permission' => 'administer CiviCRM',
       'operator' => NULL,
       'separator' => NULL,
