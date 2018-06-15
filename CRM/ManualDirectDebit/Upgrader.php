@@ -378,6 +378,9 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     ]);
   }
 
+  /**
+   * Deletes Direct Debit navigation menu
+   */
   private function deleteDirectDebitNavigationMenu() {
     $menuItems = [
       'direct_debit',
