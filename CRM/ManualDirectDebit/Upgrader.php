@@ -229,7 +229,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->deletePaymentProcessor();
     $this->alterCustomValues('uninstall');
     $this->alterCustomGroups('uninstall');
-    $this->removeNav('direct_debit');
+    $this->deleteDirectDebitNavigationMenu();
     $this->deleteMessageTemplates();
   }
 
@@ -251,6 +251,8 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       1 => [$isActive, 'Integer'],
       2 => [$menuItem, 'String'],
     ]);
+
+    CRM_Core_BAO_Navigation::resetNavigation();
   }
 
   /**
@@ -374,6 +376,21 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       'name' => "Direct Debit",
       'api.PaymentProcessor.delete' => ['id' => '$value.id'],
     ]);
+  }
+
+  private function deleteDirectDebitNavigationMenu() {
+    $menuItems = [
+      'direct_debit',
+      'create_new_instructions_batch',
+      'export_direct_debit_payments',
+      'view_new_instruction_batches',
+      'view_payment_batches',
+    ];
+
+    foreach ($menuItems as $item) {
+      $this->removeNav($item);
+    }
+    CRM_Core_BAO_Navigation::resetNavigation();
   }
 
 }
