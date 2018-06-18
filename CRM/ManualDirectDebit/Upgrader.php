@@ -79,7 +79,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
 
   private $customGroups = [
     "direct_debit_mandate",
-    "searchValue" => "direct_debit_information",
+    "direct_debit_information",
   ];
 
 
