@@ -84,12 +84,36 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
 
 
   public function install() {
+    $this->createScheduledJob();
     $this->createDirectDebitNavigationMenu();
     $this->createDirectDebitPaymentInstrument();
     $this->createDirectDebitPaymentProcessorType();
     $this->createDirectDebitPaymentProcessor();
   }
 
+  /**
+   * Installs scheduled job
+   */
+  private function createScheduledJob() {
+    $domainID = CRM_Core_Config::domainID();
+
+    $params = [
+      'name' => 'Send Direct Debit Payment Collection Reminders',
+      'description' => 'Send Direct Debit Payment Collection Reminders',
+      'api_entity' => 'ManualDirectDebit',
+      'api_action' => 'run',
+      'run_frequency' => 'Daily',
+      'domain_id' => $domainID,
+      'is_active' => '1',
+      'parameters' => ''
+    ];
+
+    CRM_Core_BAO_Job::create($params);
+  }
+
+  public function upgrade_0002() {
+    $this->createScheduledJob();
+  }
 
   /**
    * Creates Direct Debit navigation menu items
@@ -226,11 +250,23 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   }
 
   public function uninstall() {
+    $this->deleteScheduledJob();
     $this->deletePaymentProcessor();
     $this->alterCustomValues('uninstall');
     $this->alterCustomGroups('uninstall');
     $this->deleteDirectDebitNavigationMenu();
-    $this->deleteMessageTemplates();
+  }
+
+  /**
+   * Deletes scheduled job created by the extension
+   *
+   * @throws \CiviCRM_API3_Exception
+   */
+  private function deleteScheduledJob() {
+    civicrm_api3('Job', 'get', [
+      'name' => 'Send Direct Debit Payment Collection Reminders',
+      'api.Job.delete' => ['id' => '$value.id'],
+    ]);
   }
 
   public function onDisable() {
