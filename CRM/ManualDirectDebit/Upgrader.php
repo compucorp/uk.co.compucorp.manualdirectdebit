@@ -230,7 +230,6 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->alterCustomValues('uninstall');
     $this->alterCustomGroups('uninstall');
     $this->deleteDirectDebitNavigationMenu();
-    $this->deleteMessageTemplates();
   }
 
   public function onDisable() {
