@@ -232,9 +232,9 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
   }
 
   /**
-   * Gets max mandate id
+   * Gets max id of 'direct debit mandate'
    *
-   * @return mixed
+   * @return int
    */
   public static function getMaxMandateId() {
     $sqlSelectDebitMandateID = "SELECT MAX(`id`) as id FROM `civicrm_value_dd_mandate`";
@@ -243,4 +243,5 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
 
     return $queryResult->id;
   }
+
 }
