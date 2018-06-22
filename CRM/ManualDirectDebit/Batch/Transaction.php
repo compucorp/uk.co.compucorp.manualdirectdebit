@@ -521,7 +521,8 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'view' => [
           'name' => ts('View'),
           'title' => ts('View Contribution'),
-          'extra' => 'onclick = "contactRecurContribution( %%contribution_id%%, %%contact_id%% );"',
+          'url' => "civicrm/contact/view",
+          'qs' => "reset=1&cid=%%contact_id%%&selectedChild=contribute&openContribution=%%contribution_id%%",
         ],
       ],
       NULL,
