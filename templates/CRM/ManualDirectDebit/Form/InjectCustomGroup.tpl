@@ -24,9 +24,9 @@
   var minimumDaysToFirstPayment = '{$minimumDaysToFirstPayment}';
   {literal}
 
-    moveDirectDebitMandateFormFields();
-    checkVisibilityOfMandateCustomGroup();
-    setDirectDebitStartDate();
+  moveDirectDebitMandateFormFields();
+  checkVisibilityOfMandateCustomGroup();
+  setDirectDebitStartDate();
 
   CRM.$('input[name=receive_date]').parent().change(function () {
     setDirectDebitStartDate();
