@@ -140,7 +140,16 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
     $directDebitPaymentProcessorId = civicrm_api3('PaymentProcessor', 'getvalue', [
       'return' => "id",
       'name' => "Direct Debit",
+      'is_test' => 0,
     ]);
+
+    if($directDebitPaymentProcessorId != $currentPaymentProcessor){
+      $directDebitPaymentProcessorId = civicrm_api3('PaymentProcessor', 'getvalue', [
+        'return' => "id",
+        'name' => "Direct Debit",
+        'is_test' => 1,
+      ]);
+    }
     return $directDebitPaymentProcessorId == $currentPaymentProcessor;
   }
 
