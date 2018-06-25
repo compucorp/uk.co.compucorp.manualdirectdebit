@@ -51,8 +51,10 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
    *  Sets id of current mandate
    */
   public function setCurrentMandateId() {
-    if (isset($this->form->getVar('_submitValues')['mandateId']) && !empty($this->form->getVar('_submitValues')['mandateId'])) {
-      $this->mandateId = $this->form->getVar('_submitValues')['mandateId'];
+    $mandateId = $this->form->getVar('_submitValues')['mandateId'];
+
+    if (isset($mandateId) && !empty($mandateId)) {
+      $this->mandateId = $mandateId;
     }
   }
 
@@ -96,11 +98,11 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
    * @return bool
    */
   public function checkChangingMandateContribution() {
-    if (!isset($this->form->getVar('_submitValues')['recurrId']) || empty($this->form->getVar('_submitValues')['recurrId'])) {
+    $recurringContributionId = $this->form->getVar('_submitValues')['recurrId'];
+    if (!isset($recurringContributionId) || empty($recurringContributionId)) {
       return FALSE;
     }
 
-    $recurringContributionId = $this->form->getVar('_submitValues')['recurrId'];
     $oldMandateId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($recurringContributionId);
 
     if (is_null($oldMandateId)) {
@@ -133,11 +135,12 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
    * Sends mail if appropriate checkbox is checked on
    */
   public function checkMailNotification() {
-    if (!isset($this->form->getVar('_submitValues')['send_mandate_update_notification_to_the_contact']) || empty($this->form->getVar('_submitValues')['send_mandate_update_notification_to_the_contact'])) {
+    $valueOfSendMailCheckbox = $this->form->getVar('_submitValues')['send_mandate_update_notification_to_the_contact'];
+
+    if (!isset($valueOfSendMailCheckbox) || empty($valueOfSendMailCheckbox)) {
       return FALSE;
     }
 
-    $valueOfSendMailCheckbox = $this->form->getVar('_submitValues')['send_mandate_update_notification_to_the_contact'];
     $isSendMailCheckboxTurnedOn = $valueOfSendMailCheckbox == 1;
 
     if ($isSendMailCheckboxTurnedOn) {
