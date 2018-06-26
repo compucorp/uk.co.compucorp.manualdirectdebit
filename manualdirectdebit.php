@@ -350,14 +350,16 @@ function manualdirectdebit_civicrm_searchTasks( $objectName, &$tasks ){
   if($objectName == 'contribution') {
     $tasks[] = [
       'title' => 'Direct Debit send Email Contribution',
-      'class' => 'CRM_ManualDirectDebit_Form_Email_Contribution'
+      'class' => 'CRM_ManualDirectDebit_Form_Email_Contribution',
+      'result' => FALSE
     ];
   }
 
   if($objectName == 'membership') {
     $tasks[] = [
       'title' => 'Direct Debit send Email Membership',
-      'class' => 'CRM_ManualDirectDebit_Form_Email_Membership'
+      'class' => 'CRM_ManualDirectDebit_Form_Email_Membership',
+      'result' => FALSE
     ];
   }
 
