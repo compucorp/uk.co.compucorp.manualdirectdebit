@@ -294,6 +294,14 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       $rows[$mandateId] = $row;
     }
 
+    if (!$this->total) {
+      if (!empty($this->params['rowCount']) &&
+        $this->params['rowCount'] > 0
+      ) {
+        $rows = array_slice($rows, (int) $this->params['offset'], (int) $this->params['rowCount']);
+      }
+    }
+
     return $rows;
   }
 
