@@ -72,6 +72,8 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate {
         $this->mandateValues[$this->getColumnName($field)] = $value;
       }
     }
+
+    unset($this->mandateValues['dd_ref']);
   }
 
   /**
