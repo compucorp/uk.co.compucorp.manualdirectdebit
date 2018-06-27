@@ -38,14 +38,21 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
    *
    * @var int
    */
-  private $email = FALSE;
+  private $contactEmailData = FALSE;
 
   /**
    * Recurring contribution id
    *
    * @var int
    */
-  protected $recurringContributionId;
+  protected $recurringContributionId = FALSE;
+
+  /**
+   * Contribution data
+   *
+   * @var array
+   */
+  private $contributionData = FALSE;
 
   /**
    * Retrieves tpl params for template
@@ -54,7 +61,8 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
    */
   public function retrieve() {
     $this->setContributionId();
-    $this->setEmail();
+    $this->loadContributionData();
+    $this->setContactEmailData();
     $this->setRecurringContributionId();
     $this->setMembershipId();
 
@@ -72,8 +80,8 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
    *
    * @return int
    */
-  public function retrieveEmail() {
-    return $this->email;
+  public function retrieveContactEmailData() {
+    return $this->contactEmailData;
   }
 
   /**
@@ -82,77 +90,46 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
   abstract protected function setContributionId();
 
   /**
+   *  Loads Contribution Data
+   */
+  private function loadContributionData() {
+    $this->contributionData = civicrm_api3('Contribution', 'getsingle', [
+      'id' => $this->contributionId,
+    ]);
+  }
+
+  /**
    * Sets email by contribution id
    */
-  private function setEmail() {
-    $query = "
-      SELECT
-        (
-          SELECT email.email
-          FROM civicrm_email AS email
-          WHERE email.contact_id = contribution.contact_id
-          LIMIT 1
-        ) AS email
-      FROM civicrm_contribution AS contribution
-      WHERE contribution.id = %1
-      LIMIT 1
-    ";
-
-    $dao = CRM_Core_DAO::executeQuery($query, [
-      1 => [$this->contributionId, 'Integer']
-    ]);
-
-    while ($dao->fetch()) {
-      $this->email = $dao->email;
+  private function setContactEmailData() {
+    try {
+      $this->contactEmailData = civicrm_api3('Contact', 'getsingle', [
+        'return' => ["do_not_email", "is_opt_out", "email"],
+        'id' => $this->contributionData['contact_id'],
+      ]);
     }
+    catch (CiviCRM_API3_Exception $e) {}
   }
 
   /**
    * Sets recurring contribution id
    */
   private function setRecurringContributionId() {
-    $query = "
-      SELECT 
-        contribution.contribution_recur_id AS contribution_recur_id
-      FROM civicrm_contribution AS contribution
-      WHERE contribution.id = %1
-    ";
-
-    $dao = CRM_Core_DAO::executeQuery($query, [
-      1 => [$this->contributionId, 'Integer']
-    ]);
-
-    while ($dao->fetch()) {
-      if (!is_null($dao->contribution_recur_id)) {
-        $this->recurringContributionId = $dao->contribution_recur_id;
-        return;
-      }
+    if (!empty($this->contributionData['contribution_recur_id'])) {
+      $this->recurringContributionId = $this->contributionData['contribution_recur_id'];
     }
-
-    $this->recurringContributionId = FALSE;
   }
 
   /**
    * Sets membership id
    */
   private function setMembershipId() {
-    $query = "
-      SELECT 
-        membership_payment.membership_id AS membership_id
-      FROM civicrm_membership_payment AS membership_payment
-      WHERE membership_payment.contribution_id = %1
-    ";
-
-    $dao = CRM_Core_DAO::executeQuery($query, [
-      1 => [$this->contributionId, 'Integer']
+    $result = civicrm_api3('MembershipPayment', 'get', [
+      'sequential' => 1,
+      'contribution_id' => $this->contributionId,
     ]);
 
-    while ($dao->fetch()) {
-      $this->membershipId = $dao->membership_id;
-      return;
-    }
-
-    $this->membershipId = FALSE;
+    $this->membershipId = $result['count'] == 1 ? $result['values'][0]['membership_id'] : FALSE;
   }
 
   /**
@@ -321,8 +298,8 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
    * Gets next payment date
    */
   private function collectNextMembershipPayment() {
-    $cancelledStatus = CRM_ManualDirectDebit_Common_OptionValue::getOptionValueID('contribution_status', 'Cancelled');
-    $completedStatus = CRM_ManualDirectDebit_Common_OptionValue::getOptionValueID('contribution_status', 'Completed');
+    $cancelledStatus = CRM_ManualDirectDebit_Common_OptionValue::getValueForOptionValue('contribution_status', 'Cancelled');
+    $completedStatus = CRM_ManualDirectDebit_Common_OptionValue::getValueForOptionValue('contribution_status', 'Completed');
 
     $query = "
       SELECT 
@@ -332,7 +309,6 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
       LEFT JOIN civicrm_contribution AS contribution
         ON membership_payment.contribution_id = contribution.id
       WHERE membership_payment.membership_id = %1
-        AND contribution.receive_date >= NOW()
         AND contribution.contribution_status_id NOT IN (%2, %3)
       ORDER BY contribution.receive_date ASC
       LIMIT 1
@@ -366,11 +342,10 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     if ($this->recurringContributionId !== FALSE) {
       $recurringContributionBao = CRM_Contribute_BAO_ContributionRecur::findById($this->recurringContributionId);
       $this->tplParams['currency'] = $this->getCurrencySymbol($recurringContributionBao->currency);
-      return;
+    } else {
+      $contributionBao = CRM_Contribute_BAO_Contribution::findById($this->contributionId);
+      $this->tplParams['currency'] = $this->getCurrencySymbol($contributionBao->currency);
     }
-
-    $contributionBao = CRM_Contribute_BAO_Contribution::findById($this->contributionId);
-    $this->tplParams['currency'] = $this->getCurrencySymbol($contributionBao->currency);
   }
 
 }

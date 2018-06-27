@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class overrides 'postProcess' method for adding custom data into template
+ */
 class CRM_ManualDirectDebit_Form_Email_Contribution extends CRM_Contribute_Form_Task_Email {
 
   /**
@@ -9,10 +12,9 @@ class CRM_ManualDirectDebit_Form_Email_Contribution extends CRM_Contribute_Form_
     $messageTemplateId = $this->getVar('_submitValues')['template'];
     if (CRM_ManualDirectDebit_Common_MessageTemplate::isDirectDebitTemplate($messageTemplateId)) {
       CRM_ManualDirectDebit_Mail_Task_ContributionEmailCommon::postProcess($this);
-      return;
+    } else {
+      CRM_Contact_Form_Task_EmailCommon::postProcess($this);
     }
-
-    CRM_Contact_Form_Task_EmailCommon::postProcess($this);
   }
 
 }

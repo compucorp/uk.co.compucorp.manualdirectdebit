@@ -25,7 +25,7 @@ class CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution extends CRM
    * Sets contribution id
    */
   protected function setContributionId() {
-    $contributionId = $this->getContributionIdByRecurringContributionId();
+    $contributionId = $this->getLastContributionIdByRecurringContributionId();
     if ($contributionId) {
       $this->contributionId = $contributionId;
     }
@@ -39,26 +39,14 @@ class CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution extends CRM
    *
    * @return int
    */
-  private function getContributionIdByRecurringContributionId() {
-    $query = "
-      SELECT contribution.id AS contribution_id
-      FROM civicrm_contribution_recur AS contribution_recur
-      LEFT JOIN civicrm_contribution AS contribution
-        ON contribution_recur.id = contribution.contribution_recur_id
-      WHERE contribution_recur.id = %1
-      ORDER BY contribution.id ASC
-      LIMIT 1
-    ";
-
-    $dao = CRM_Core_DAO::executeQuery($query, [
-      1 => [$this->enteredRecurringContributionId, 'Integer']
+  private function getLastContributionIdByRecurringContributionId() {
+    $result = civicrm_api3('Contribution', 'get', [
+      'sequential' => 1,
+      'contribution_recur_id' => $this->enteredRecurringContributionId,
+      'options' => ['sort' => 'id DESC', 'limit' => 1]
     ]);
 
-    while ($dao->fetch()) {
-      return $dao->contribution_id;
-    }
-
-    return FALSE;
+    return $result['count'] == 1 ? $result['values'][0]['id'] : FALSE;
   }
 
 }

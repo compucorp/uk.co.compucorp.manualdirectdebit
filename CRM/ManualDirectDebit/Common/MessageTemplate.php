@@ -5,12 +5,16 @@
  */
 class CRM_ManualDirectDebit_Common_MessageTemplate {
 
-  const SING_UP = 'Direct Debit Payment Sign Up Notification';
-  const PAYMENT_UPDATE = 'Direct Debit Payment Update Notification';
-  const COLLECTION_REMINDER = 'Direct Debit Payment Collection Reminder';
-  const AUTO_RENEW = 'Direct Debit Auto-renew Notification';
-  const MANDATE_UPDATE = 'Direct Debit Mandate Update Notification';
-  
+  const SIGN_UP_MSG_TITLE = 'Direct Debit Payment Sign Up Notification';
+
+  const PAYMENT_UPDATE_MSG_TITLE = 'Direct Debit Payment Update Notification';
+
+  const COLLECTION_REMINDER_MSG_TITLE = 'Direct Debit Payment Collection Reminder';
+
+  const AUTO_RENEW_MSG_TITLE = 'Direct Debit Auto-renew Notification';
+
+  const MANDATE_UPDATE_MSG_TITLE = 'Direct Debit Mandate Update Notification';
+
   /**
    * Checks if template is direct debit template
    *
@@ -28,11 +32,11 @@ class CRM_ManualDirectDebit_Common_MessageTemplate {
 
     $dao = CRM_Core_DAO::executeQuery($query, [
       1 => [$templateId, 'Integer'],
-      2 => ['Direct Debit Payment Sign Up Notification', 'String'],
-      3 => ['Direct Debit Payment Update Notification', 'String'],
-      4 => ['Direct Debit Payment Collection Reminder', 'String'],
-      5 => ['Direct Debit Auto-renew Notification', 'String'],
-      6 => ['Direct Debit Mandate Update Notification', 'String'],
+      2 => [self::SIGN_UP_MSG_TITLE, 'String'],
+      3 => [self::PAYMENT_UPDATE_MSG_TITLE, 'String'],
+      4 => [self::COLLECTION_REMINDER_MSG_TITLE, 'String'],
+      5 => [self::AUTO_RENEW_MSG_TITLE, 'String'],
+      6 => [self::MANDATE_UPDATE_MSG_TITLE, 'String'],
     ]);
 
     while ($dao->fetch()) {
@@ -47,22 +51,33 @@ class CRM_ManualDirectDebit_Common_MessageTemplate {
    *
    * @param $title
    *
-   * @return bool
+   * @return int|bool
    */
   public static function getMessageTemplateId($title) {
-    $query = "
-      SELECT template.id AS template_id
-      FROM civicrm_msg_template AS template
-      WHERE template.msg_title = %1
-    ";
+    $messageTemplate = civicrm_api3('MessageTemplate', 'get', [
+      'sequential' => 1,
+      'return' => ["id"],
+      'msg_title' => $title
+    ]);
 
-    $dao = CRM_Core_DAO::executeQuery($query, [1 => [$title, 'String']]);
+    return $messageTemplate['count'] == 1 ? $messageTemplate['values'][0]['id'] : FALSE;
+  }
 
-    while ($dao->fetch()) {
-      return $dao->template_id;
-    }
+  /**
+   * Gets 'message template title' by id
+   *
+   * @param $idMessageTemplate
+   *
+   * @return int|bool
+   */
+  public static function getMessageTemplateTitle($idMessageTemplate) {
+    $messageTemplate = civicrm_api3('MessageTemplate', 'get', [
+      'sequential' => 1,
+      'return' => ["msg_title"],
+      'id' => $idMessageTemplate
+    ]);
 
-    return FALSE;
+    return $messageTemplate['count'] == 1 ? $messageTemplate['values'][0]['msg_title'] : FALSE;
   }
 
 }

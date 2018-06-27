@@ -25,7 +25,7 @@ class CRM_ManualDirectDebit_Mail_DataCollector_Membership extends CRM_ManualDire
    * Sets contribution id
    */
   protected function setContributionId() {
-    $contributionId = $this->getContributionIdByMembership();
+    $contributionId = $this->getLastContributionIDByMembership();
     if ($contributionId) {
       $this->contributionId = $contributionId;
     }
@@ -39,24 +39,14 @@ class CRM_ManualDirectDebit_Mail_DataCollector_Membership extends CRM_ManualDire
    *
    * @return int
    */
-  private function getContributionIdByMembership() {
-    $query = "
-      SELECT membership_payment.contribution_id AS contribution_id
-      FROM civicrm_membership_payment AS membership_payment
-      WHERE membership_payment.membership_id = %1
-      ORDER BY membership_payment.contribution_id ASC
-      LIMIT 1
-    ";
-
-    $dao = CRM_Core_DAO::executeQuery($query, [
-      1 => [$this->enteredMembershipId, 'Integer']
+  private function getLastContributionIDByMembership() {
+    $result = civicrm_api3('MembershipPayment', 'get', [
+      'sequential' => 1,
+      'membership_id' => $this->enteredMembershipId,
+      'options' => ['sort' => 'contribution_id DESC', 'limit' => 1]
     ]);
 
-    while ($dao->fetch()) {
-      return $dao->contribution_id;
-    }
-
-    return FALSE;
+    return $result['count'] == 1 ? $result['values'][0]['contribution_id'] : FALSE;
   }
 
 }

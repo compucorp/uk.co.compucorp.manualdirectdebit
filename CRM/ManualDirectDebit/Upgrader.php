@@ -106,11 +106,11 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
    */
   public function setMessageTemplateParamList() {
     $templates = [
-      CRM_ManualDirectDebit_Common_MessageTemplate::SING_UP => 'PaymentSignUpNotification.tpl',
-      CRM_ManualDirectDebit_Common_MessageTemplate::PAYMENT_UPDATE => 'PaymentUpdateNotification.tpl',
-      CRM_ManualDirectDebit_Common_MessageTemplate::COLLECTION_REMINDER => 'PaymentCollectionReminder.tpl',
-      CRM_ManualDirectDebit_Common_MessageTemplate::AUTO_RENEW => 'AutoRenewNotification.tpl',
-      CRM_ManualDirectDebit_Common_MessageTemplate::MANDATE_UPDATE => 'MandateUpdateNotification.tpl',
+      CRM_ManualDirectDebit_Common_MessageTemplate::SIGN_UP_MSG_TITLE => 'PaymentSignUpNotification.tpl',
+      CRM_ManualDirectDebit_Common_MessageTemplate::PAYMENT_UPDATE_MSG_TITLE => 'PaymentUpdateNotification.tpl',
+      CRM_ManualDirectDebit_Common_MessageTemplate::COLLECTION_REMINDER_MSG_TITLE => 'PaymentCollectionReminder.tpl',
+      CRM_ManualDirectDebit_Common_MessageTemplate::AUTO_RENEW_MSG_TITLE => 'AutoRenewNotification.tpl',
+      CRM_ManualDirectDebit_Common_MessageTemplate::MANDATE_UPDATE_MSG_TITLE => 'MandateUpdateNotification.tpl',
     ];
 
     foreach ($templates as $title => $fileName) {
