@@ -233,6 +233,9 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
     $pageProcessor = new CRM_ManualDirectDebit_Hook_PageRun_TabPage();
     $pageProcessor->setContributionId($contributionId);
     $pageProcessor->hideDirectDebitFields();
+
+    CRM_Core_Resources::singleton()
+      ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/openContribution.js');
   }
 
   if (get_class($page) == 'CRM_Contribute_Page_ContributionRecur') {
@@ -251,9 +254,16 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
  *
  */
 function manualdirectdebit_civicrm_custom($op, $groupID, $entityID, &$params) {
-  if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($groupID) && ($op == 'create' || $op == 'edit')) {
-    $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_DataGenerator($entityID, $params);
-    $mandateDataGenerator->generate();
+  if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($groupID)) {
+    if ($op == 'create' || $op == 'edit') {
+      $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_DataGenerator($entityID, $params);
+      $mandateDataGenerator->runDataGeneration();
+    }
+
+    if ($op == 'update') {
+      $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_DataGenerator($entityID, $params);
+      $mandateDataGenerator->generateMandateData();
+    }
   }
 }
 
@@ -269,6 +279,12 @@ function manualdirectdebit_civicrm_postSave_civicrm_contribution($dao) {
  * Implements hook_civicrm_buildForm()
  */
 function manualdirectdebit_civicrm_buildForm($formName, &$form) {
+  if ($formName == 'CRM_Activity_Form_ActivityLinks') {
+    $openContributionId = CRM_Utils_Request::retrieveValue('openContribution', 'Integer', FALSE);
+    if ($openContributionId){
+      $form->add('hidden', 'optionContributionId', $openContributionId);
+    }
+  }
   if ($formName == 'CRM_Contact_Form_CustomData') {
     $customData = new CRM_ManualDirectDebit_Hook_BuildForm_CustomData($form);
     $customData->run();

@@ -1,7 +1,8 @@
 <?php
 
 /**
- * This class Generates the required mandate fields automatically in case they are not submitted by the user
+ * This class Generates the required mandate fields automatically in case they
+ * are not submitted by the user
  */
 class CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator {
 
@@ -56,8 +57,14 @@ class CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator {
    */
   public function generateMandateFieldsValues() {
     foreach ($this->savedFields as $field) {
-      if (array_key_exists($field['column_name'], $this->fieldsToGenerate)) {
-        $this->fieldsToGenerate[$field['column_name']] = $field['value'];
+      $isFieldNameExist = isset($field['column_name']) && !empty($field['column_name']);
+
+      if ($isFieldNameExist) {
+        $isFieldNeedToBeGenerated = array_key_exists($field['column_name'], $this->fieldsToGenerate);
+
+        if ($isFieldNeedToBeGenerated) {
+          $this->fieldsToGenerate[$field['column_name']] = $field['value'];
+        }
       }
     }
 
@@ -67,7 +74,8 @@ class CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator {
 
     if ($this->fieldsToGenerate['start_date'] == FALSE) {
       $this->fieldsToGenerate['start_date'] = $this->generateStartDate();
-    } else{
+    }
+    else {
       $date = new DateTime();
 
       $this->fieldsToGenerate['start_date'] = $date->setTimestamp(
@@ -107,7 +115,7 @@ class CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator {
    *
    * @return object
    */
-  function getMandateStartDate(){
+  function getMandateStartDate() {
     return $this->fieldsToGenerate['start_date'];
   }
 

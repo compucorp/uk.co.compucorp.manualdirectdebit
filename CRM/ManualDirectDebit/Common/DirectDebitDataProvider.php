@@ -62,6 +62,10 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
         $optionGroupId = $this->getOptionList($value['option_group_id']);
       }
 
+      if ($value['name'] == 'dd_ref') {
+        $value['html_type'] = 'hidden';
+      }
+
       $mandateCustomGroupFieldData[] = [
         'name' => self::PREFIX . $value['name'],
         'label' => $value['label'],
@@ -140,7 +144,16 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
     $directDebitPaymentProcessorId = civicrm_api3('PaymentProcessor', 'getvalue', [
       'return' => "id",
       'name' => "Direct Debit",
+      'is_test' => 0,
     ]);
+
+    if($directDebitPaymentProcessorId != $currentPaymentProcessor){
+      $directDebitPaymentProcessorId = civicrm_api3('PaymentProcessor', 'getvalue', [
+        'return' => "id",
+        'name' => "Direct Debit",
+        'is_test' => 1,
+      ]);
+    }
     return $directDebitPaymentProcessorId == $currentPaymentProcessor;
   }
 
@@ -232,9 +245,9 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
   }
 
   /**
-   * Gets max mandate id
+   * Gets max id of 'direct debit mandate'
    *
-   * @return mixed
+   * @return int
    */
   public static function getMaxMandateId() {
     $sqlSelectDebitMandateID = "SELECT MAX(`id`) as id FROM `civicrm_value_dd_mandate`";
@@ -243,4 +256,5 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
 
     return $queryResult->id;
   }
+
 }

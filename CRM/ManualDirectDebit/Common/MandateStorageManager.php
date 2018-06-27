@@ -105,6 +105,22 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
 
     $this->assignMandate($mandateId, $currentContactId);
 
+    $this->launchCustomHook($currentContactId, $mandateValues);
+  }
+
+  /**
+   * Launches custom hook
+   *
+   * @param $currentContactId
+   * @param $mandateValues
+   */
+  private function launchCustomHook($currentContactId, $mandateValues) {
+    $directDebitMandateId = civicrm_api3('CustomGroup', 'getvalue', [
+      'return' => "id",
+      'name' => "direct_debit_mandate",
+    ]);
+
+    CRM_Utils_Hook::custom('update', $directDebitMandateId, $currentContactId, $mandateValues);
   }
 
   /**

@@ -294,6 +294,14 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       $rows[$mandateId] = $row;
     }
 
+    if (!$this->total) {
+      if (!empty($this->params['rowCount']) &&
+        $this->params['rowCount'] > 0
+      ) {
+        $rows = array_slice($rows, (int) $this->params['offset'], (int) $this->params['rowCount']);
+      }
+    }
+
     return $rows;
   }
 
@@ -386,6 +394,11 @@ class CRM_ManualDirectDebit_Batch_Transaction {
 
     //select
     $query->select(implode(' , ', $this->returnValues));
+
+    $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID));
+    if ($batch->getBatchType() == 'instructions_batch') {
+      $query->distinct(TRUE);
+    }
 
     foreach ($this->searchableFields as $k => $field) {
       if (isset($this->params[$k])) {
@@ -521,7 +534,8 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'view' => [
           'name' => ts('View'),
           'title' => ts('View Contribution'),
-          'extra' => 'onclick = "contactRecurContribution( %%contribution_id%%, %%contact_id%% );"',
+          'url' => "civicrm/contact/view",
+          'qs' => "reset=1&cid=%%contact_id%%&selectedChild=contribute&openContribution=%%contribution_id%%",
         ],
       ],
       NULL,
