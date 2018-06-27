@@ -26,22 +26,43 @@ class CRM_ManualDirectDebit_Hook_Custom_DataGenerator {
    */
   private $savedFields;
 
+  /**
+   * Instance of Mandate Data Generator
+   *
+   * @var object
+   */
+  private $mandateDataGenerator;
+
   public function __construct($entityID, &$params) {
     $this->entityID = $entityID;
     $this->savedFields = $params;
     $settingsManager = new CRM_ManualDirectDebit_Common_SettingsManager();
     $this->settings = $settingsManager->getManualDirectDebitSettings();
+    $this->mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator($this->entityID, $this->settings, $this->savedFields);
   }
 
   /**
    * Generates and saves the required fields values if they are not supplied by the user.
    */
-  public function generate() {
-    $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator($this->entityID, $this->settings, $this->savedFields);
-    $mandateDataGenerator->generateMandateFieldsValues();
-    $mandateDataGenerator->saveGeneratedMandateValues();
+  public function runDataGeneration() {
+    $this->generateMandateData();
+    $this->generateContributionData();
+  }
+
+  /**
+   * Generates and saves the Mandate required fields.
+   */
+  public function generateMandateData() {
+    $this->mandateDataGenerator->generateMandateFieldsValues();
+    $this->mandateDataGenerator->saveGeneratedMandateValues();
+  }
+
+  /**
+   * Generates and saves the Contribution required fields.
+   */
+  private function generateContributionData() {
     $contributionDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_Contribution_ContributionDataGenerator($this->entityID, $this->settings);
-    $contributionDataGenerator->setMandateStartDate($mandateDataGenerator->getMandateStartDate());
+    $contributionDataGenerator->setMandateStartDate($this->mandateDataGenerator->getMandateStartDate());
     $contributionDataGenerator->generateContributionFieldsValues();
     $contributionDataGenerator->saveGeneratedContributionValues();
   }
