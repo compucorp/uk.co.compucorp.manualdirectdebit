@@ -26,6 +26,10 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       "searchValue" => "OfflineDirectDebit",
     ],
     [
+      "entityType" => "Job",
+      "searchValue" => "Send Direct Debit Payment Collection Reminders",
+    ],
+    [
       "entityType" => "OptionValue",
       "searchValue" => "direct_debit",
       "optionGroup" => "payment_instrument",
@@ -104,7 +108,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       'api_action' => 'run',
       'run_frequency' => 'Daily',
       'domain_id' => $domainID,
-      'is_active' => '1',
+      'is_active' => '0',
       'parameters' => ''
     ];
 
@@ -250,23 +254,10 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   }
 
   public function uninstall() {
-    $this->deleteScheduledJob();
     $this->deletePaymentProcessor();
     $this->alterCustomValues('uninstall');
     $this->alterCustomGroups('uninstall');
     $this->deleteDirectDebitNavigationMenu();
-  }
-
-  /**
-   * Deletes scheduled job created by the extension
-   *
-   * @throws \CiviCRM_API3_Exception
-   */
-  private function deleteScheduledJob() {
-    civicrm_api3('Job', 'get', [
-      'name' => 'Send Direct Debit Payment Collection Reminders',
-      'api.Job.delete' => ['id' => '$value.id'],
-    ]);
   }
 
   public function onDisable() {
@@ -348,10 +339,10 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
         break;
 
       case 'uninstall':
-          civicrm_api3('CustomGroup', 'get', [
-            'name' => $searchValue,
-            'api.CustomGroup.delete' => ['id' => '$value.id'],
-          ]);
+        civicrm_api3('CustomGroup', 'get', [
+          'name' => $searchValue,
+          'api.CustomGroup.delete' => ['id' => '$value.id'],
+        ]);
         break;
     }
   }

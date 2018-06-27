@@ -15,7 +15,7 @@ class CRM_ManualDirectDebit_Common_OptionValue {
    * @return string
    * @throws \CiviCRM_API3_Exception
    */
-  public static function getOptionValueID($optionGroupName, $optionValueName) {
+  public static function getValueForOptionValue($optionGroupName, $optionValueName) {
     $optionValue = civicrm_api3('OptionValue', 'getSingle', [
       'sequential' => 1,
       'options' => ['limit' => 1],

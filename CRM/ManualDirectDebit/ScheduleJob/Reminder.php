@@ -40,7 +40,7 @@ class CRM_ManualDirectDebit_ScheduleJob_Reminder {
         $this->sendEmail($targetContributionData['contributionId']);
       }
       else {
-        $this->setLog(ts("Email not sent. Related contact haven't email."));
+        $this->setLog(ts("Email not sent. Related contact haven't email or turn on 'do not send email'"));
       }
 
       $this->createActivity(

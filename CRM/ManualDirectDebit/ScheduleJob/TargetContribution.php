@@ -12,9 +12,9 @@ class CRM_ManualDirectDebit_ScheduleJob_TargetContribution {
    */
   public static function retrieve() {
     $reminderOffsetDays = CRM_ManualDirectDebit_ScheduleJob_ReminderOffsetDays::retrieve();
-    $pendingStatusId = CRM_ManualDirectDebit_Common_OptionValue::getOptionValueID('contribution_status', 'Pending');
-    $cancelledStatusId = CRM_ManualDirectDebit_Common_OptionValue::getOptionValueID('contribution_status', 'Cancelled');
-    $directDebitPaymentInstrumentId = CRM_ManualDirectDebit_Common_OptionValue::getOptionValueID('payment_instrument', 'direct_debit');
+    $pendingStatusId = CRM_ManualDirectDebit_Common_OptionValue::getValueForOptionValue('contribution_status', 'Pending');
+    $cancelledStatusId = CRM_ManualDirectDebit_Common_OptionValue::getValueForOptionValue('contribution_status', 'Cancelled');
+    $directDebitPaymentInstrumentId = CRM_ManualDirectDebit_Common_OptionValue::getValueForOptionValue('payment_instrument', 'direct_debit');
 
     $query = "
       SELECT 
@@ -24,6 +24,7 @@ class CRM_ManualDirectDebit_ScheduleJob_TargetContribution {
           SELECT email.email
           FROM civicrm_email AS email
           WHERE email.contact_id = contact.id
+            AND (contact.do_not_email IS NULL OR contact.do_not_email = 0)
           LIMIT 1
         ) AS email
       FROM civicrm_contribution AS contribution

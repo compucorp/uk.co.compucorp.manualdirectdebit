@@ -7,7 +7,7 @@ class CRM_ManualDirectDebit_ScheduleJob_ReminderOffsetDays {
   /**
    * Reminder offset in days
    *
-   * @return NULL|int|false
+   * @var NULL|int|false
    */
   private static $reminderOffsetDays = NULL;
 
