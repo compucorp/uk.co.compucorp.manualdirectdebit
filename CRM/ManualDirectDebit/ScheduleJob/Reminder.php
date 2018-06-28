@@ -106,16 +106,14 @@ class CRM_ManualDirectDebit_ScheduleJob_Reminder {
    * @param $contributionId
    */
   private function sendEmail($contributionId) {
-    //TODO: send mail notification
-//    $notification = new CRM_ManualDirectDebit_Mail_Notification();
-//    $result = $notification->sendPaymentCollectionReminder($contributionId);
-    $result = FALSE;
+    $notification = new CRM_ManualDirectDebit_Mail_Notification();
+    $result = $notification->sendPaymentCollectionReminder($contributionId);
 
     if ($result) {
       $this->setLog(ts("Email was sent."));
     }
     else {
-      $this->setLog(ts("Error. Email was not sent."));
+      $this->setLog(ts("Email was not sent."));
     }
   }
 
