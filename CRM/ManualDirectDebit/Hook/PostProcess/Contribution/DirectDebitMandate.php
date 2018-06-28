@@ -138,16 +138,14 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
     $valueOfSendMailCheckbox = $this->form->getVar('_submitValues')['send_mandate_update_notification_to_the_contact'];
 
     if (!isset($valueOfSendMailCheckbox) || empty($valueOfSendMailCheckbox)) {
-      return FALSE;
+      return;
     }
 
     $isSendMailCheckboxTurnedOn = $valueOfSendMailCheckbox == 1;
 
     if ($isSendMailCheckboxTurnedOn) {
-
-//      TODO: Sending mail process will be implemented in DD-30
-//      $notification = new CRM_ManualDirectDebit_Mail_Notification();
-//      $notification->sendMandateUpdateNotification($this->mandateId);
+      $notification = new CRM_ManualDirectDebit_Mail_Notification();
+      $notification->sendMandateUpdateNotification($this->mandateId);
     }
   }
 
