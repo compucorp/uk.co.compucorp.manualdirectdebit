@@ -6,6 +6,13 @@
 class CRM_ManualDirectDebit_Hook_BuildForm_CustomData {
 
   /**
+   * Path where template with new fields is stored.
+   *
+   * @var string
+   */
+  private $templatePath;
+
+  /**
    * Form object that is being altered.
    *
    * @var object
@@ -14,6 +21,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomData {
 
   public function __construct($form) {
     $this->form = $form;
+    $this->templatePath = CRM_ManualDirectDebit_ExtensionUtil::path() . '/templates';
   }
 
   /**
@@ -25,6 +33,9 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomData {
     }
 
     $this->checkRecurringContribution();
+    $this->addMandateIdHiddenValue();
+
+    $this->addSendMailCheckbox();
   }
 
   /**
