@@ -368,6 +368,11 @@ function manualdirectdebit_civicrm_searchTasks( $objectName, &$tasks ){
       'class' => 'CRM_ManualDirectDebit_Form_Email_Membership',
       'result' => FALSE
     ];
+    $tasks[] = [
+      'title' => 'Direct debit print/merge document',
+      'class' => 'CRM_ManualDirectDebit_Form_PrintMergeDocument',
+      'result' => FALSE
+    ];
   }
 
 }
