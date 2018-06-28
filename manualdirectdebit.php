@@ -255,9 +255,16 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
  *
  */
 function manualdirectdebit_civicrm_custom($op, $groupID, $entityID, &$params) {
-  if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($groupID) && ($op == 'create' || $op == 'edit')) {
-    $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_DataGenerator($entityID, $params);
-    $mandateDataGenerator->generate();
+  if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($groupID)) {
+    if ($op == 'create' || $op == 'edit') {
+      $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_DataGenerator($entityID, $params);
+      $mandateDataGenerator->runDataGeneration();
+    }
+
+    if ($op == 'update') {
+      $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_DataGenerator($entityID, $params);
+      $mandateDataGenerator->generateMandateData();
+    }
   }
 }
 
@@ -345,5 +352,24 @@ function manualdirectdebit_civicrm_post($op, $objectName, $objectId, &$objectRef
     $activity = new CRM_ManualDirectDebit_Hook_Post_RecurContribution_Activity($objectId, $op);
     $activity->process();
   }
+}
+
+function manualdirectdebit_civicrm_searchTasks( $objectName, &$tasks ){
+  if($objectName == 'contribution') {
+    $tasks[] = [
+      'title' => 'Direct Debit send Email Contribution',
+      'class' => 'CRM_ManualDirectDebit_Form_Email_Contribution',
+      'result' => FALSE
+    ];
+  }
+
+  if($objectName == 'membership') {
+    $tasks[] = [
+      'title' => 'Direct Debit send Email Membership',
+      'class' => 'CRM_ManualDirectDebit_Form_Email_Membership',
+      'result' => FALSE
+    ];
+  }
+
 }
 

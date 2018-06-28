@@ -82,14 +82,104 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     "direct_debit_information",
   ];
 
+  /**
+   * Message template param list
+   *
+   * @var array
+   */
+  public $messageTemplateParamList = [];
 
   public function install() {
+    $this->createMessageTemplates();
     $this->createDirectDebitNavigationMenu();
     $this->createDirectDebitPaymentInstrument();
     $this->createDirectDebitPaymentProcessorType();
     $this->createDirectDebitPaymentProcessor();
   }
 
+  public function upgrade_0001() {
+    $this->createMessageTemplates();
+  }
+
+  /**
+   * Sets message template param list
+   */
+  public function setMessageTemplateParamList() {
+    $templates = [
+      CRM_ManualDirectDebit_Common_MessageTemplate::SIGN_UP_MSG_TITLE => 'PaymentSignUpNotification.tpl',
+      CRM_ManualDirectDebit_Common_MessageTemplate::PAYMENT_UPDATE_MSG_TITLE => 'PaymentUpdateNotification.tpl',
+      CRM_ManualDirectDebit_Common_MessageTemplate::COLLECTION_REMINDER_MSG_TITLE => 'PaymentCollectionReminder.tpl',
+      CRM_ManualDirectDebit_Common_MessageTemplate::AUTO_RENEW_MSG_TITLE => 'AutoRenewNotification.tpl',
+      CRM_ManualDirectDebit_Common_MessageTemplate::MANDATE_UPDATE_MSG_TITLE => 'MandateUpdateNotification.tpl',
+    ];
+
+    foreach ($templates as $title => $fileName) {
+      $this->messageTemplateParamList[] = [
+        'filePath' => $this->extensionDir . "/templates/CRM/ManualDirectDebit/MessageTemplate/$fileName",
+        'title' => $title,
+        'subject' => ts($title),
+      ];
+    }
+  }
+
+  /**
+   * Creates message templates
+   *
+   * @throws \CiviCRM_API3_Exception
+   */
+  private function createMessageTemplates() {
+    $this->setMessageTemplateParamList();
+
+    foreach ($this->messageTemplateParamList as $messageTemplateParam) {
+      $this->createMessageTemplate($messageTemplateParam);
+    }
+  }
+
+  /**
+   * Creates message template
+   *
+   * @param $params
+   *
+   * @throws \CiviCRM_API3_Exception
+   */
+  private function createMessageTemplate($params) {
+    $messageHtml = '';
+    if (file_exists($params['filePath'])) {
+      $messageHtml = file_get_contents($params['filePath']);
+    }
+    else {
+      CRM_Core_Session::setStatus(
+        ts('Creating message template'),
+        ts("Couldn't find default template at '" . $params['filePath'] . "'"),
+        'alert'
+      );
+    }
+
+    civicrm_api3('MessageTemplate', 'create', [
+      'msg_title' => $params['title'],
+      'msg_subject' => $params['subject'],
+      'is_reserved' => 0,
+      'msg_html' => $messageHtml,
+      'is_active' => 1,
+      'msg_text' => 'N/A',
+    ]);
+  }
+
+  /**
+   * Deletes 'CiviCRM Direct Debit' message template
+   *
+   * @throws \CiviCRM_API3_Exception
+   */
+  private function deleteMessageTemplates() {
+    $this->setMessageTemplateParamList();
+
+    foreach ($this->messageTemplateParamList as $messageTemplateParam) {
+      civicrm_api3('MessageTemplate', 'get', [
+        'msg_title' => $messageTemplateParam['title'],
+        'api.MessageTemplate.delete' => ['id' => '$value.id'],
+      ]);
+    }
+  }
 
   /**
    * Creates Direct Debit navigation menu items
@@ -230,6 +320,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->alterCustomValues('uninstall');
     $this->alterCustomGroups('uninstall');
     $this->deleteDirectDebitNavigationMenu();
+    $this->deleteMessageTemplates();
   }
 
   public function onDisable() {

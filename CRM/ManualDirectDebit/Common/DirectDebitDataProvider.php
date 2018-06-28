@@ -62,6 +62,10 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
         $optionGroupId = $this->getOptionList($value['option_group_id']);
       }
 
+      if ($value['name'] == 'dd_ref') {
+        $value['html_type'] = 'hidden';
+      }
+
       $mandateCustomGroupFieldData[] = [
         'name' => self::PREFIX . $value['name'],
         'label' => $value['label'],
