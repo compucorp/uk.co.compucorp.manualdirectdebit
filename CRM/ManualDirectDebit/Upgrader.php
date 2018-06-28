@@ -133,8 +133,6 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
 
   /**
    * Creates message templates
-   *
-   * @throws \CiviCRM_API3_Exception
    */
   private function createMessageTemplates() {
     $this->setMessageTemplateParamList();
