@@ -4,8 +4,6 @@ class CRM_ManualDirectDebit_Mail_Task_PDFLetterCommon extends CRM_Member_Form_Ta
 
   /**
    * Process the form after the input has been submitted and validated.
-   * @todo this is horrible copy & paste code because there is so much risk of breakage
-   * in fixing the existing pdfLetter classes to be suitably generic
    *
    * @param CRM_Core_Form $form
    * @param $membershipIDs
@@ -14,7 +12,6 @@ class CRM_ManualDirectDebit_Mail_Task_PDFLetterCommon extends CRM_Member_Form_Ta
    * @param $contactIDs
    */
   public static function postProcessMembers(&$form, $membershipIDs, $skipOnHold, $skipDeceased, $contactIDs) {
-
     $formValues = $form->controller->exportValues($form->getName());
     list($formValues, $categories, $html_message, $messageToken, $returnProperties) = self::processMessageTemplate($formValues);
 
@@ -59,6 +56,7 @@ class CRM_ManualDirectDebit_Mail_Task_PDFLetterCommon extends CRM_Member_Form_Ta
     }
 
     $htmlMessageSmartyHandled = $smarty->fetch("string:$html");
+
     return $htmlMessageSmartyHandled;
   }
 
