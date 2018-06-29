@@ -188,15 +188,16 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
 
   switch ($formName) {
     case "CRM_Contact_Form_CustomData":
-      if (isset($form->getVar('_submitValues')['recurrId']) && !empty($form->getVar('_submitValues')['recurrId'])) {
+      if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($form->getVar('_groupID'))) {
         $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
-        $manualDirectDebit->changeMandateForRecurringContribution();
-      };
+        $manualDirectDebit->run();
+      }
       break;
 
     case "CRM_Contribute_Form_Contribution":
       if ($action == CRM_Core_Action::ADD) {
         $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
+        $manualDirectDebit->setCurrentContactId($form->getVar('_contactID'));
         $manualDirectDebit->checkPaymentOptionToCreateMandate();
       }
       break;
