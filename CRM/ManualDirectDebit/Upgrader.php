@@ -7,24 +7,12 @@ use CRM_ManualDirectDebit_ExtensionUtil as E;
  */
 class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base {
 
-  private $customValues = [
-    [
-      "entityType" => "OptionGroup",
-      "searchValue" => "direct_debit_codes",
-    ],
-    [
-      "entityType" => "OptionGroup",
-      "searchValue" => "direct_debit_originator_number",
-    ],
-    [
-      "entityType" => "UFGroup",
-      "searchValue" => "Direct Debit Information",
-      "searchField" => "title",
-    ],
-    [
-      "entityType" => "PaymentProcessorType",
-      "searchValue" => "OfflineDirectDebit",
-    ],
+  /**
+   * List of option values
+   *
+   * @var array
+   */
+  private $optionValues =[
     [
       "entityType" => "OptionValue",
       "searchValue" => "direct_debit",
@@ -77,6 +65,65 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     ],
   ];
 
+  /**
+   * List of scheduled jobs
+   *
+   * @var array
+   */
+  private $scheduledJobs = [
+    [
+      "entityType" => "Job",
+      "searchValue" => "Send Direct Debit Payment Collection Reminders",
+    ],
+  ];
+
+  /**
+   * List of option groups
+   *
+   * @var array
+   */
+  private $optionGroups = [
+    [
+      "entityType" => "OptionGroup",
+      "searchValue" => "direct_debit_codes",
+    ],
+    [
+      "entityType" => "OptionGroup",
+      "searchValue" => "direct_debit_originator_number",
+    ],
+  ];
+
+
+  /**
+   * List of processor types
+   *
+   * @var array
+   */
+  private $processorTypes = [
+    [
+      "entityType" => "PaymentProcessorType",
+      "searchValue" => "OfflineDirectDebit",
+    ],
+  ];
+
+  /**
+   * List of UF groups
+   *
+   * @var array
+   */
+  private $ufGroups = [
+    [
+      "entityType" => "UFGroup",
+      "searchValue" => "Direct Debit Information",
+      "searchField" => "title",
+    ],
+  ];
+
+  /**
+   * List of custom groups
+   *
+   * @var array
+   */
   private $customGroups = [
     "direct_debit_mandate",
     "direct_debit_information",
@@ -90,6 +137,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   public $messageTemplateParamList = [];
 
   public function install() {
+    $this->createScheduledJob();
     $this->createMessageTemplates();
     $this->createDirectDebitNavigationMenu();
     $this->createDirectDebitPaymentInstrument();
@@ -99,6 +147,10 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
 
   public function upgrade_0001() {
     $this->createMessageTemplates();
+  }
+
+  public function upgrade_0002() {
+    $this->createScheduledJob();
   }
 
   /**
@@ -124,8 +176,6 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
 
   /**
    * Creates message templates
-   *
-   * @throws \CiviCRM_API3_Exception
    */
   private function createMessageTemplates() {
     $this->setMessageTemplateParamList();
@@ -179,6 +229,25 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
         'api.MessageTemplate.delete' => ['id' => '$value.id'],
       ]);
     }
+  }
+  /**
+   * Installs scheduled job
+   */
+  private function createScheduledJob() {
+    $domainID = CRM_Core_Config::domainID();
+
+    $params = [
+      'name' => 'Send Direct Debit Payment Collection Reminders',
+      'description' => 'Send Direct Debit Payment Collection Reminders',
+      'api_entity' => 'ManualDirectDebit',
+      'api_action' => 'run',
+      'run_frequency' => 'Daily',
+      'domain_id' => $domainID,
+      'is_active' => '0',
+      'parameters' => ''
+    ];
+
+    CRM_Core_BAO_Job::create($params);
   }
 
   /**
@@ -311,13 +380,13 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
 
   public function onEnable() {
     $this->alterNavigationMenu("direct_debit", "enable");
-    $this->alterCustomValues('enable');
+    $this->alterEntitiesValues('enable');
     $this->alterCustomGroups('enable');
   }
 
   public function uninstall() {
     $this->deletePaymentProcessor();
-    $this->alterCustomValues('uninstall');
+    $this->alterEntitiesValues('uninstall');
     $this->alterCustomGroups('uninstall');
     $this->deleteDirectDebitNavigationMenu();
     $this->deleteMessageTemplates();
@@ -325,7 +394,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
 
   public function onDisable() {
     $this->alterNavigationMenu("direct_debit", "disable");
-    $this->alterCustomValues('disable');
+    $this->alterEntitiesValues('disable');
     $this->alterCustomGroups('disable');
   }
 
@@ -350,13 +419,21 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
    *
    * @param $action
    */
-  private function alterCustomValues($action) {
-    foreach ($this->customValues as $customValue) {
+  private function alterEntitiesValues($action) {
+    $entities = array_merge(
+      $this->optionValues,
+      $this->scheduledJobs,
+      $this->optionGroups,
+      $this->processorTypes,
+      $this->ufGroups
+    );
+
+    foreach ($entities as $customEntityValue) {
       $this->alterEntity(
-        $customValue['entityType'],
-        $customValue['searchValue'],
-        isset($customValue['searchField']) ? $customValue['searchField'] : 'name',
-        isset($customValue['optionGroup']) ? $customValue['optionGroup'] : FALSE,
+        $customEntityValue['entityType'],
+        $customEntityValue['searchValue'],
+        isset($customEntityValue['searchField']) ? $customEntityValue['searchField'] : 'name',
+        isset($customEntityValue['optionGroup']) ? $customEntityValue['optionGroup'] : FALSE,
         $action
       );
     }
@@ -402,10 +479,10 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
         break;
 
       case 'uninstall':
-          civicrm_api3('CustomGroup', 'get', [
-            'name' => $searchValue,
-            'api.CustomGroup.delete' => ['id' => '$value.id'],
-          ]);
+        civicrm_api3('CustomGroup', 'get', [
+          'name' => $searchValue,
+          'api.CustomGroup.delete' => ['id' => '$value.id'],
+        ]);
         break;
     }
   }

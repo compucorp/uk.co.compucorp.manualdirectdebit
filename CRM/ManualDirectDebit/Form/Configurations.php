@@ -27,6 +27,15 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
 
   private $paymentConfigs = [];
 
+  /**
+   * Contains array of names, which must be displayed
+   * in Reminder configuration section
+   *
+   * @var string[]
+   */
+
+  private $reminderConfig = [];
+
   public function buildQuickForm() {
     CRM_Utils_System::setTitle(E::ts('Direct Debit Configurations'));
 
@@ -63,6 +72,7 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
 
     $this->assign('mandateConfigSection', $this->mandateConfigs);
     $this->assign('paymentConfigSection', $this->paymentConfigs);
+    $this->assign('reminderConfigSection', $this->reminderConfig);;
     $this->assign('fieldsWithHelp', $fieldsWithHelp);
 
   }
@@ -135,6 +145,10 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
 
       case 'payment_config':
         $this->paymentConfigs[] = $name;
+        break;
+
+      case 'reminder_config':
+        $this->reminderConfig[] = $name;
         break;
 
     }
