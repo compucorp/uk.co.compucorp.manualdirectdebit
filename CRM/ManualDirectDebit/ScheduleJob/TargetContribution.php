@@ -25,6 +25,7 @@ class CRM_ManualDirectDebit_ScheduleJob_TargetContribution {
           FROM civicrm_email AS email
           WHERE email.contact_id = contact.id
             AND (contact.do_not_email IS NULL OR contact.do_not_email = 0)
+            AND is_primary = 1
           LIMIT 1
         ) AS email
       FROM civicrm_contribution AS contribution

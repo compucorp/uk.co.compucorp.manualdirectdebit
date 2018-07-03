@@ -24,6 +24,7 @@ class CRM_ManualDirectDebit_ScheduleJob_ReminderHandler {
       $log['is_error'] = 1;
       $log['values'] = $this->requirementsErrorMessage;
       $log['error_message'] = $this->requirementsErrorMessage;
+
       return $log;
     }
 
