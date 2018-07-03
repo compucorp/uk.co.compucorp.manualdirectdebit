@@ -73,4 +73,27 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomData {
     }
   }
 
+  /**
+   *  Adds hidden mandate id
+   */
+  private function addMandateIdHiddenValue() {
+    $mandateId = CRM_Utils_Request::retrieve('mandateId', 'Integer', $this->form, FALSE);
+
+    if (isset($mandateId) && !empty($mandateId)) {
+      $this->form->add('hidden', 'mandateId', $mandateId);
+    }
+  }
+
+  /**
+   *  Adds send mail checkbox
+   */
+  private function addSendMailCheckbox() {
+    $this->form->add('checkbox', 'send_mandate_update_notification_to_the_contact', ts('Send mandate update notification to the contact?'), NULL);
+
+    CRM_Core_Region::instance('page-body')->add([
+      'template' => "{$this->templatePath}/CRM/ManualDirectDebit/Form/SendMandateNotification.tpl",
+    ]);
+  }
+
+
 }

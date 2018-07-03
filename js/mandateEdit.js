@@ -12,13 +12,13 @@ CRM.$('document').ready(function () {
       if (isAlreadyEditButtonAdd) {
         var mandateData = JSON.parse(CRM.$(this).attr('data-post'));
 
-        CRM.$('<a href=\"#\" class=\"crm-hover-button crm-custom-value\" id="edit_direct_debit_mandate_' + cgCount + '" title=\"Edit Direct Debit Mandate\" onclick=\"CRM.loadPage(\'' + getUrlForUpdatingCurrentMandate(cgCount, mandateData.groupID, mandateData.contactId) + '\')\">Edit</a>').insertAfter(CRM.$(this));
+        CRM.$('<a href=\"#\" class=\"crm-hover-button crm-custom-value\" id="edit_direct_debit_mandate_' + cgCount + '" title=\"Edit Direct Debit Mandate\" onclick=\"CRM.loadPage(\'' + getUrlForUpdatingCurrentMandate(cgCount, mandateData.groupID, mandateData.contactId, mandateData.valueID) + '\')\">Edit</a>').insertAfter(CRM.$(this));
         CRM.$(this).hide();
       }
     });
   }
 
-  function getUrlForUpdatingCurrentMandate(cgCount, groupId, contactId) {
+  function getUrlForUpdatingCurrentMandate(cgCount, groupId, contactId, mandateId) {
     var url = CRM.url(
       'civicrm/contact/view/cd/edit',
       {
@@ -28,7 +28,8 @@ CRM.$('document').ready(function () {
         entityID: contactId,
         cgcount: cgCount,
         multiRecordDisplay: 'single',
-        mode: 'edit'
+        mode: 'edit',
+        mandateId: mandateId
       }
     );
 

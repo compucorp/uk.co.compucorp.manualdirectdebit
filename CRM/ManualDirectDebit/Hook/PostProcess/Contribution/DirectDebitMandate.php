@@ -26,10 +26,36 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
    */
   private $currentContactId;
 
+  /**
+   * Id of current mandate
+   *
+   * @var int
+   */
+  private $mandateId;
+
   public function __construct(&$form) {
     $this->mandateStorage = new CRM_ManualDirectDebit_Common_MandateStorageManager();
     $this->form = $form;
-    $this->currentContactId = $this->form->getVar('_contactID');
+  }
+
+  /**
+   * Sets Id of current contact
+   *
+   * @param $contactId
+   */
+  public function setCurrentContactId($contactId) {
+    $this->currentContactId = $contactId;
+  }
+
+  /**
+   *  Sets id of current mandate
+   */
+  public function setCurrentMandateId() {
+    $mandateId = $this->form->getVar('_submitValues')['mandateId'];
+
+    if (isset($mandateId) && !empty($mandateId)) {
+      $this->mandateId = $mandateId;
+    }
   }
 
   /**
@@ -55,24 +81,39 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
   }
 
   /**
+   *  Launches all required processes after saving mandate
+   */
+  public function run() {
+    $this->setCurrentContactId($this->form->getVar('_entityId'));
+    $this->setCurrentMandateId();
+
+    $this->checkChangingMandateContribution();
+    $this->checkMailNotification();
+    $this->createMandateActivity();
+  }
+
+  /**
    * Changes mandate for recurring contribution
    *
    * @return bool
    */
-  public function changeMandateForRecurringContribution() {
+  public function checkChangingMandateContribution() {
     $recurringContributionId = $this->form->getVar('_submitValues')['recurrId'];
+    if (!isset($recurringContributionId) || empty($recurringContributionId)) {
+      return FALSE;
+    }
+
     $oldMandateId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($recurringContributionId);
 
-    if (is_null($oldMandateId)){
+    if (is_null($oldMandateId)) {
       CRM_Core_Session::setStatus(t("Mandate doesn't exist"), $title = 'Error', $type = 'alert');
 
       return FALSE;
     }
 
-    $mandateId = $this->mandateStorage->getLastInsertedMandateId( $this->form->getVar('_entityId'));
-
-    CRM_ManualDirectDebit_BAO_RecurrMandateRef::changeMandateForRecurrContribution($mandateId, $recurringContributionId);
-    $this->mandateStorage->changeMandateForContribution($mandateId, $oldMandateId);
+    $this->mandateId = $this->mandateStorage->getLastInsertedMandateId($this->currentContactId);
+    CRM_ManualDirectDebit_BAO_RecurrMandateRef::changeMandateForRecurrContribution($this->mandateId, $recurringContributionId);
+    $this->mandateStorage->changeMandateForContribution($this->mandateId, $oldMandateId);
 
     $this->redirectToContributionTab();
   }
@@ -84,10 +125,42 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
     $this->form->controller->setDestination(CRM_Utils_System::url('civicrm/contact/view', http_build_query([
         'action' => 'browse',
         'reset' => 1,
-        'cid' => $this->form->getVar('_entityId'),
+        'cid' => $this->currentContactId,
         'selectedChild' => 'contribute',
       ])
     ));
+  }
+
+  /**
+   * Sends mail if appropriate checkbox is checked on
+   */
+  public function checkMailNotification() {
+    $valueOfSendMailCheckbox = $this->form->getVar('_submitValues')['send_mandate_update_notification_to_the_contact'];
+
+    if (!isset($valueOfSendMailCheckbox) || empty($valueOfSendMailCheckbox)) {
+      return;
+    }
+
+    $isSendMailCheckboxTurnedOn = $valueOfSendMailCheckbox == 1;
+
+    if ($isSendMailCheckboxTurnedOn) {
+      $notification = new CRM_ManualDirectDebit_Mail_Notification();
+      $notification->sendMandateUpdateNotification($this->mandateId);
+    }
+  }
+
+  /**
+   * Creates mandate activity
+   */
+  public function createMandateActivity() {
+    $contactRelatedToContribution = $this->currentContactId;
+    CRM_ManualDirectDebit_Common_Activity::create(
+      "Direct Debit Mandate Update",
+      "direct_debit_mandate_update",
+      $this->mandateId,
+      CRM_ManualDirectDebit_Common_User::getAdminContactId(),
+      $contactRelatedToContribution
+    );
   }
 
 }
