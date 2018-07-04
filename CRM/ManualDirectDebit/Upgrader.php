@@ -12,7 +12,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
    *
    * @var array
    */
-  private $optionValues =[
+  private $optionValues = [
     [
       "entityType" => "OptionValue",
       "searchValue" => "direct_debit",
@@ -146,11 +146,23 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   }
 
   public function upgrade_0001() {
-    $this->createMessageTemplates();
+    try {
+      $this->createMessageTemplates();
+
+      return TRUE;
+    } catch (CiviCRM_API3_Exception $e) {
+      return FALSE;
+    }
   }
 
   public function upgrade_0002() {
-    $this->createScheduledJob();
+    try {
+      $this->createScheduledJob();
+
+      return TRUE;
+    } catch (Exception $e) {
+      return FALSE;
+    }
   }
 
   /**
@@ -181,8 +193,27 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->setMessageTemplateParamList();
 
     foreach ($this->messageTemplateParamList as $messageTemplateParam) {
+      if($this->isMessageTemplateExists($messageTemplateParam['title'])){
+        $this->deleteMessageTemplate($messageTemplateParam['title']);
+      }
+
       $this->createMessageTemplate($messageTemplateParam);
     }
+  }
+
+  /**
+   * Checks if message template exists
+   *
+   * @param $messageTitle
+   *
+   * @return bool
+   */
+  private function isMessageTemplateExists($messageTitle) {
+    $templateCount = civicrm_api3('MessageTemplate', 'getcount', array(
+      'msg_title' => $messageTitle,
+    ));
+
+    return $templateCount >= 1 ? TRUE : FALSE;
   }
 
   /**
@@ -224,12 +255,10 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->setMessageTemplateParamList();
 
     foreach ($this->messageTemplateParamList as $messageTemplateParam) {
-      civicrm_api3('MessageTemplate', 'get', [
-        'msg_title' => $messageTemplateParam['title'],
-        'api.MessageTemplate.delete' => ['id' => '$value.id'],
-      ]);
+      $this->deleteMessageTemplate($messageTemplateParam['title']);
     }
   }
+
   /**
    * Installs scheduled job
    */
@@ -244,7 +273,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       'run_frequency' => 'Daily',
       'domain_id' => $domainID,
       'is_active' => '0',
-      'parameters' => ''
+      'parameters' => '',
     ];
 
     CRM_Core_BAO_Job::create($params);
@@ -561,6 +590,18 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       $this->removeNav($item);
     }
     CRM_Core_BAO_Navigation::resetNavigation();
+  }
+
+  /**
+   * Deletes message templates
+   *
+   * @param $messageTitle
+   */
+  private function deleteMessageTemplate($messageTitle) {
+    civicrm_api3('MessageTemplate', 'get', [
+      'msg_title' => $messageTitle,
+      'api.MessageTemplate.delete' => ['id' => '$value.id'],
+    ]);
   }
 
 }
