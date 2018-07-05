@@ -110,7 +110,7 @@
     <!-- Start of code block for generating membership information. Edit with caution. -->
     <div>
       <p style="color: black;">
-        {ts 1=$membershipData.amountPerUnit 2=$membershipData.durationUnit 3=$currency }General Membership at %3%1 per %2.{/ts}
+        {ts 1=$membershipData.amountPerUnit 2=$membershipData.durationUnit 3=$currency }{$membershipData.membershipName} at %3%1 per %2.{/ts}
       </p>
     </div>
     <!-- End of code block for generating membership information. -->
@@ -124,7 +124,7 @@
 
       <!-- Start of code block for generating next contribution information. Edit with caution. -->
       <div>
-        <p style="color: black;">{ts 1=$nextMembershipPayment.amount 2=$nextMembershipPayment.date|date_format:"%d/%m/%Y" 3=$currency }Your next payment of %3%1 will be collected on %2{/ts}</p>
+        <p style="color: black;">{ts 1=$nextMembershipPayment.amount 2=$nextMembershipPayment.date 3=$currency }Your next payment of %3%1 will be collected on %2{/ts}</p>
       </div>
       <!-- End of code block for generating next contribution information. -->
     {/if}
@@ -132,30 +132,32 @@
 
   {if isset($mandateData) and $mandateData}
     <!-- Start of Direct Debit Guarantee.  -->
-    <table style="border-collapse: collapse;border: 1px solid black;max-width: 600px;width: 100%;">
-      <tr >
-        <th style="text-align: left; padding-left: 40px;">
-          <h3 style="color: black;">{ts}The Direct Debit Guarantee{/ts}</h3>
-        </th>
-        <th>
-          <div>
-            <img src="{$directDebitImageSrc}" style="max-width: 170px;width: 100%;height: auto;" alt="Direct Debit" />
-          </div>
-        </th>
-      </tr>
-      <tr>
-        <td>
-          <ul>
-            <li style="color: black;">{ts}Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s{/ts}</li>
-            <li style="color: black;">{ts}Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old.{/ts}</li>
-            <li style="color: black;">{ts}There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable.{/ts}</li>
-            <li style="color: black;">{ts}The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested.{/ts}</li>
-            <li style="color: black;">{ts}Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy.{/ts}</li>
-          </ul>
-        </td>
-        <td></td>
-      </tr>
-    </table>
+    <div style="padding-top: 60px">
+      <table style="border-collapse: collapse;border: 1px solid black;max-width: 600px;width: 100%;">
+        <tr >
+          <th style="text-align: left; padding-left: 40px;">
+            <h3 style="color: black;">{ts}The Direct Debit Guarantee{/ts}</h3>
+          </th>
+          <th>
+            <div style="margin-right: 20px">
+              <img src="{$directDebitImageSrc}" style="width: 100%;height: auto;" alt="Direct Debit" />
+            </div>
+          </th>
+        </tr>
+        <tr>
+          <td>
+            <ul>
+              <li style="color: black;">{ts}Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s{/ts}</li>
+              <li style="color: black;">{ts}Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old.{/ts}</li>
+              <li style="color: black;">{ts}There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable.{/ts}</li>
+              <li style="color: black;">{ts}The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested.{/ts}</li>
+              <li style="color: black;">{ts}Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy.{/ts}</li>
+            </ul>
+          </td>
+          <td></td>
+        </tr>
+      </table>
+    </div>
     <!-- End of Direct Debit Guarantee.  -->
   {/if}
 </div>
