@@ -19,9 +19,17 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomData {
    */
   private $form;
 
+  /**
+   * Id of DirectDebit Mandate Custom Group
+   *
+   * @var int
+   */
+  private $directDebitMandateId;
+
   public function __construct($form) {
     $this->form = $form;
     $this->templatePath = CRM_ManualDirectDebit_ExtensionUtil::path() . '/templates';
+    $this->directDebitMandateId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getGroupIDByName("direct_debit_mandate");
   }
 
   /**
@@ -29,7 +37,8 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomData {
    */
   public function run() {
     if ($this->checkIfDirectDebitMandateInGroupTree()) {
-      $this->hideButton();
+      $this->hideSaveAndNewButton();
+      $this->hideDdRef();
     }
 
     $this->checkRecurringContribution();
@@ -44,22 +53,29 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomData {
    * @return bool
    */
   private function checkIfDirectDebitMandateInGroupTree() {
-    $directDebitMandateId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getGroupIDByName("direct_debit_mandate");
     $customGroupTree = $this->form->getVar('_groupTree');
 
-    return array_key_exists($directDebitMandateId, $customGroupTree);
+    return array_key_exists($this->directDebitMandateId, $customGroupTree);
   }
 
   /**
    *  Hides 'Save and New' button
    */
-  private function hideButton() {
+  private function hideSaveAndNewButton() {
     $buttonsGroup = $this->form->getElement('buttons');
     foreach ($buttonsGroup->_elements as $key => $button) {
       if ($button->_attributes['value'] == "Save and New") {
         unset($buttonsGroup->_elements[$key]);
       }
     }
+  }
+
+  /**
+   *  Hides 'DD ref' custom field
+   */
+  private function hideDdRef() {
+    $customFieldId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName("dd_ref");
+    unset($this->form->_groupTree[$this->directDebitMandateId]['fields'][$customFieldId]);
   }
 
   /**
@@ -94,6 +110,5 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomData {
       'template' => "{$this->templatePath}/CRM/ManualDirectDebit/Form/SendMandateNotification.tpl",
     ]);
   }
-
 
 }
