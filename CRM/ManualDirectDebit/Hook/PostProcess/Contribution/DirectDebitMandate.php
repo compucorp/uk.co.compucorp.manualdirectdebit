@@ -98,10 +98,12 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
    * @return bool
    */
   public function checkChangingMandateContribution() {
-    $recurringContributionId = $this->form->getVar('_submitValues')['recurrId'];
-    if (!isset($recurringContributionId) || empty($recurringContributionId)) {
+    if (!isset($this->form->getVar('_submitValues')['recurrId'])
+      || empty($this->form->getVar('_submitValues')['recurrId'])) {
       return FALSE;
     }
+
+    $recurringContributionId = $this->form->getVar('_submitValues')['recurrId'];
 
     $oldMandateId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($recurringContributionId);
 
@@ -135,11 +137,12 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
    * Sends mail if appropriate checkbox is checked on
    */
   public function checkMailNotification() {
-    $valueOfSendMailCheckbox = $this->form->getVar('_submitValues')['send_mandate_update_notification_to_the_contact'];
-
-    if (!isset($valueOfSendMailCheckbox) || empty($valueOfSendMailCheckbox)) {
+    if (!isset($this->form->getVar('_submitValues')['send_mandate_update_notification_to_the_contact'])
+      || empty($this->form->getVar('_submitValues')['send_mandate_update_notification_to_the_contact'])) {
       return;
     }
+
+    $valueOfSendMailCheckbox = $this->form->getVar('_submitValues')['send_mandate_update_notification_to_the_contact'];
 
     $isSendMailCheckboxTurnedOn = $valueOfSendMailCheckbox == 1;
 

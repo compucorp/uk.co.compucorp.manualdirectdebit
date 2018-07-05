@@ -30,7 +30,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     'recurringContributionData' => FALSE,
     'currency' => FALSE,
     'membershipData' => FALSE,
-    'nextMembershipPayment' => FALSE
+    'nextMembershipPayment' => FALSE,
   ];
 
   /**
@@ -172,7 +172,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
         'ac_number' => $dao->ac_number,
         'sort_code' => $dao->sort_code,
         'dd_ref' => $dao->dd_ref,
-        'dd_code' => $dao->dd_code,
+        'dd_code' => $this->getDdCode($dao->dd_code),
         'start_date' => $dao->start_date,
         'authorisation_date' => $dao->authorisation_date,
       ];
@@ -332,7 +332,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
    * Gets direct debit image src
    */
   private function collectImageSrc() {
-    $this->tplParams['directDebitImageSrc'] = CRM_ManualDirectDebit_ExtensionUtil::url() . '/Images/debit.ico';
+    $this->tplParams['directDebitImageSrc'] = CRM_ManualDirectDebit_ExtensionUtil::path() . '/Images/debit.ico';
   }
 
   /**
@@ -346,6 +346,29 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
       $contributionBao = CRM_Contribute_BAO_Contribution::findById($this->contributionId);
       $this->tplParams['currency'] = $this->getCurrencySymbol($contributionBao->currency);
     }
+  }
+
+  /**
+   * Gets direct debit code label
+   *
+   * @param $dd_code
+   *
+   * @return string
+   */
+  private function getDdCode($dd_code) {
+    $result = civicrm_api3('OptionGroup', 'get', [
+      'return' => 'label',
+      'name' => 'direct_debit_codes',
+      'sequential' => 1,
+      'api.OptionValue.getValue' => [
+        'return' => 'label',
+        'option_group_id' => '$value.id',
+        'sequential' => 1,
+        'value' => $dd_code,
+      ],
+    ]);
+
+    return $result['values'][0]['api.OptionValue.getValue'];
   }
 
 }

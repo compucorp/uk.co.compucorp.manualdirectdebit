@@ -40,6 +40,10 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
     ];
 
     CRM_ManualDirectDebit_BAO_RecurrMandateRef::create($rows);
+
+    // Creates "New Direct Debit Recurring Payment" activity
+    $activity = new CRM_ManualDirectDebit_Hook_Post_RecurContribution_Activity($contributionId, 'create');
+    $activity->process();
   }
 
   /**
