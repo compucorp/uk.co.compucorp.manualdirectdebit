@@ -155,7 +155,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     }
   }
 
-  public function upgrade_0002() {
+  public function upgrade_0003() {
     try {
       $this->createScheduledJob();
 
@@ -193,27 +193,12 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->setMessageTemplateParamList();
 
     foreach ($this->messageTemplateParamList as $messageTemplateParam) {
-      if($this->isMessageTemplateExists($messageTemplateParam['title'])){
+      if($this->isEntityAlreadyExist("MessageTemplate", $messageTemplateParam['title'], 'msg_title')){
         $this->deleteMessageTemplate($messageTemplateParam['title']);
       }
 
       $this->createMessageTemplate($messageTemplateParam);
     }
-  }
-
-  /**
-   * Checks if message template exists
-   *
-   * @param $messageTitle
-   *
-   * @return bool
-   */
-  private function isMessageTemplateExists($messageTitle) {
-    $templateCount = civicrm_api3('MessageTemplate', 'getcount', array(
-      'msg_title' => $messageTitle,
-    ));
-
-    return $templateCount >= 1 ? TRUE : FALSE;
   }
 
   /**
@@ -265,6 +250,10 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   private function createScheduledJob() {
     $domainID = CRM_Core_Config::domainID();
 
+    if($this->isEntityAlreadyExist("Job", 'Send Direct Debit Payment Collection Reminders', 'name')){
+      $this->alterEntity('Job','Send Direct Debit Payment Collection Reminders','name',FALSE,'uninstall');
+    }
+
     $params = [
       'name' => 'Send Direct Debit Payment Collection Reminders',
       'description' => 'Send Direct Debit Payment Collection Reminders',
@@ -277,6 +266,23 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     ];
 
     CRM_Core_BAO_Job::create($params);
+  }
+
+  /**
+   * Checks if entity exists
+   *
+   * @param $entityType
+   * @param $searchValue
+   * @param $searchField
+   *
+   * @return bool
+   */
+  private function isEntityAlreadyExist($entityType, $searchValue, $searchField) {
+    $result = civicrm_api3($entityType, 'getcount', [
+      $searchField => $searchValue,
+    ]);
+
+    return $result >= 1;
   }
 
   /**
