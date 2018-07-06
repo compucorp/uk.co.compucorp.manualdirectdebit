@@ -322,7 +322,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
 
     while ($dao->fetch()) {
       $this->tplParams['nextMembershipPayment'] = [
-        'date' => $this->convertDateFormat($dao->next_payment_date),
+        'date' => CRM_Utils_Date::customFormat($dao->next_payment_date, '%d/%m/%Y'),
         'amount' => round($dao->next_payment_amount, 2)
       ];
     }
@@ -369,18 +369,6 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     ]);
 
     return $result['values'][0]['api.OptionValue.getValue'];
-  }
-
-  /**
-   * Converts date time format
-   *
-   * @param $date
-   *
-   * @return string
-   */
-  private function convertDateFormat($date) {
-    $myDateTime = DateTime::createFromFormat('Y-m-d H:i:s', $date);
-    return $myDateTime->format('d/m/Y');
   }
 
 }
