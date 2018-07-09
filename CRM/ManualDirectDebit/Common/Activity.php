@@ -17,9 +17,6 @@ class CRM_ManualDirectDebit_Common_Activity {
    * @return int|bool
    */
   public static function create($subject, $activityTypeName, $sourceRecordId, $addedByContactId, $withContactId) {
-    CRM_Core_Session::setStatus(
-      ts('Subject "%1"', [1 => $subject]), ts("Activity was created")
-    );
     $activityParams = [
       'subject' => $subject,
       'activity_type_id' => $activityTypeName,
