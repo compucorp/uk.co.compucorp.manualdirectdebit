@@ -322,7 +322,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
 
     while ($dao->fetch()) {
       $this->tplParams['nextMembershipPayment'] = [
-        'date' => $dao->next_payment_date,
+        'date' => CRM_Utils_Date::customFormat($dao->next_payment_date, '%d/%m/%Y'),
         'amount' => round($dao->next_payment_amount, 2)
       ];
     }
@@ -332,7 +332,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
    * Gets direct debit image src
    */
   private function collectImageSrc() {
-    $this->tplParams['directDebitImageSrc'] = CRM_ManualDirectDebit_ExtensionUtil::path() . '/Images/debit.ico';
+    $this->tplParams['directDebitImageSrc'] = CRM_ManualDirectDebit_ExtensionUtil::url() . '/Images/debit.ico';
   }
 
   /**
