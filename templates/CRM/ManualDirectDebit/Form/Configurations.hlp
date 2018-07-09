@@ -8,6 +8,11 @@ contribution date should be set to the nearest new instruction run
 date with an extra offset of the number of days configured here.{/ts}
 {/htxt}
 
+{htxt id="manualdirectdebit_days_in_advance_for_collection_reminder-title"}
+  {ts}Set how many days in advance of the Received Date of a Direct Debit
+contribution should the Direct Debit Payment Collection Reminder
+be sent to the user.{/ts}
+{/htxt}
 
 {htxt id="inactivity_code-title"}
   {ts}Mandates with inactive codes will not be selectable when
