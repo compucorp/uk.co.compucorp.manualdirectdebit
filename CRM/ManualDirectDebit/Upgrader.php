@@ -145,7 +145,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->createDirectDebitPaymentProcessor();
   }
 
-  public function upgrade_0001() {
+  public function upgrade_0004() {
     try {
       $this->createMessageTemplates();
 
