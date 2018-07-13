@@ -91,7 +91,9 @@ class CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator {
    * @return string
    */
   private function generateDirectDebitReference() {
-    return $this->settings['default_reference_prefix'] . $this->mandateId;
+    $settingsManager = new CRM_ManualDirectDebit_Common_SettingsManager();
+    $minimumReferencePrefixLength = (int) $settingsManager->getManualDirectDebitSettings()['minimum_reference_prefix_length'];
+    return $this->settings['default_reference_prefix'] . str_pad($this->mandateId, $minimumReferencePrefixLength, '0', STR_PAD_LEFT);
   }
 
   /**
@@ -115,7 +117,7 @@ class CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator {
    *
    * @return object
    */
-  function getMandateStartDate() {
+  public function getMandateStartDate() {
     return $this->fieldsToGenerate['start_date'];
   }
 
