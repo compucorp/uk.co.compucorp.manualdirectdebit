@@ -1,6 +1,7 @@
 <?php
 
 use CRM_ManualDirectDebit_ExtensionUtil as E;
+use CRM_ManualDirectDebit_Common_SettingsManager as SettingsManager;
 
 /**
  * Direct Debt Configuration form controller
@@ -40,7 +41,7 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
     CRM_Utils_System::setTitle(E::ts('Direct Debit Configurations'));
 
     $fieldsWithHelp = [];
-    $allowedConfigFields  = $this->getAllowedConfigFields();
+    $allowedConfigFields  = SettingsManager::getConfigFields();
     foreach ($allowedConfigFields  as $name => $config) {
       $this->add(
         $config['html_type'],
@@ -78,40 +79,10 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
   }
 
   public function postProcess() {
-    $allowedConfigFields = $this->getAllowedConfigFields();
+    $allowedConfigFields = SettingsManager::getConfigFields();
     $submittedValues = $this->exportValues();
     $valuesToSave = array_intersect_key($submittedValues, $allowedConfigFields);
       civicrm_api3('setting', 'create', $valuesToSave);
-  }
-
-  /**
-   * Gets the configurations allowed to be set on this form.
-   *
-   * @return array
-   */
-  private function getAllowedConfigFields() {
-
-    $allowedConfigFields = $this->fetchSettingFields();
-    if (!isset($allowedConfigFields) || empty($allowedConfigFields)) {
-      $result = civicrm_api3('System', 'flush');
-
-      if ($result['is_error'] == 0){
-        $allowedConfigFields =  $this->fetchSettingFields();
-      }
-    }
-
-    return $allowedConfigFields;
-  }
-
-  /**
-   * Gets the settings fields
-   *
-   * @return array|null
-   */
-  private function fetchSettingFields() {
-    return civicrm_api3('setting', 'getfields',[
-      'filters' =>[ 'group' => 'manualdirectdebit'],
-    ])['values'];
   }
 
   /**
@@ -121,7 +92,7 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
    */
   public function setDefaultValues() {
     $currentValues = civicrm_api3('setting', 'get',
-      ['return' => array_keys($this->getAllowedConfigFields())]);
+      ['return' => array_keys(SettingsManager::getConfigFields())]);
     $defaults = [];
     $domainID = CRM_Core_Config::domainID();
     foreach ($currentValues['values'][$domainID] as $name => $value) {

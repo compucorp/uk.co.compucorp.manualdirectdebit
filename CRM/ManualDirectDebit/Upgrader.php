@@ -413,6 +413,17 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     civicrm_api3('PaymentProcessor', 'create', $paymentProcessor);
   }
 
+  public function postInstall() {
+    $this->setDefaultSettingValues();
+  }
+
+  private function setDefaultSettingValues() {
+    $configFields = CRM_ManualDirectDebit_Common_SettingsManager::getConfigFields();
+    foreach ($configFields  as $name => $config) {
+      civicrm_api3('setting', 'create', [$name => $config['default']]);
+    }
+  }
+
   public function onEnable() {
     $this->alterNavigationMenu("direct_debit", "enable");
     $this->alterEntitiesValues('enable');
