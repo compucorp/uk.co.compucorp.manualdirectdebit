@@ -324,7 +324,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
         'name' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.account_holder_name as name',
         'sort_code' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.sort_code as sort_code',
         'account_number' => 'CONCAT("\t",' . CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.ac_number) as account_number',
-        'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0) as amount',
+        'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0.00) as amount',
         'reference_number' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.dd_ref as reference_number',
         'transaction_type' => 'CONCAT("\t",civicrm_option_value.label) as transaction_type',
       ];
@@ -378,15 +378,14 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
     );
 
     $mandateItems = $batchTransaction->getDDMandateInstructions();
-    while ($mandateItems->fetch()) {
-
+    foreach ($mandateItems as $mandateItem) {
       switch ($this->getBatchType()) {
         case 'instructions_batch':
-        $dataForExport[$mandateItems->mandate_id] = $mandateItems->toArray();
+        $dataForExport[$mandateItem['mandate_id']] = $mandateItem;
           break;
 
         case 'dd_payments':
-        $dataForExport[$mandateItems->contribute_id] = $mandateItems->toArray();
+        $dataForExport[$mandateItems['contribute_id']] = $mandateItem;
           break;
       }
     }
