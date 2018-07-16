@@ -303,7 +303,13 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
    * @param $oldMandateId
    */
   public function changeMandateForContribution($mandateId, $oldMandateId) {
-    $query = "UPDATE `civicrm_value_dd_information` SET mandate_id = $mandateId WHERE mandate_id = $oldMandateId";
+    $completedStatusId = CRM_ManualDirectDebit_Common_OptionValue::getValueForOptionValue('contribution_status', 'Completed');
+
+    $query = "UPDATE `civicrm_value_dd_information` AS dd_information 
+              LEFT JOIN `civicrm_contribution` AS contribution ON dd_information.entity_id = contribution.id 
+              SET dd_information.mandate_id = $mandateId 
+              WHERE dd_information.mandate_id = $oldMandateId 
+              AND contribution.contribution_status_id != $completedStatusId";
     CRM_Core_DAO::executeQuery($query);
   }
 
