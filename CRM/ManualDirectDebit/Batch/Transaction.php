@@ -39,84 +39,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    *
    * @var array
    */
-  protected $searchableFields = [
-    'entity_id' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.entity_id',
-    ],
-    'bank_name' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.bank_name',
-    ],
-    'bank_street_address' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.bank_street_address',
-    ],
-    'bank_city' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.bank_city',
-    ],
-    'bank_county' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.bank_county',
-    ],
-    'bank_postcode' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.bank_postcode',
-    ],
-    'account_holder_name' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.account_holder_name',
-    ],
-    'ac_number' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.ac_number',
-    ],
-    'sort_code' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.sort_code',
-    ],
-    'dd_code' => [
-      'op' => 'IN',
-      'field' => self::DD_MANDATE_TABLE . '.dd_code',
-    ],
-    'dd_ref' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.dd_ref',
-    ],
-    'start_date' => [
-      'op' => '<=',
-      'field' => self::DD_MANDATE_TABLE . '.start_date',
-    ],
-    'authorisation_date' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.authorisation_date',
-    ],
-    'collection_day' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.collection_day',
-    ],
-    'originator_number' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.originator_number',
-    ],
-    'payment_instrument' => [
-      'op' => 'IN',
-      'field' => 'civicrm_contribution.payment_instrument_id',
-    ],
-    'contribution_status' => [
-      'op' => 'IN',
-      'field' => 'civicrm_contribution.contribution_status_id',
-    ],
-    'receive_date' => [
-      'op' => '<=',
-      'field' => 'civicrm_contribution.receive_date',
-    ],
-    'recur_status' => [
-      'op' => 'IN',
-      'field' => 'civicrm_contribution_recur.contribution_status_id',
-    ],
-  ];
+  protected $searchableFields = [];
 
   /**
    * What column does select in SQL query
@@ -177,6 +100,8 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       $this->params['entityTable'] = self::DD_MANDATE_TABLE;
     }
 
+    $this->setSearchableFields();
+
     $this->setColumnHeader($columnHeader);
     $this->setReturnValues($returnValues);
 
@@ -185,6 +110,86 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     }
   }
 
+  private function setSearchableFields() {
+    $this->searchableFields = [
+      'entity_id' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.entity_id',
+      ],
+      'bank_name' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.bank_name',
+      ],
+      'bank_street_address' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.bank_street_address',
+      ],
+      'bank_city' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.bank_city',
+      ],
+      'bank_county' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.bank_county',
+      ],
+      'bank_postcode' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.bank_postcode',
+      ],
+      'account_holder_name' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.account_holder_name',
+      ],
+      'ac_number' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.ac_number',
+      ],
+      'sort_code' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.sort_code',
+      ],
+      'dd_code' => [
+        'op' => 'IN',
+        'field' => self::DD_MANDATE_TABLE . '.dd_code',
+      ],
+      'dd_ref' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.dd_ref',
+      ],
+      'start_date' => [
+        'op' => '<=',
+        'field' => self::DD_MANDATE_TABLE . '.start_date',
+      ],
+      'authorisation_date' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.authorisation_date',
+      ],
+      'collection_day' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.collection_day',
+      ],
+      'originator_number' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.originator_number',
+      ],
+      'payment_instrument' => [
+        'op' => 'IN',
+        'field' => 'civicrm_contribution.payment_instrument_id',
+      ],
+      'contribution_status' => [
+        'op' => 'IN',
+        'field' => 'civicrm_contribution.contribution_status_id',
+      ],
+      'receive_date' => [
+        'op' => '<=',
+        'field' => 'civicrm_contribution.receive_date',
+      ],
+      'recur_status' => [
+        'op' => 'IN',
+        'field' => 'civicrm_contribution_recur.contribution_status_id',
+      ],
+    ];
+  }
 
   /**
    * Sets columns for rows
