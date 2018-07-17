@@ -40,7 +40,10 @@
     </div>
   {else}
     <div class="float-left">
-      {$form.done_and_export_batch.html}
+      {$form.save_batch.html}
+    </div>
+    <div class="float-left">
+      {$form.save_and_export_batch.html}
     </div>
   {/if}
 
