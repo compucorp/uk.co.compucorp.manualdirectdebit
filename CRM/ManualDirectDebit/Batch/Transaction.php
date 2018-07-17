@@ -106,7 +106,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $this->setReturnValues($returnValues);
 
     if ($this->params['entityTable'] == self::DD_MANDATE_TABLE) {
-      $this->addReturnValues(['amount' => '0 as amount']);
+      $this->addReturnValues(['amount' => '0.00 as amount']);
     }
   }
 
@@ -234,7 +234,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'name' => self::DD_MANDATE_TABLE . '.account_holder_name as name',
         'sort_code' => self::DD_MANDATE_TABLE . '.sort_code as sort_code',
         'account_number' => self::DD_MANDATE_TABLE . '.ac_number as account_number',
-        'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0) as amount',
+        'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0.00) as amount',
         'reference_number' => self::DD_MANDATE_TABLE . '.dd_ref as reference_number',
         'transaction_type' => 'civicrm_option_value.label as transaction_type',
       ];
@@ -321,34 +321,34 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $mandateItems = $this->getDDMandateInstructions();
 
     $rows = [];
-    while ($mandateItems->fetch()) {
+    foreach ($mandateItems as $mandateItem) {
       $row = [];
       foreach ($this->columnHeader as $columnKey => $columnValue) {
-        if (isset($mandateItems->$columnKey)) {
-          $row[$columnKey] = $mandateItems->$columnKey;
+        if (isset($mandateItem[$columnKey])) {
+          $row[$columnKey] = $mandateItem[$columnKey];
         }
         else {
           $row[$columnKey] = NULL;
         }
       }
 
-      $row['check'] = $this->getCheckRow($batch, $mandateItems->id);
+      $row['check'] = $this->getCheckRow($batch, $mandateItem['id']);
 
       switch ($batch->getBatchType()) {
         case "instructions_batch":
-          if (!empty($mandateItems->contact_id)) {
-            $row['action'] = $this->getLinkToMandate($mandateItems->contact_id);
+          if (!empty($mandateItem['contact_id'])) {
+            $row['action'] = $this->getLinkToMandate($mandateItem['contact_id']);
           }
 
-          $rows[$mandateItems->mandate_id] = $row;
+          $rows[$mandateItem['mandate_id']] = $row;
           break;
 
         case "dd_payments":
-          if (!empty($mandateItems->contact_id)) {
-            $row['action'] = $this->getLinkToContribution($mandateItems->id, $mandateItems->contact_id);
+          if (!empty($mandateItem['contact_id'])) {
+            $row['action'] = $this->getLinkToContribution($mandateItem['id'], $mandateItem['contact_id']);
           }
 
-          $rows[$mandateItems->id] = $row;
+          $rows[$mandateItem['id']] = $row;
           break;
       }
 
@@ -383,9 +383,9 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   }
 
   /**
-   * Returns DAO of Direct Debit mandate instructions
+   * Returns array of Direct Debit mandate instructions
    *
-   * @return \CRM_Core_DAO
+   * @return array
    */
   public function getDDMandateInstructions() {
 
@@ -452,7 +452,31 @@ class CRM_ManualDirectDebit_Batch_Transaction {
 
     $mandateItems = CRM_Core_DAO::executeQuery($query->toSQL());
 
-    return $mandateItems;
+    $rows = [];
+    while($mandateItems->fetch()) {
+      $mandateItem = [];
+      foreach ($this->returnValues as $key => $value) {
+        if (isset($mandateItems->$key)) {
+          $mandateItem[$key] = $mandateItems->$key;
+        }
+        else {
+          $mandateItem[$key] = NULL;
+        }
+      }
+
+      $mandateItem['amount'] = $this->formatAmount($mandateItem['amount']);
+
+      $rows[] = $mandateItem;
+    }
+
+
+    return $rows;
+  }
+
+  private function formatAmount($amount) {
+    $decimalPoints = 2;
+    $roundedAmount = (float) round($amount, $decimalPoints);
+    return number_format($roundedAmount, $decimalPoints);
   }
 
   /**
@@ -463,8 +487,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   public function getTotalNumber() {
     $this->total = TRUE;
 
-    return count($this->getDDMandateInstructions()
-      ->fetchAll());
+    return count($this->getDDMandateInstructions());
   }
 
   /**
