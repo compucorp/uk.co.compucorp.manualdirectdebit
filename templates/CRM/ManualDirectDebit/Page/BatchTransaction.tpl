@@ -1,8 +1,8 @@
 <div id="enableDisableStatusMsg" class="crm-container" style="display:none;"></div>
 {if $batchInfo}
-  <div>
-    <table>
-      <thead>
+  <div class="batch-transaction crm-results-block">
+    <table class="batchPaginator selector row-highlight">
+      <thead class="sticky">
       <tr>
         <th class="crm-batch-name">{ts}Batch Name{/ts}</th>
         <th class="crm-batch-item_count">{ts}{$type} Count{/ts}</th>
