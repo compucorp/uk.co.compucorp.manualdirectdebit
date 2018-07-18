@@ -42,7 +42,6 @@
   {include file="CRM/common/pager.tpl" location="bottom"}
 </div>
 
-
 {literal}
 <script type="text/javascript">
 
