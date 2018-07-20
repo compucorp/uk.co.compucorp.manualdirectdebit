@@ -23,7 +23,7 @@ return [
     'group_name' => 'Manual Direct Debit',
     'group' => 'manualdirectdebit',
     'name' => 'manualdirectdebit_minimum_reference_prefix_length',
-    'title' => 'Minimum prefix reference length',
+    'title' => 'Minimum mandate reference length',
     'type' => 'Integer',
     'html_type' => 'number',
     'quick_form_type' => 'Element',
