@@ -91,9 +91,14 @@ class CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator {
    * @return string
    */
   private function generateDirectDebitReference() {
-    $settingsManager = new CRM_ManualDirectDebit_Common_SettingsManager();
-    $minimumReferencePrefixLength = (int) $settingsManager->getManualDirectDebitSettings()['minimum_reference_prefix_length'];
-    return $this->settings['default_reference_prefix'] . str_pad($this->mandateId, $minimumReferencePrefixLength, '0', STR_PAD_LEFT);
+    $prefixLength = strlen($this->settings['default_reference_prefix']);
+    $mandateIdLength = 0;
+    if ($this->settings['minimum_reference_prefix_length'] > $prefixLength) {
+      $mandateIdLength = $this->settings['minimum_reference_prefix_length'] - $prefixLength;
+    }
+    $mandateIdPart = str_pad($this->mandateId, $mandateIdLength, '0', STR_PAD_LEFT);
+
+    return $this->settings['default_reference_prefix'] . $mandateIdPart;
   }
 
   /**
