@@ -3,20 +3,9 @@
 *}
 
 {htxt id="manualdirectdebit_minimum_reference_prefix_length-title"}
-  {ts} If the mandate prefix is "M" and you selected this value to be be for example 6 characters long, the generated mandate reference will appear as:
-      M000001
-      M000002
-      ...
-      ...
-      M000100
-
-    but if the mandate id exceeded this length, then it will appear as is :
-    M1000000
-    M1000001
-    ...
-    ...
-    M121312312441
-  {/ts}
+  {ts}The minimum length of the mandate reference digits.
+   If the length is not enough, leading 0s will be amended to it. For example,
+   if the prefix is A and the minimum length is 6, the first mandate reference will be A000001.{/ts}
 {/htxt}
 
 {htxt id="manualdirectdebit_minimum_days_to_first_payment-title"}
