@@ -39,84 +39,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    *
    * @var array
    */
-  protected $searchableFields = [
-    'entity_id' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.entity_id',
-    ],
-    'bank_name' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.bank_name',
-    ],
-    'bank_street_address' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.bank_street_address',
-    ],
-    'bank_city' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.bank_city',
-    ],
-    'bank_county' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.bank_county',
-    ],
-    'bank_postcode' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.bank_postcode',
-    ],
-    'account_holder_name' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.account_holder_name',
-    ],
-    'ac_number' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.ac_number',
-    ],
-    'sort_code' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.sort_code',
-    ],
-    'dd_code' => [
-      'op' => 'IN',
-      'field' => self::DD_MANDATE_TABLE . '.dd_code',
-    ],
-    'dd_ref' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.dd_ref',
-    ],
-    'start_date' => [
-      'op' => '<=',
-      'field' => self::DD_MANDATE_TABLE . '.start_date',
-    ],
-    'authorisation_date' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.authorisation_date',
-    ],
-    'collection_day' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.collection_day',
-    ],
-    'originator_number' => [
-      'op' => '=',
-      'field' => self::DD_MANDATE_TABLE . '.originator_number',
-    ],
-    'payment_instrument' => [
-      'op' => 'IN',
-      'field' => 'civicrm_contribution.payment_instrument_id',
-    ],
-    'contribution_status' => [
-      'op' => 'IN',
-      'field' => 'civicrm_contribution.contribution_status_id',
-    ],
-    'receive_date' => [
-      'op' => '<=',
-      'field' => 'civicrm_contribution.receive_date',
-    ],
-    'recur_status' => [
-      'op' => 'IN',
-      'field' => 'civicrm_contribution_recur.contribution_status_id',
-    ],
-  ];
+  protected $searchableFields = [];
 
   /**
    * What column does select in SQL query
@@ -177,14 +100,96 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       $this->params['entityTable'] = self::DD_MANDATE_TABLE;
     }
 
+    $this->setSearchableFields();
+
     $this->setColumnHeader($columnHeader);
     $this->setReturnValues($returnValues);
 
     if ($this->params['entityTable'] == self::DD_MANDATE_TABLE) {
-      $this->addReturnValues(['amount' => '0 as amount']);
+      $this->addReturnValues(['amount' => '0.00 as amount']);
     }
   }
 
+  private function setSearchableFields() {
+    $this->searchableFields = [
+      'entity_id' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.entity_id',
+      ],
+      'bank_name' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.bank_name',
+      ],
+      'bank_street_address' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.bank_street_address',
+      ],
+      'bank_city' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.bank_city',
+      ],
+      'bank_county' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.bank_county',
+      ],
+      'bank_postcode' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.bank_postcode',
+      ],
+      'account_holder_name' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.account_holder_name',
+      ],
+      'ac_number' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.ac_number',
+      ],
+      'sort_code' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.sort_code',
+      ],
+      'dd_code' => [
+        'op' => 'IN',
+        'field' => self::DD_MANDATE_TABLE . '.dd_code',
+      ],
+      'dd_ref' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.dd_ref',
+      ],
+      'start_date' => [
+        'op' => '<=',
+        'field' => self::DD_MANDATE_TABLE . '.start_date',
+      ],
+      'authorisation_date' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.authorisation_date',
+      ],
+      'collection_day' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.collection_day',
+      ],
+      'originator_number' => [
+        'op' => '=',
+        'field' => self::DD_MANDATE_TABLE . '.originator_number',
+      ],
+      'payment_instrument' => [
+        'op' => 'IN',
+        'field' => 'civicrm_contribution.payment_instrument_id',
+      ],
+      'contribution_status' => [
+        'op' => 'IN',
+        'field' => 'civicrm_contribution.contribution_status_id',
+      ],
+      'receive_date' => [
+        'op' => '<=',
+        'field' => 'civicrm_contribution.receive_date',
+      ],
+      'recur_status' => [
+        'op' => 'IN',
+        'field' => 'civicrm_contribution_recur.contribution_status_id',
+      ],
+    ];
+  }
 
   /**
    * Sets columns for rows
@@ -229,7 +234,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'name' => self::DD_MANDATE_TABLE . '.account_holder_name as name',
         'sort_code' => self::DD_MANDATE_TABLE . '.sort_code as sort_code',
         'account_number' => self::DD_MANDATE_TABLE . '.ac_number as account_number',
-        'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0) as amount',
+        'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0.00) as amount',
         'reference_number' => self::DD_MANDATE_TABLE . '.dd_ref as reference_number',
         'transaction_type' => 'civicrm_option_value.label as transaction_type',
       ];
@@ -268,7 +273,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    *
    * @return array
    */
-   private function getSavedRows($mandateData, $batch) {
+  private function getSavedRows($mandateData, $batch) {
     $rows = [];
 
     foreach ($mandateData['values']['mandates'] as $mandateId => $mandateValue) {
@@ -282,16 +287,24 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       if (!empty($mandateValue['contact_id'])) {
         switch ($batch->getBatchType()) {
           case "instructions_batch":
-            $row['action'] = $this->getLinkToMandate($mandateId, $mandateValue['contact_id']);
+            $row['action'] = $this->getLinkToMandate($mandateValue['contact_id']);
             break;
 
           case "dd_payments":
-            $row['action'] = $this->getLinkToRecurringContribution($mandateId, $mandateValue['contact_id']);
+            $row['action'] = $this->getLinkToContribution($mandateValue['contribute_id'], $mandateValue['contact_id']);
             break;
         }
       }
 
       $rows[$mandateId] = $row;
+    }
+
+    if (!$this->total) {
+      if (!empty($this->params['rowCount']) &&
+        $this->params['rowCount'] > 0
+      ) {
+        $rows = array_slice($rows, (int) $this->params['offset'], (int) $this->params['rowCount']);
+      }
     }
 
     return $rows;
@@ -308,32 +321,37 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $mandateItems = $this->getDDMandateInstructions();
 
     $rows = [];
-    while ($mandateItems->fetch()) {
+    foreach ($mandateItems as $mandateItem) {
       $row = [];
       foreach ($this->columnHeader as $columnKey => $columnValue) {
-        if (isset($mandateItems->$columnKey)) {
-          $row[$columnKey] = $mandateItems->$columnKey;
+        if (isset($mandateItem[$columnKey])) {
+          $row[$columnKey] = $mandateItem[$columnKey];
         }
         else {
           $row[$columnKey] = NULL;
         }
       }
 
-      $row['check'] = $this->getCheckRow($batch, $mandateItems->id);
+      $row['check'] = $this->getCheckRow($batch, $mandateItem['id']);
 
-      if (!empty($mandateItems->contact_id)) {
-        switch ($batch->getBatchType()) {
-          case "instructions_batch":
-            $row['action'] = $this->getLinkToMandate($mandateItems->mandate_id, $mandateItems->contact_id);
-            break;
+      switch ($batch->getBatchType()) {
+        case "instructions_batch":
+          if (!empty($mandateItem['contact_id'])) {
+            $row['action'] = $this->getLinkToMandate($mandateItem['contact_id']);
+          }
 
-          case "dd_payments":
-            $row['action'] = $this->getLinkToRecurringContribution($mandateItems->id, $mandateItems->contact_id);
-            break;
-        }
+          $rows[$mandateItem['mandate_id']] = $row;
+          break;
+
+        case "dd_payments":
+          if (!empty($mandateItem['contact_id'])) {
+            $row['action'] = $this->getLinkToContribution($mandateItem['id'], $mandateItem['contact_id']);
+          }
+
+          $rows[$mandateItem['id']] = $row;
+          break;
       }
 
-      $rows[$mandateItems->mandate_id] = $row;
     }
 
     return $rows;
@@ -365,9 +383,9 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   }
 
   /**
-   * Returns DAO of Direct Debit mandate instructions
+   * Returns array of Direct Debit mandate instructions
    *
-   * @return \CRM_Core_DAO
+   * @return array
    */
   public function getDDMandateInstructions() {
 
@@ -381,6 +399,11 @@ class CRM_ManualDirectDebit_Batch_Transaction {
 
     //select
     $query->select(implode(' , ', $this->returnValues));
+
+    $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID));
+    if ($batch->getBatchType() == 'instructions_batch') {
+      $query->distinct(TRUE);
+    }
 
     foreach ($this->searchableFields as $k => $field) {
       if (isset($this->params[$k])) {
@@ -426,11 +449,34 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         $query->limit((int) $this->params['rowCount'], (int) $this->params['offset']);
       }
     }
-    $query->groupBy('civicrm_value_dd_mandate.id');
 
     $mandateItems = CRM_Core_DAO::executeQuery($query->toSQL());
 
-    return $mandateItems;
+    $rows = [];
+    while($mandateItems->fetch()) {
+      $mandateItem = [];
+      foreach ($this->returnValues as $key => $value) {
+        if (isset($mandateItems->$key)) {
+          $mandateItem[$key] = $mandateItems->$key;
+        }
+        else {
+          $mandateItem[$key] = NULL;
+        }
+      }
+
+      $mandateItem['amount'] = $this->formatAmount($mandateItem['amount']);
+
+      $rows[] = $mandateItem;
+    }
+
+
+    return $rows;
+  }
+
+  private function formatAmount($amount) {
+    $decimalPoints = 2;
+    $roundedAmount = (float) round($amount, $decimalPoints);
+    return number_format($roundedAmount, $decimalPoints);
   }
 
   /**
@@ -441,8 +487,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   public function getTotalNumber() {
     $this->total = TRUE;
 
-    return count($this->getDDMandateInstructions()
-      ->fetchAll());
+    return count($this->getDDMandateInstructions());
   }
 
   /**
@@ -477,9 +522,11 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   /**
    * Gets link to mandate
    *
+   * @param $contactId
+   *
    * @return string
    */
-  private function getLinkToMandate($mandateId, $contactId) {
+  private function getLinkToMandate($contactId) {
     $mandateCustomGroupId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getGroupIDByName('direct_debit_mandate');
     $linkToMandate = CRM_Core_Action::formLink(
       [
@@ -487,7 +534,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
           'name' => ts('View'),
           'title' => ts('View Mandate'),
           'url' => "civicrm/contact/view",
-          'qs' => "reset=1&cid=%%contact_id%%&selectedChild=custom_%%mandate_custom_group_id%%"
+          'qs' => "reset=1&cid=%%contact_id%%&selectedChild=custom_%%mandate_custom_group_id%%",
         ],
       ],
       NULL,
@@ -503,9 +550,12 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   /**
    * Gets link to contribution
    *
+   * @param $contributionId
+   * @param $contactId
+   *
    * @return string
    */
-  private function getLinkToRecurringContribution($contributionId, $contactId) {
+  private function getLinkToContribution($contributionId, $contactId) {
 
     $linkToRecurringContribution = CRM_Core_Action::formLink(
       [
@@ -513,11 +563,12 @@ class CRM_ManualDirectDebit_Batch_Transaction {
           'name' => ts('View'),
           'title' => ts('View Contribution'),
           'url' => "civicrm/contact/view",
-          'qs' => "reset=1&cid=%%contact_id%%&selectedChild=contribute",
+          'qs' => "reset=1&cid=%%contact_id%%&selectedChild=contribute&openContribution=%%contribution_id%%",
         ],
       ],
       NULL,
       [
+        'contribution_id' => $contributionId,
         'contact_id' => $contactId,
       ]
     );

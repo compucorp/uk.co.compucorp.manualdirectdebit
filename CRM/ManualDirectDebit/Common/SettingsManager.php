@@ -13,19 +13,11 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
    * @return array
    */
   public function getManualDirectDebitSettings() {
-    $settingFields = [
-      'manualdirectdebit_default_reference_prefix',
-      'manualdirectdebit_new_instruction_run_dates',
-      'manualdirectdebit_payment_collection_run_dates',
-      'manualdirectdebit_minimum_days_to_first_payment',
-    ];
-    $settingValues = civicrm_api3('setting', 'get', [
-      'return' => $settingFields,
-      'sequential' => 1,
-    ]);
+    $settingValues = $this->getSettingsValues();
 
     $settings = [];
     $settings['default_reference_prefix'] = $settingValues['values'][0]['manualdirectdebit_default_reference_prefix'];
+    $settings['minimum_reference_prefix_length'] = $settingValues['values'][0]['manualdirectdebit_minimum_reference_prefix_length'];
     $settings['new_instruction_run_dates'] = $this->incrementAllArrayValues(
       $settingValues['values'][0]['manualdirectdebit_new_instruction_run_dates']);
     $settings['payment_collection_run_dates'] = $this->incrementAllArrayValues(
@@ -70,9 +62,71 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
     if(isset($settingValues[$settingTitle]) && !empty($settingValues[$settingTitle])){
       self::$minimumDaysToFirstPayment = $settingValues[$settingTitle];
       return self::$minimumDaysToFirstPayment;
-    } else{
+    } else {
       throw new CiviCRM_API3_Exception(t("Please, configure minimum days to first payment"),'required_setting_not_configured');
     }
+  }
+
+  /**
+   * Gets setting values
+   *
+   * @return array
+   */
+  private function getSettingsValues() {
+    $settingValues = $this->fetchSettingsValues();
+
+    if (!isset($settingValues) || empty($settingValues)) {
+      $result = civicrm_api3('System', 'flush');
+      if ($result['is_error'] == 0){
+        $settingValues =  $this->fetchSettingsValues();
+      }
+    }
+    return $settingValues;
+  }
+
+  /**
+   * Fetches setting values
+   *
+   * @return array
+   */
+  private function fetchSettingsValues() {
+    $settingFields = [
+      'manualdirectdebit_default_reference_prefix',
+      'manualdirectdebit_minimum_reference_prefix_length',
+      'manualdirectdebit_new_instruction_run_dates',
+      'manualdirectdebit_payment_collection_run_dates',
+      'manualdirectdebit_minimum_days_to_first_payment',
+    ];
+
+    return civicrm_api3('setting', 'get', [
+      'return' => $settingFields,
+      'sequential' => 1,
+    ]);
+  }
+
+  /**
+   * Gets the extension configuration fields
+   *
+   * @return array
+   */
+  public static function getConfigFields() {
+    $allowedConfigFields = self::fetchSettingFields();
+    if (!isset($allowedConfigFields) || empty($allowedConfigFields)) {
+      $result = civicrm_api3('System', 'flush');
+
+      if ($result['is_error'] == 0){
+        $allowedConfigFields =  self::fetchSettingFields();
+      }
+    }
+
+    return $allowedConfigFields;
+  }
+
+
+  private static function fetchSettingFields() {
+    return civicrm_api3('setting', 'getfields',[
+      'filters' =>[ 'group' => 'manualdirectdebit'],
+    ])['values'];
   }
 
 }

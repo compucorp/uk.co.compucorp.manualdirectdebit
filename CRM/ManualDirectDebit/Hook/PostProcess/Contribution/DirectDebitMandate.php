@@ -26,10 +26,34 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
    */
   private $currentContactId;
 
+  /**
+   * Id of current mandate
+   *
+   * @var int
+   */
+  private $mandateId;
+
   public function __construct(&$form) {
     $this->mandateStorage = new CRM_ManualDirectDebit_Common_MandateStorageManager();
     $this->form = $form;
-    $this->currentContactId = $this->form->getVar('_contactID');
+  }
+
+  /**
+   * Sets Id of current contact
+   *
+   * @param $contactId
+   */
+  public function setCurrentContactId($contactId) {
+    $this->currentContactId = $contactId;
+  }
+
+  /**
+   *  Sets id of current mandate
+   */
+  public function setCurrentMandateId() {
+    if (isset($this->form->getVar('_submitValues')['mandateId']) && !empty($this->form->getVar('_submitValues')['mandateId'])) {
+      $this->mandateId = $this->form->getVar('_submitValues')['mandateId'];
+    }
   }
 
   /**
@@ -38,19 +62,112 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
   public function checkPaymentOptionToCreateMandate() {
     $isRecurring = isset($this->form->getVar('_params')['is_recur']) && !empty($this->form->getVar('_params')['is_recur']);
 
-    if ($isRecurring){
+    if ($isRecurring) {
       $selectedPaymentProcessor = $this->form->getVar('_params')['payment_processor_id'];
 
-      if(CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitPaymentProcessor($selectedPaymentProcessor)){
-        $this->mandateStorage->createEmptyMandate($this->currentContactId);
-      }
-    } else {
-      $selectedPaymentInstrument = $this->form->getVar('_params')['payment_instrument_id'];
-
-      if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($selectedPaymentInstrument)){
+      if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitPaymentProcessor($selectedPaymentProcessor)) {
         $this->mandateStorage->createEmptyMandate($this->currentContactId);
       }
     }
+    else {
+      $selectedPaymentInstrument = $this->form->getVar('_params')['payment_instrument_id'];
+
+      if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($selectedPaymentInstrument)) {
+        $this->mandateStorage->createEmptyMandate($this->currentContactId);
+      }
+    }
+  }
+
+  /**
+   *  Launches all required processes after saving mandate
+   */
+  public function run() {
+    $this->setCurrentContactId($this->form->getVar('_entityId'));
+    $this->setCurrentMandateId();
+
+    $this->checkChangingMandateContribution();
+    $this->checkMailNotification();
+    $this->createMandateActivity();
+  }
+
+  /**
+   * Changes mandate for recurring contribution
+   *
+   * @return bool
+   */
+  public function checkChangingMandateContribution() {
+    if (!isset($this->form->getVar('_submitValues')['recurrId'])
+      || empty($this->form->getVar('_submitValues')['recurrId'])) {
+      return FALSE;
+    }
+
+    $recurringContributionId = $this->form->getVar('_submitValues')['recurrId'];
+
+    $oldMandateId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($recurringContributionId);
+
+    if (is_null($oldMandateId)) {
+      CRM_Core_Session::setStatus(t("Mandate doesn't exist"), $title = 'Error', $type = 'alert');
+
+      return FALSE;
+    }
+
+    $this->mandateId = $this->mandateStorage->getLastInsertedMandateId($this->currentContactId);
+
+    $params = [
+      'recurr_id' => $recurringContributionId,
+      'mandate_id' => $this->mandateId,
+    ];
+    CRM_ManualDirectDebit_BAO_RecurrMandateRef::create($params);
+
+    $this->mandateStorage->changeMandateForContribution($this->mandateId, $oldMandateId);
+
+    $this->redirectToContributionTab();
+  }
+
+  /**
+   * Redirects to contribution tab
+   */
+  private function redirectToContributionTab() {
+    $this->form->controller->setDestination(CRM_Utils_System::url('civicrm/contact/view', http_build_query([
+        'action' => 'browse',
+        'reset' => 1,
+        'cid' => $this->currentContactId,
+        'selectedChild' => 'contribute',
+      ])
+    ));
+  }
+
+  /**
+   * Sends mail if appropriate checkbox is checked on
+   */
+  public function checkMailNotification() {
+    if (!isset($this->form->getVar('_submitValues')['send_mandate_update_notification_to_the_contact'])
+      || empty($this->form->getVar('_submitValues')['send_mandate_update_notification_to_the_contact'])) {
+      return;
+    }
+
+    $valueOfSendMailCheckbox = $this->form->getVar('_submitValues')['send_mandate_update_notification_to_the_contact'];
+
+    $isSendMailCheckboxTurnedOn = $valueOfSendMailCheckbox == 1;
+
+    if ($isSendMailCheckboxTurnedOn) {
+      $notification = new CRM_ManualDirectDebit_Mail_Notification();
+      $notification->sendMandateUpdateNotification($this->mandateId);
+    }
+  }
+
+  /**
+   * Creates mandate activity
+   */
+  public function createMandateActivity() {
+    $contactRelatedToContribution = $this->currentContactId;
+    CRM_ManualDirectDebit_Common_Activity::create(
+      "Direct Debit Mandate Update",
+      "direct_debit_mandate_update",
+      $this->mandateId,
+      CRM_ManualDirectDebit_Common_User::getAdminContactId(),
+      $contactRelatedToContribution
+    );
   }
 
 }

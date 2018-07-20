@@ -20,6 +20,17 @@
     </div>
 {/foreach}
 
+<h3>{ts}Reminder config{/ts}</h3>
+{foreach from=$reminderConfigSection item=elementName}
+    <div class="crm-section">
+        <div class="label">{$form.$elementName.label}</div>
+        <div class="content">{$form.$elementName.html}
+            {if $fieldsWithHelp.$elementName}{help id=$form.$elementName.name}{/if}
+        </div>
+        <div class="clear"></div>
+    </div>
+{/foreach}
+
 <h3 class="title">{ts}Batch and code transition{/ts}</h3>
 <table style="width:100%" class="row-highlight">
     <tr class="crm-admin-options crm-entity odd-row">

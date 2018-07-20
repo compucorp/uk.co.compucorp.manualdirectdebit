@@ -179,7 +179,8 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
     if (CRM_Batch_BAO_Batch::checkBatchPermission('close', $this->_values['created_id'])) {
       if (CRM_Batch_BAO_Batch::checkBatchPermission('export', $this->_values['created_id'])) {
         $this->add('submit', 'export_batch', ts('Export Batch'), ['formtarget' => '_blank']);
-        $this->add('submit', 'done_and_export_batch', ts('Done and Export Batch'), ['formtarget' => '_blank']);
+        $this->add('submit', 'save_batch', ts('Save'));
+        $this->add('submit', 'save_and_export_batch', ts('Save and Export Batch'), ['formtarget' => '_blank']);
         $this->add('submit', 'submitted', ts('Submit'));
         $this->add('submit', 'discard', ts('Discard'));
       }
@@ -251,7 +252,7 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
         'name' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.account_holder_name as name',
         'sort_code' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.sort_code as sort_code',
         'account_number' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.ac_number as account_number',
-        'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0) as amount',
+        'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0.00) as amount',
         'reference_number' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.dd_ref as reference_number',
         'transaction_type' => 'civicrm_option_value.label as transaction_type',
       ];
@@ -264,10 +265,19 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
       $this->updateBatchValues($batchSerializedValues, $mandateCurrentState);
     }
 
-    if (isset($params['export_batch']) || isset($params['done_and_export_batch'])) {
+    if (isset($params['export_batch']) || isset($params['save_and_export_batch'])) {
       $batch = new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID);
       $batch->createExportFile();
     }
+
+    $this->redirectToBatchViewPage();
+  }
+
+  private function redirectToBatchViewPage() {
+    $redirectPath = 'civicrm/direct_debit/batch-list';
+    $redirectParams = http_build_query(['reset' => 1, 'type_id' => $this->_values['type_id']]);
+    $redirectURL = CRM_Utils_System::url($redirectPath, $redirectParams);
+    CRM_Utils_System::redirect($redirectURL);
   }
 
   /**

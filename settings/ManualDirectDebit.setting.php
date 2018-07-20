@@ -19,6 +19,21 @@ return [
     'extra_data' => '',
     'section' => 'mandate_config',
   ],
+  'manualdirectdebit_minimum_reference_prefix_length' => [
+    'group_name' => 'Manual Direct Debit',
+    'group' => 'manualdirectdebit',
+    'name' => 'manualdirectdebit_minimum_reference_prefix_length',
+    'title' => 'Minimum mandate reference length',
+    'type' => 'Integer',
+    'html_type' => 'number',
+    'quick_form_type' => 'Element',
+    'default' => 6,
+    'is_required' => TRUE,
+    'is_help' => TRUE,
+    'html_attributes' => ['min' => 0],
+    'extra_data' => '',
+    'section' => 'mandate_config',
+  ],
   'manualdirectdebit_new_instruction_run_dates' => [
     'group_name' => 'Manual Direct Debit',
     'group' => 'manualdirectdebit',
@@ -72,6 +87,21 @@ return [
     'extra_data' => '',
     'section' => 'payment_config',
   ],
+  'manualdirectdebit_days_in_advance_for_collection_reminder' => [
+    'group_name' => 'Manual Direct Debit',
+    'group' => 'manualdirectdebit',
+    'name' => 'manualdirectdebit_days_in_advance_for_collection_reminder',
+    'title' => 'Days in advance for Collection Reminder',
+    'type' => 'Integer',
+    'html_type' => 'number',
+    'quick_form_type' => 'Element',
+    'default' => '',
+    'is_required' => TRUE,
+    'is_help' => TRUE,
+    'html_attributes' => '',
+    'extra_data' => '',
+    'section' => 'reminder_config',
+  ]
 ];
 
 /**

@@ -290,5 +290,22 @@ function bulkAssignRemove( action ) {
     }
   }, 'json');
 }
+
+function contactRecurContribution(recId, cid) {
+  var url = CRM.url(
+    'civicrm/contact/view/contribution',
+    {
+      reset: '1',
+      id: recId,
+      cid: cid,
+      context: 'contribution',
+      action: 'view',
+      selectedChild: 'contribute'
+    }
+  );
+  CRM.loadPage(url);
+  return false;
+}
+
 </script>
 {/literal}

@@ -166,7 +166,7 @@ function manualdirectdebit_civicrm_navigationMenu(&$menu) {
     ],
     [
       'name' => ts('Direct Debit Originator Number'),
-      'url' => 'civicrm/admin/options/direct_debit_originator_number',
+      'url' => 'civicrm/admin/options/direct_debit_originator_number?reset=1',
       'permission' => 'administer CiviCRM',
       'operator' => NULL,
       'separator' => NULL,
@@ -187,9 +187,24 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
   $action = $form->getAction();
 
   switch ($formName) {
-    case "CRM_Contribute_Form_Contribution":
-      if($action == CRM_Core_Action::ADD){
+    case "CRM_Contribute_Form_UpdateSubscription":
+      if ($action == CRM_Core_Action::UPDATE) {
+        $activity = new CRM_ManualDirectDebit_Hook_Post_RecurContribution_Activity($form->getVar('contributionRecurID'), 'edit');
+        $activity->process();
+      }
+      break;
+
+    case "CRM_Contact_Form_CustomData":
+      if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($form->getVar('_groupID'))) {
         $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
+        $manualDirectDebit->run();
+      }
+      break;
+
+    case "CRM_Contribute_Form_Contribution":
+      if ($action == CRM_Core_Action::ADD) {
+        $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
+        $manualDirectDebit->setCurrentContactId($form->getVar('_contactID'));
         $manualDirectDebit->checkPaymentOptionToCreateMandate();
       }
       break;
@@ -226,6 +241,9 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
     $pageProcessor = new CRM_ManualDirectDebit_Hook_PageRun_TabPage();
     $pageProcessor->setContributionId($contributionId);
     $pageProcessor->hideDirectDebitFields();
+
+    CRM_Core_Resources::singleton()
+      ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/openContribution.js');
   }
 
   if (get_class($page) == 'CRM_Contribute_Page_ContributionRecur') {
@@ -234,7 +252,8 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
   }
 
   if (get_class($page) == 'CRM_Contact_Page_View_CustomData') {
-    CRM_Core_Resources::singleton()->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/mandateEdit.js');
+    CRM_Core_Resources::singleton()
+      ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/mandateEdit.js');
   }
 }
 
@@ -243,9 +262,16 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
  *
  */
 function manualdirectdebit_civicrm_custom($op, $groupID, $entityID, &$params) {
-  if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($groupID) && ($op == 'create' || $op == 'edit')) {
-    $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_DataGenerator($entityID, $params);
-    $mandateDataGenerator->generate();
+  if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($groupID)) {
+    if ($op == 'create' || $op == 'edit') {
+      $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_DataGenerator($entityID, $params);
+      $mandateDataGenerator->runDataGeneration();
+    }
+
+    if ($op == 'update') {
+      $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_DataGenerator($entityID, $params);
+      $mandateDataGenerator->generateMandateData();
+    }
   }
 }
 
@@ -261,6 +287,12 @@ function manualdirectdebit_civicrm_postSave_civicrm_contribution($dao) {
  * Implements hook_civicrm_buildForm()
  */
 function manualdirectdebit_civicrm_buildForm($formName, &$form) {
+  if ($formName == 'CRM_Activity_Form_ActivityLinks') {
+    $openContributionId = CRM_Utils_Request::retrieveValue('openContribution', 'Integer', FALSE);
+    if ($openContributionId){
+      $form->add('hidden', 'optionContributionId', $openContributionId);
+    }
+  }
   if ($formName == 'CRM_Contact_Form_CustomData') {
     $customData = new CRM_ManualDirectDebit_Hook_BuildForm_CustomData($form);
     $customData->run();
@@ -300,20 +332,14 @@ function manualdirectdebit_civicrm_postSave_civicrm_membership_payment($dao) {
  * Implements hook_civicrm_links().
  */
 function manualdirectdebit_civicrm_links($op, $objectName, $objectId, &$links, &$mask, &$values) {
+  $linkProvider = new CRM_ManualDirectDebit_Hook_Links_LinkProvider($links);
+
+  if ($objectName == 'Contribution' && $op == 'contribution.selector.recurring') {
+    $linkProvider->alterRecurContributionLinks($values, $objectId);
+  }
 
   if ($objectName == 'Batch') {
-    $batch = CRM_Batch_BAO_Batch::findById($objectId);
-
-    $instructionsBatchTypeId = CRM_Core_OptionGroup::getRowValues('batch_type', 'instructions_batch', 'name', 'String', FALSE);
-    if ($batch->type_id == $instructionsBatchTypeId['value']) {
-      foreach ($links as &$link) {
-        switch ($link['name']) {
-          case 'Transactions':
-            $link['url'] = 'civicrm/direct_debit/batch-transaction';
-            break;
-        }
-      }
-    }
+    $linkProvider->alterBatchLinks($objectId);
   }
 }
 
@@ -325,13 +351,26 @@ function manualdirectdebit_membershipextras_postOfflineAutoRenewal($membershipId
   $activity->process();
 }
 
-/**
- * Implements hook_civicrm_post()
- */
-function manualdirectdebit_civicrm_post($op, $objectName, $objectId, &$objectRef) {
-  if ($objectName == "ContributionRecur" && ($op == "create" || $op == "edit")) {
-    $activity = new CRM_ManualDirectDebit_Hook_Post_RecurContribution_Activity($objectId, $op);
-    $activity->process();
+function manualdirectdebit_civicrm_searchTasks( $objectName, &$tasks ){
+  if($objectName == 'contribution') {
+    $tasks[] = [
+      'title' => 'Direct Debit send Email Contribution',
+      'class' => 'CRM_ManualDirectDebit_Form_Email_Contribution',
+      'result' => FALSE
+    ];
   }
-}
 
+  if($objectName == 'membership') {
+    $tasks[] = [
+      'title' => 'Direct Debit send Email Membership',
+      'class' => 'CRM_ManualDirectDebit_Form_Email_Membership',
+      'result' => FALSE
+    ];
+    $tasks[] = [
+      'title' => 'Direct debit print/merge document',
+      'class' => 'CRM_ManualDirectDebit_Form_PrintMergeDocument',
+      'result' => FALSE
+    ];
+  }
+
+}

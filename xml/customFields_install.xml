@@ -10,7 +10,7 @@
             <help_pre></help_pre>
             <help_post></help_post>
             <weight>10</weight>
-            <is_active>1</is_active>
+            <is_active>0</is_active>
             <table_name>civicrm_value_dd_mandate</table_name>
             <is_multiple>1</is_multiple>
             <collapse_adv_display>0</collapse_adv_display>
@@ -25,7 +25,7 @@
             <help_pre></help_pre>
             <help_post></help_post>
             <weight>11</weight>
-            <is_active>1</is_active>
+            <is_active>0</is_active>
             <table_name>civicrm_value_dd_information</table_name>
             <is_multiple>0</is_multiple>
             <collapse_adv_display>0</collapse_adv_display>
@@ -314,13 +314,13 @@
             <name>direct_debit_codes</name>
             <title>Direct Debit Codes</title>
             <is_reserved>1</is_reserved>
-            <is_active>1</is_active>
+            <is_active>0</is_active>
         </OptionGroup>
         <OptionGroup>
           <name>direct_debit_originator_number</name>
           <title>Direct Debit Originator Number</title>
           <is_reserved>0</is_reserved>
-          <is_active>1</is_active>
+          <is_active>0</is_active>
         </OptionGroup>
     </OptionGroups>
     <OptionValues>
@@ -376,20 +376,23 @@
             <label>New Direct Debit Instructions</label>
             <name>instructions_batch</name>
             <is_active>1</is_active>
+            <weight>4</weight>
             <description>New Direct Debit Instructions</description>
             <option_group_name>batch_type</option_group_name>
         </OptionValue>
         <OptionValue>
             <label>Direct Debit Payments</label>
             <name>dd_payments</name>
-            <is_active>1</is_active>
+            <weight>5</weight>
             <description>Direct Debit Payments</description>
             <option_group_name>batch_type</option_group_name>
+            <is_active>1</is_active>
         </OptionValue>
         <OptionValue>
             <label>Submitted</label>
             <name>Submitted</name>
             <is_active>1</is_active>
+            <weight>6</weight>
             <description>Submitted</description>
             <option_group_name>batch_status</option_group_name>
         </OptionValue>
@@ -397,53 +400,59 @@
             <label>Discarded</label>
             <name>Discarded</name>
             <is_active>1</is_active>
+            <weight>7</weight>
             <description>Discarded</description>
             <option_group_name>batch_status</option_group_name>
         </OptionValue>
         <OptionValue>
             <label>New Direct Debit Recurring Payment</label>
             <name>new_direct_debit_recurring_payment</name>
-            <is_active>1</is_active>
             <is_default>0</is_default>
+            <weight>100</weight>
             <description>New Direct Debit Recurring Payment</description>
             <option_group_name>activity_type</option_group_name>
+            <is_active>1</is_active>
         </OptionValue>
         <OptionValue>
             <label>Update Direct Debit Recurring Payment</label>
             <name>update_direct_debit_recurring_payment</name>
-            <is_active>1</is_active>
             <is_default>0</is_default>
+            <weight>101</weight>
             <description>Update Direct Debit Recurring Payment</description>
             <option_group_name>activity_type</option_group_name>
+            <is_active>1</is_active>
         </OptionValue>
         <OptionValue>
             <label>Direct Debit Payment Reminder</label>
             <name>direct_debit_payment_reminder</name>
-            <is_active>1</is_active>
             <is_default>0</is_default>
+            <weight>102</weight>
             <description>Direct Debit Payment Reminder</description>
             <option_group_name>activity_type</option_group_name>
+            <is_active>1</is_active>
         </OptionValue>
         <OptionValue>
             <label>Offline Direct Debit Auto-renewal</label>
             <name>offline_direct_debit_auto_renewal</name>
-            <is_active>1</is_active>
             <is_default>0</is_default>
+            <weight>103</weight>
             <description>Offline Direct Debit Auto-renewal</description>
             <option_group_name>activity_type</option_group_name>
+            <is_active>1</is_active>
         </OptionValue>
         <OptionValue>
             <label>Direct Debit Mandate Update</label>
             <name>direct_debit_mandate_update</name>
-            <is_active>1</is_active>
             <is_default>0</is_default>
+            <weight>104</weight>
             <description>Direct Debit Mandate Update</description>
             <option_group_name>activity_type</option_group_name>
+            <is_active>1</is_active>
         </OptionValue>
     </OptionValues>
     <ProfileGroups>
         <ProfileGroup>
-            <is_active>1</is_active>
+            <is_active>0</is_active>
             <group_type>Contact</group_type>
             <title>Direct Debit Information</title>
             <add_captcha>0</add_captcha>

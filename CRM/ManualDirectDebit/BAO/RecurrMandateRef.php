@@ -3,6 +3,12 @@
 class CRM_ManualDirectDebit_BAO_RecurrMandateRef extends CRM_ManualDirectDebit_DAO_RecurrMandateRef {
 
   /**
+   * Name of table which save dependency between recurring contribution and
+   * mandate
+   */
+  const DIRECT_DEBIT_RECURRING_CONTRIBUTION_NAME = 'dd_contribution_recurr_mandate_ref';
+
+  /**
    * @param $params
    * @param $defaults
    *
@@ -60,6 +66,33 @@ class CRM_ManualDirectDebit_BAO_RecurrMandateRef extends CRM_ManualDirectDebit_D
     }
 
     return $entityData;
+  }
+
+  /**
+   * Gets id of recurring contribution
+   *
+   * @param $recurContributionId
+   *
+   * @return int|null
+   */
+  public static function getMandateIdForRecurringContribution($recurContributionId) {
+    $sqlSelectDebitMandateID = "SELECT `mandate_id` AS id 
+      FROM " . self::DIRECT_DEBIT_RECURRING_CONTRIBUTION_NAME . " 
+      WHERE `recurr_id` = %1 ORDER BY mandate_id DESC LIMIT 1";
+
+    $queryResult = CRM_Core_DAO::executeQuery($sqlSelectDebitMandateID, [
+      1 => [
+        $recurContributionId,
+        'String',
+      ],
+    ]);
+    $queryResult->fetch();
+
+    if (isset($queryResult->id) && !empty($queryResult->id)) {
+      return $queryResult->id;
+    } else {
+      return NULL;
+    }
   }
 
 }
