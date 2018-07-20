@@ -1,9 +1,20 @@
-#directDebitMandate:hover {
+.html-adjust.positionRelative:hover {
   background-color: #ffffcc;
 }
 
-#directDebitMandate {
+.html-adjust.positionRelative {
   cursor: pointer;
   transition: 0.3s;
   color: #2786c2;
+}
+
+.positionRelative {
+  position: relative;
+}
+
+.newMandateButton {
+  display: block;
+  position: absolute;
+  top: 4px;
+  right: 12px;
 }

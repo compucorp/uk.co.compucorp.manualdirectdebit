@@ -2,12 +2,23 @@
 	Help texts for Manual Direct Debit Settings.
 *}
 
+{htxt id="manualdirectdebit_minimum_reference_prefix_length-title"}
+  {ts}The minimum length of the mandate reference digits.
+   If the length is not enough, leading 0s will be amended to it. For example,
+   if the prefix is A and the minimum length is 6, the first mandate reference will be A000001.{/ts}
+{/htxt}
+
 {htxt id="manualdirectdebit_minimum_days_to_first_payment-title"}
   {ts}For new mandates, Direct Debit first
 contribution date should be set to the nearest new instruction run
 date with an extra offset of the number of days configured here.{/ts}
 {/htxt}
 
+{htxt id="manualdirectdebit_days_in_advance_for_collection_reminder-title"}
+  {ts}Set how many days in advance of the Received Date of a Direct Debit
+contribution should the Direct Debit Payment Collection Reminder
+be sent to the user.{/ts}
+{/htxt}
 
 {htxt id="inactivity_code-title"}
   {ts}Mandates with inactive codes will not be selectable when

@@ -1,6 +1,7 @@
 <?php
 
 use CRM_ManualDirectDebit_ExtensionUtil as E;
+use CRM_ManualDirectDebit_Common_SettingsManager as SettingsManager;
 
 /**
  * Direct Debt Configuration form controller
@@ -8,14 +9,6 @@ use CRM_ManualDirectDebit_ExtensionUtil as E;
  * @see http://wiki.civicrm.org/confluence/display/CRMDOC43/QuickForm+Reference
  */
 class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
-
-  /**
-   * Contains array of fields, which config Manual Direct Debit Expansion
-   *
-   * @var string[]
-   */
-
-  private $allowedConfigFields = [];
 
   /**
    * Contains array of names, which must be displayed
@@ -35,11 +28,20 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
 
   private $paymentConfigs = [];
 
+  /**
+   * Contains array of names, which must be displayed
+   * in Reminder configuration section
+   *
+   * @var string[]
+   */
+
+  private $reminderConfig = [];
+
   public function buildQuickForm() {
     CRM_Utils_System::setTitle(E::ts('Direct Debit Configurations'));
 
     $fieldsWithHelp = [];
-    $allowedConfigFields  = $this->getAllowedConfigFields();
+    $allowedConfigFields  = SettingsManager::getConfigFields();
     foreach ($allowedConfigFields  as $name => $config) {
       $this->add(
         $config['html_type'],
@@ -71,32 +73,16 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
 
     $this->assign('mandateConfigSection', $this->mandateConfigs);
     $this->assign('paymentConfigSection', $this->paymentConfigs);
+    $this->assign('reminderConfigSection', $this->reminderConfig);;
     $this->assign('fieldsWithHelp', $fieldsWithHelp);
 
   }
 
   public function postProcess() {
-    $allowedConfigFields = $this->getAllowedConfigFields();
+    $allowedConfigFields = SettingsManager::getConfigFields();
     $submittedValues = $this->exportValues();
     $valuesToSave = array_intersect_key($submittedValues, $allowedConfigFields);
       civicrm_api3('setting', 'create', $valuesToSave);
-  }
-
-  /**
-   * Gets the configurations allowed to be set on this form.
-   *
-   * @return array
-   */
-  private function getAllowedConfigFields() {
-    if (!empty($this->allowedConfigFields )) {
-      return $this->allowedConfigFields;
-    }
-
-    $this->allowedConfigFields =  civicrm_api3('setting', 'getfields',[
-      'filters' =>[ 'group' => 'manualdirectdebit'],
-    ])['values'];
-
-    return $this->allowedConfigFields;
   }
 
   /**
@@ -106,7 +92,7 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
    */
   public function setDefaultValues() {
     $currentValues = civicrm_api3('setting', 'get',
-      ['return' => array_keys($this->getAllowedConfigFields())]);
+      ['return' => array_keys(SettingsManager::getConfigFields())]);
     $defaults = [];
     $domainID = CRM_Core_Config::domainID();
     foreach ($currentValues['values'][$domainID] as $name => $value) {
@@ -130,6 +116,10 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
 
       case 'payment_config':
         $this->paymentConfigs[] = $name;
+        break;
+
+      case 'reminder_config':
+        $this->reminderConfig[] = $name;
         break;
 
     }

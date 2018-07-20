@@ -33,7 +33,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomDataByType {
   }
 
   /**
-   *  Checks if custom group 'Direct Debit Information' and launches hiding
+   * Checks if custom group 'Direct Debit Information' and launches hiding
    */
   public function run() {
     if ($this->checkIfDirectDebitInformationInGroupTree()) {

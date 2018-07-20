@@ -12,12 +12,6 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
   const DIRECT_DEBIT_TABLE_NAME = 'civicrm_value_dd_mandate';
 
   /**
-   * Name of table which save dependency between recurring contribution and
-   * mandate
-   */
-  const DIRECT_DEBIT_RECURRING_CONTRIBUTION_NAME = 'dd_contribution_recurr_mandate_ref';
-
-  /**
    * Assigns depandency between contribution and mandate
    *
    * @param $contributionId
@@ -46,6 +40,10 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
     ];
 
     CRM_ManualDirectDebit_BAO_RecurrMandateRef::create($rows);
+
+    // Creates "New Direct Debit Recurring Payment" activity
+    $activity = new CRM_ManualDirectDebit_Hook_Post_RecurContribution_Activity($contributionId, 'create');
+    $activity->process();
   }
 
   /**
@@ -66,31 +64,6 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
     $queryResult->fetch();
 
     return $queryResult->id;
-  }
-
-  /**
-   * Gets id of recurring contribution
-   *
-   * @return int|null
-   */
-  public function getMandateForCurrentRecurringContribution($recurContributionId) {
-    $sqlSelectDebitMandateID = "SELECT `mandate_id` AS id 
-      FROM " . self::DIRECT_DEBIT_RECURRING_CONTRIBUTION_NAME . " 
-      WHERE `recurr_id` = %1";
-
-    $queryResult = CRM_Core_DAO::executeQuery($sqlSelectDebitMandateID, [
-      1 => [
-        $recurContributionId,
-        'String',
-      ],
-    ]);
-    $queryResult->fetch();
-
-    if (isset($queryResult->id) && !empty($queryResult->id)) {
-      return $queryResult->id;
-    } else {
-      return NULL;
-    }
   }
 
   /**
@@ -136,6 +109,22 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
 
     $this->assignMandate($mandateId, $currentContactId);
 
+    $this->launchCustomHook($currentContactId, $mandateValues);
+  }
+
+  /**
+   * Launches custom hook
+   *
+   * @param $currentContactId
+   * @param $mandateValues
+   */
+  private function launchCustomHook($currentContactId, $mandateValues) {
+    $directDebitMandateId = civicrm_api3('CustomGroup', 'getvalue', [
+      'return' => "id",
+      'name' => "direct_debit_mandate",
+    ]);
+
+    CRM_Utils_Hook::custom('update', $directDebitMandateId, $currentContactId, $mandateValues);
   }
 
   /**
@@ -304,6 +293,24 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
     ]);
 
     return $amountOfInstallments == $amountOfContributions ? TRUE : FALSE;
+  }
+
+
+  /**
+   * Changes mandate id for contribution
+   *
+   * @param $mandateId
+   * @param $oldMandateId
+   */
+  public function changeMandateForContribution($mandateId, $oldMandateId) {
+    $completedStatusId = CRM_ManualDirectDebit_Common_OptionValue::getValueForOptionValue('contribution_status', 'Completed');
+
+    $query = "UPDATE `civicrm_value_dd_information` AS dd_information 
+              LEFT JOIN `civicrm_contribution` AS contribution ON dd_information.entity_id = contribution.id 
+              SET dd_information.mandate_id = $mandateId 
+              WHERE dd_information.mandate_id = $oldMandateId 
+              AND contribution.contribution_status_id != $completedStatusId";
+    CRM_Core_DAO::executeQuery($query);
   }
 
 }

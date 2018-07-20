@@ -89,7 +89,7 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
 
     list($param['offset'], $param['rowCount']) = $this->_pager->getOffsetAndRowCount();
 
-    $batchList = CRM_Batch_BAO_Batch::getBatchList($param);
+    $batchList = CRM_ManualDirectDebit_Page_BatchTableListHandler::generateRows($param);
     $batchStatuses = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id', ['labelColumn' => 'name']);
 
     $param = [];

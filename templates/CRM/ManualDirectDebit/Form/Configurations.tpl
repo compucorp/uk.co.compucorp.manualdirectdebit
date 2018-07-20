@@ -28,6 +28,19 @@
       {/foreach}
     </tbody>
   </table>
+  <h3>{ts}Reminder config{/ts}</h3>
+  <table class="form-layout-compressed">
+    <tbody>
+      {foreach from=$reminderConfigSection item=elementName}
+        <tr>
+          <td class="label">{$form.$elementName.label}</td>
+          <td>{$form.$elementName.html}
+            {if $fieldsWithHelp.$elementName}{help id=$form.$elementName.name}{/if}
+          </td>
+        </tr>
+      {/foreach}
+    </tbody>
+  </table>
   <h3 class="title">{ts}Batch and code transition{/ts}</h3>
   <table style="width:100%" class="row-highlight">
     <tr class="crm-admin-options crm-entity odd-row">
