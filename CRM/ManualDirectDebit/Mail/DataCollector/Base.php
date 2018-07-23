@@ -31,6 +31,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     'currency' => FALSE,
     'membershipData' => FALSE,
     'nextMembershipPayment' => FALSE,
+    'priseItemList' => FALSE
   ];
 
   /**
@@ -67,6 +68,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $this->setMembershipId();
 
     $this->collectRecurringContributionData();
+    $this->collectPriceItemList();
     $this->collectMandateData();
     $this->collectMembershipData();
     $this->collectImageSrc();
@@ -173,8 +175,8 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
         'sort_code' => $dao->sort_code,
         'dd_ref' => $dao->dd_ref,
         'dd_code' => $this->getDdCode($dao->dd_code),
-        'start_date' => $dao->start_date,
-        'authorisation_date' => $dao->authorisation_date,
+        'start_date' => CRM_Utils_Date::customFormat($dao->start_date, '%d/%m/%Y'),
+        'authorisation_date' => CRM_Utils_Date::customFormat($dao->authorisation_date, '%d/%m/%Y'),
       ];
     }
   }
@@ -188,19 +190,49 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     }
 
     $recurringContributionBao = CRM_Contribute_BAO_ContributionRecur::findById($this->recurringContributionId);
-    $recurringContributionRows = $this->collectRecurringContributionRows();
-    $total = 0;
-    foreach ($recurringContributionRows as $recurringContributionRow ) {
-      $total += $recurringContributionRow['amount'];
-    }
-    $total = round($total, 2);
 
     $this->tplParams['recurringContributionData'] = [
-      'recurringContributionRows' => $recurringContributionRows,
-      'total' => $total,
+      'total' => $this->getRecurringContributionTotal(),
       'installments' => $recurringContributionBao->installments,
       'installments_paid' => $recurringContributionBao->amount
     ];
+  }
+
+  /**
+   * Gets price items for contribution
+   */
+  private function collectPriceItemList() {
+    if ($this->recurringContributionId === FALSE) {
+      return;
+    }
+
+    $recurringContributionBao = CRM_Contribute_BAO_ContributionRecur::findById($this->recurringContributionId);
+
+    try {
+      $lineItems = civicrm_api3('LineItem', 'get', [
+        'sequential' => 1,
+        'return' => ["label", "line_total"],
+        'contribution_id' => $this->contributionId,
+        'options' => ['limit' => 0],
+        'entity_table' => "civicrm_contribution",
+      ]);
+    } catch (CiviCRM_API3_Exception $e) {
+      return;
+    }
+
+    if (empty($lineItems['values'])) {
+      return;
+    }
+
+    $priceItemList = [];
+    foreach ($lineItems['values'] as $lineItem) {
+      $priceItemList[] = [
+        'label' => $lineItem['label'],
+        'totalAmount' => $recurringContributionBao->installments * $lineItem['line_total']
+      ];
+    }
+
+    $this->tplParams['priseItemList'] = (empty($priceItemList)) ? FALSE : $priceItemList;
   }
 
   /**
@@ -226,37 +258,6 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     }
 
     return '(' . $currencyString . ')';
-  }
-
-  /**
-   * Collect recurring contribution table rows
-   *
-   * @return array
-   */
-  private function collectRecurringContributionRows() {
-    $query = "
-      SELECT 
-        contribution.total_amount AS amount,
-        financial_type.name AS financial_type_name
-      FROM civicrm_contribution AS contribution
-      LEFT JOIN civicrm_financial_type AS financial_type
-        ON contribution.financial_type_id = financial_type.id
-      WHERE contribution.contribution_recur_id = %1
-    ";
-
-    $dao = CRM_Core_DAO::executeQuery($query, [
-      1 => [$this->recurringContributionId, 'Integer']
-    ]);
-
-    $rows = [];
-    while ($dao->fetch()) {
-      $rows[] = [
-        'type' => $dao->financial_type_name,
-        'amount' => $dao->amount
-      ];
-    }
-
-    return $rows;
   }
 
   /**
@@ -332,7 +333,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
    * Gets direct debit image src
    */
   private function collectImageSrc() {
-    $this->tplParams['directDebitImageSrc'] = CRM_ManualDirectDebit_ExtensionUtil::url() . '/Images/debit.ico';
+    $this->tplParams['directDebitImageSrc'] = $_SERVER['HTTP_ORIGIN'] . Civi::paths()->getUrl("[civicrm.files]/ext/") . CRM_ManualDirectDebit_ExtensionUtil::LONG_NAME . '/Images/debit.png';
   }
 
   /**
@@ -369,6 +370,32 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     ]);
 
     return $result['values'][0]['api.OptionValue.getValue'];
+  }
+
+  /**
+   * Gets recurring contribution total amount
+   *
+   * @return int
+   */
+  private function getRecurringContributionTotal() {
+    $query = "
+      SELECT 
+        IF(SUM(contribution.total_amount) IS NOT NULL, ROUND(SUM(contribution.total_amount), 2), 0) AS sumAmount
+      FROM civicrm_contribution AS contribution
+      LEFT JOIN civicrm_financial_type AS financial_type
+        ON contribution.financial_type_id = financial_type.id
+      WHERE contribution.contribution_recur_id = %1
+    ";
+
+    $dao = CRM_Core_DAO::executeQuery($query, [
+      1 => [$this->recurringContributionId, 'Integer']
+    ]);
+
+    while ($dao->fetch()) {
+      return $dao->sumAmount;
+    }
+
+    return 0;
   }
 
 }

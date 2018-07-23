@@ -168,6 +168,16 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     }
   }
 
+  public function upgrade_0005() {
+    try {
+      $this->createMessageTemplates();
+
+      return TRUE;
+    } catch (CiviCRM_API3_Exception $e) {
+      return FALSE;
+    }
+  }
+
   public function upgrade_0003() {
     try {
       $this->createScheduledJob();
