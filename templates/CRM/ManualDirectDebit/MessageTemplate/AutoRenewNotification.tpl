@@ -88,11 +88,11 @@
       </tr>
       <tr>
         <td style="padding-left: 10px;"><span style="color: black;">{ts}Start Date{/ts}</span></td>
-        <td style="padding-left: 10px;"><span style="color: black;">{$mandateData.start_date|date_format:"%d/%m/%Y"}</span></td>
+        <td style="padding-left: 10px;"><span style="color: black;">{$mandateData.start_date}</span></td>
       </tr>
       <tr>
         <td style="padding-left: 10px;"><span style="color: black;">{ts}Authorisation Date:{/ts}</span></td>
-        <td style="padding-left: 10px;"><span style="color: black;">{$mandateData.authorisation_date|date_format:"%d/%m/%Y"}</span></td>
+        <td style="padding-left: 10px;"><span style="color: black;">{$mandateData.authorisation_date}</span></td>
       </tr>
     </table>
     <!-- End of code block for generating mandate information. -->
@@ -139,8 +139,8 @@
             <h3 style="color: black;">{ts}The Direct Debit Guarantee{/ts}</h3>
           </th>
           <th>
-            <div style="margin-right: 20px">
-              <img src="{$directDebitImageSrc}" style="width: 100%;height: auto;" alt="Direct Debit" />
+            <div style="margin-right: 10px;">
+              <img src="{$directDebitImageSrc}" style="width:90px;height: auto;" alt="Direct Debit"/>
             </div>
           </th>
         </tr>
