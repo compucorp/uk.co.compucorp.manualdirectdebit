@@ -173,8 +173,8 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
         'sort_code' => $dao->sort_code,
         'dd_ref' => $dao->dd_ref,
         'dd_code' => $this->getDdCode($dao->dd_code),
-        'start_date' => $dao->start_date,
-        'authorisation_date' => $dao->authorisation_date,
+        'start_date' => CRM_Utils_Date::customFormat($dao->start_date, '%d/%m/%Y'),
+        'authorisation_date' => CRM_Utils_Date::customFormat($dao->authorisation_date, '%d/%m/%Y'),
       ];
     }
   }
@@ -332,7 +332,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
    * Gets direct debit image src
    */
   private function collectImageSrc() {
-    $this->tplParams['directDebitImageSrc'] = CRM_ManualDirectDebit_ExtensionUtil::url() . '/Images/debit.ico';
+    $this->tplParams['directDebitImageSrc'] = CRM_ManualDirectDebit_ExtensionUtil::url('Images/debit.png');
   }
 
   /**
