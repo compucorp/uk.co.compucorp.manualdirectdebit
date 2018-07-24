@@ -106,6 +106,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
 
       throw $exception;
     }
+    $transaction->commit();
 
     $this->assignMandate($mandateId, $currentContactId);
 
@@ -148,6 +149,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
       $transaction->rollback();
       throw $exception;
     }
+    $transaction->commit();
 
     $this->setMandateForCreatingDependency($mandateId);
   }
