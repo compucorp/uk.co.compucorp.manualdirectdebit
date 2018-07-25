@@ -346,9 +346,12 @@ function manualdirectdebit_civicrm_links($op, $objectName, $objectId, &$links, &
 /**
  * Implements hook_membershipextras_postOfflineAutoRenewal()
  */
-function manualdirectdebit_membershipextras_postOfflineAutoRenewal($membershipId, $recurContributionId) {
+function manualdirectdebit_membershipextras_postOfflineAutoRenewal($membershipId, $recurContributionId, $previousRecurContributionId) {
   $activity = new CRM_ManualDirectDebit_Hook_PostOfflineAutoRenewal_Activity($recurContributionId);
   $activity->process();
+
+  $mandate = new CRM_ManualDirectDebit_Hook_PostOfflineAutoRenewal_Mandate($recurContributionId, $previousRecurContributionId);
+  $mandate->process();
 }
 
 function manualdirectdebit_civicrm_searchTasks( $objectName, &$tasks ){
