@@ -20,6 +20,13 @@ class CRM_ManualDirectDebit_Hook_Custom_Contribution_ContributionDataGenerator {
   private $start_date;
 
   /**
+   * Next contribution date
+   *
+   * @var object
+   */
+  private $nextContributionDate;
+
+  /**
    * Array of extension settings
    *
    * @var array
@@ -60,6 +67,7 @@ class CRM_ManualDirectDebit_Hook_Custom_Contribution_ContributionDataGenerator {
   public function generateContributionFieldsValues() {
     $this->generateCycleDate();
     $this->generateRecurringContributionStartDate();
+    $this->generateNextContributionDate();
   }
 
   /**
@@ -106,6 +114,19 @@ class CRM_ManualDirectDebit_Hook_Custom_Contribution_ContributionDataGenerator {
     $this->start_date = $startDateGenerator->generate();
   }
 
+  private function generateNextContributionDate() {
+    $contributionRecur = civicrm_api3('ContributionRecur', 'get', [
+      'sequential' => 1,
+      'return' => ['id', 'start_date', 'frequency_interval', 'frequency_unit'],
+      'contact_id' => $this->entityID,
+      'options' => ['limit' => 1, 'sort' => 'contribution_recur_id DESC'],
+    ])['values'][0];
+
+    $receiveDateCalculator = new CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator($contributionRecur);
+    $nextContributionIndex = 2;
+    $this->nextContributionDate = $receiveDateCalculator->calculate($nextContributionIndex);
+  }
+
   /**
    * Saves all generated values
    */
@@ -118,6 +139,7 @@ class CRM_ManualDirectDebit_Hook_Custom_Contribution_ContributionDataGenerator {
         'id' => '$value.id',
         'cycle_day' => $this->cycleDay,
         'start_date' => $this->start_date,
+        'next_sched_contribution_date' => $this->nextContributionDate,
       ],
     ]);
 
