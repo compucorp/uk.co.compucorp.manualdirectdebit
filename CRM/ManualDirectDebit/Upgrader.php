@@ -411,7 +411,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       "name" => "OfflineDirectDebit",
       "title" => ts("Offline Direct Debit"),
       "description" => ts("Payment processor"),
-      "user_name_label" => ts("Offline Direct Debit"),
+      "user_name_label" => ts("User Name"),
       "class_name" => "Payment_Manual",
       "billing_mode" => CRM_Core_Payment::BILLING_MODE_BUTTON,
       "is_recur" => "1",
@@ -425,15 +425,44 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
    * Installs the 'Direct Debit' payment processor
    */
   private function createDirectDebitPaymentProcessor() {
-    $paymentProcessor = [
+    $defaultProcessorPrams = [
       'name' => 'Direct Debit',
       'description' => '',
       'payment_processor_type_id' => 'OfflineDirectDebit',
       'domain_id' => CRM_Core_Config::domainID(),
       'payment_instrument_id' => 'direct_debit',
       'is_active' => 1,
+      'class_name' => 'Payment_Manual',
+      'is_recur' => '1',
+      'financial_account_id' => $this->getDepositBankAccountId(),
     ];
-    civicrm_api3('PaymentProcessor', 'create', $paymentProcessor);
+
+    $paramsPerType = [
+      'live' => [
+        'is_test' => '0',
+        'user_name' => 'Live',
+        'url_site' => 'https://live.civicrm.org',
+        'url_recur' => 'https://liverecurr.civicrm.org',
+      ],
+      'test' => [
+        'is_test' => '1',
+        'user_name' => 'Test',
+        'url_site' => 'https://test.civicrm.org',
+        'url_recur' => 'https://testrecurr.civicrm.org',
+      ],
+    ];
+
+    foreach($paramsPerType as $typeParams) {
+      $params = array_merge($defaultProcessorPrams, $typeParams);
+      civicrm_api3('PaymentProcessor', 'create', $params);
+    }
+  }
+
+  private function getDepositBankAccountId() {
+    return civicrm_api3('FinancialAccount', 'getvalue', [
+      'return' => 'id',
+      'name' => 'Deposit Bank Account',
+    ]);
   }
 
   public function postInstall() {
@@ -537,13 +566,19 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     switch ($action) {
       case 'enable':
         if (isset($customGroup['id'])) {
-          CRM_Core_BAO_CustomGroup::setIsActive((int) $customGroup['id'], 1);
+          civicrm_api3('CustomGroup', 'create', [
+            'id' => $customGroup['id'],
+            'is_active' => 1,
+          ]);
         }
         break;
 
       case 'disable':
         if (isset($customGroup['id'])) {
-          CRM_Core_BAO_CustomGroup::setIsActive((int) $customGroup['id'], 0);
+          civicrm_api3('CustomGroup', 'create', [
+            'id' => $customGroup['id'],
+            'is_active' => 0,
+          ]);
         }
         break;
 
@@ -608,10 +643,13 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
    * Deletes Direct Debit payment processor
    */
   private function deletePaymentProcessor() {
-    civicrm_api3('PaymentProcessor', 'get', [
-      'name' => "Direct Debit",
-      'api.PaymentProcessor.delete' => ['id' => '$value.id'],
-    ]);
+    foreach([0, 1] as $isTest) {
+      civicrm_api3('PaymentProcessor', 'get', [
+        'name' => 'Direct Debit',
+        'is_test' => $isTest,
+        'api.PaymentProcessor.delete' => ['id' => '$value.id'],
+      ]);
+    }
   }
 
   /**
