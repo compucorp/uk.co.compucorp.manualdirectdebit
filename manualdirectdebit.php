@@ -304,8 +304,11 @@ function manualdirectdebit_civicrm_buildForm($formName, &$form) {
   }
 
   if ($formName === 'CRM_Member_Form_Membership' || $formName === 'CRM_Member_Form_MembershipRenewal') {
-    $customGroupInjector = new CRM_ManualDirectDebit_Hook_BuildForm_InjectCustomGroup($form);
-    $customGroupInjector->buildForm();
+    $formBuilder = new CRM_ManualDirectDebit_Hook_BuildForm_InjectCustomGroup($form);
+    $formBuilder->buildForm();
+
+    $formBuilder = new CRM_ManualDirectDebit_Hook_BuildForm_Membership($form);
+    $formBuilder->buildForm();
   }
 }
 
