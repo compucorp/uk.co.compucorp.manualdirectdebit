@@ -12,7 +12,7 @@ CRM.$('document').ready(function () {
       if (isAlreadyEditButtonAdd) {
         var mandateData = JSON.parse(CRM.$(this).attr('data-post'));
 
-        CRM.$('<a href=\"#\" class=\"crm-hover-button crm-custom-value\" id="edit_direct_debit_mandate_' + cgCount + '" title=\"Edit Direct Debit Mandate\" onclick=\"CRM.loadPage(\'' + getUrlForUpdatingCurrentMandate(cgCount, mandateData.groupID, mandateData.contactId, mandateData.valueID) + '\')\">Edit</a>').insertAfter(CRM.$(this));
+        CRM.$('<a href=\"#\" class=\"button edit\" id="edit_direct_debit_mandate_' + cgCount + '" title=\"Edit Direct Debit Mandate\" onclick=\"CRM.loadPage(\'' + getUrlForUpdatingCurrentMandate(cgCount, mandateData.groupID, mandateData.contactId, mandateData.valueID) + '\')\"><span><i class="crm-i fa-pencil"></i> Edit </span></a>').insertAfter(CRM.$(this));
         CRM.$(this).hide();
       }
     });
