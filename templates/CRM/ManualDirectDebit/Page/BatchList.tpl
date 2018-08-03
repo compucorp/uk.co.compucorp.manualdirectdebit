@@ -1,9 +1,9 @@
 <div id="enableDisableStatusMsg" class="crm-container" style="display:none;"></div>
-<div class="batch-list">
+<div class="batch-list crm-results-block">
   {include file="CRM/common/pager.tpl" location="top"}
     {strip}
-  <table class="batchPaginator" id="crm-transaction-selector-assign-{$entityID}" cellpadding="0" cellspacing="0" border="0">
-    <thead>
+  <table class="batchPaginator selector row-highlight" id="crm-transaction-selector-assign-{$entityID}" cellpadding="0" cellspacing="0" border="0">
+    <thead class="sticky">
     <tr>
       <th class="crm-batch-name">{ts}Batch Name{/ts}</th>
       <th class="crm-batch-item_count">{ts}{$type} Count{/ts}</th>
@@ -41,7 +41,6 @@
     {/strip}
   {include file="CRM/common/pager.tpl" location="bottom"}
 </div>
-
 
 {literal}
 <script type="text/javascript">
