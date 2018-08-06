@@ -119,6 +119,7 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate {
       $transaction->rollback();
       throw $exception;
     }
+    $transaction->commit();
   }
 
   /**
