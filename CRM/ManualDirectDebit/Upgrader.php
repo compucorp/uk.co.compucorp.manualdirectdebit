@@ -331,7 +331,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
         'parent_name' => 'direct_debit',
       ],
       [
-        'label' => ts('Export Direct Debit Payments'),
+        'label' => ts('Create Payment Collection Batch'),
         'name' => 'export_direct_debit_payments',
         'url' => 'civicrm/direct_debit/batch?reset=1&action=add&type_id=' . array_search('dd_payments', $batchTypes),
         'permission' => 'can manage direct debit batches',
@@ -349,7 +349,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
         'parent_name' => 'direct_debit',
       ],
       [
-        'label' => ts('View Payment Batches'),
+        'label' => ts('View Payment Collection Batches'),
         'name' => 'view_payment_batches',
         'url' => 'civicrm/direct_debit/batch-list?reset=1&type_id=' . array_search('dd_payments', $batchTypes),
         'permission' => 'can manage direct debit batches',

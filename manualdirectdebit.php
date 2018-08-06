@@ -357,7 +357,7 @@ function manualdirectdebit_membershipextras_postOfflineAutoRenewal($membershipId
 function manualdirectdebit_civicrm_searchTasks( $objectName, &$tasks ){
   if($objectName == 'contribution') {
     $tasks[] = [
-      'title' => 'Direct Debit send Email Contribution',
+      'title' => 'Send Direct Debit Notifications',
       'class' => 'CRM_ManualDirectDebit_Form_Email_Contribution',
       'result' => FALSE
     ];
@@ -365,12 +365,12 @@ function manualdirectdebit_civicrm_searchTasks( $objectName, &$tasks ){
 
   if($objectName == 'membership') {
     $tasks[] = [
-      'title' => 'Direct Debit send Email Membership',
+      'title' => 'Send Direct Debit Notifications',
       'class' => 'CRM_ManualDirectDebit_Form_Email_Membership',
       'result' => FALSE
     ];
     $tasks[] = [
-      'title' => 'Direct debit print/merge document',
+      'title' => 'Print Direct Debit Letters',
       'class' => 'CRM_ManualDirectDebit_Form_PrintMergeDocument',
       'result' => FALSE
     ];
