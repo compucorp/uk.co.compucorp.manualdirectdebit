@@ -115,6 +115,26 @@
     </div>
     <!-- End of code block for generating membership information. -->
 
+    <!-- Start of code block for generating recurring contribution installments -->
+    {if $recurringContributionData.installments gt 0}
+      <div>
+        {foreach from=$recurringContributionData.recurringContributionRows.recurringContributionInstallments item=recurringPlanRow}
+          <div>
+            <span style="padding-left: 10px;">
+              {$recurringPlanRow.index}
+            </span>
+            <span style="padding-left: 10px;">
+              {$recurringPlanRow.amount}
+            </span>
+            <span style="padding-left: 10px;">
+              {$recurringPlanRow.due_date}
+            </span>
+          </div>
+        {/foreach}
+      </div>
+    {/if}
+    <!-- End of code block for generating recurring contribution installments -->
+
     {if isset($nextMembershipPayment) and $nextMembershipPayment}
       <!-- Start of 4th section for custom text.  -->
       <div>
