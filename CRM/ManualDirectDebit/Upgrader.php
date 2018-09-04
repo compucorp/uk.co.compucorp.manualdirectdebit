@@ -434,7 +434,6 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       'is_active' => 1,
       'class_name' => 'Payment_Manual',
       'is_recur' => '1',
-      'financial_account_id' => $this->getDepositBankAccountId(),
     ];
 
     $paramsPerType = [
@@ -456,13 +455,6 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       $params = array_merge($defaultProcessorPrams, $typeParams);
       civicrm_api3('PaymentProcessor', 'create', $params);
     }
-  }
-
-  private function getDepositBankAccountId() {
-    return civicrm_api3('FinancialAccount', 'getvalue', [
-      'return' => 'id',
-      'name' => 'Deposit Bank Account',
-    ]);
   }
 
   public function postInstall() {
