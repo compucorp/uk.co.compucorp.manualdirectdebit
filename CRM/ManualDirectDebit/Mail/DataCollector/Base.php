@@ -205,7 +205,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
       $recurringContributionPlan[$index]['amount'] = $recurringContributionRow['recur_amount'];
       $recurringContributionPlan[$index]['due_date'] = $dueDate->format('Y-m-d');
     }
-    $recurringContributionRows['recurringContributionInstallments'] = $recurringContributionPlan;
+    $recurringContributionRows['recurringInstallmentsTable'] = $this->buildRecuringContributionTable($recurringContributionPlan);
     $total = round($total, 2);
 
     $this->tplParams['recurringContributionData'] = [
@@ -214,6 +214,37 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
       'installments' => $recurringContributionBao->installments,
       'installments_paid' => $recurringContributionBao->amount
     ];
+  }
+
+  /**
+   * Builds a HTML table for recurring contribution installments
+   *
+   * @param $recurringContributionPlan
+   * @return string
+   */
+  private function buildRecuringContributionTable($recurringContributionPlan) {
+    $html = '<table>'
+        .'<tr>'
+          .'<th style="padding-left: 10px;"><strong>Installment No.</strong></th>'
+          .'<th style="padding-left: 10px;"><strong>Amount</strong></th>'
+          .'<th style="padding-left: 10px;"><strong>Due Date</strong></th>'
+        .'</tr>';
+    foreach ($recurringContributionPlan as $recurringPlanRow) {
+      $html .= '<tr>'
+            .'<td>'
+              .$recurringPlanRow['index']
+            .'</td>'
+            .'<td>'
+              .$recurringPlanRow['amount']
+            .'</td>'
+            .'<td>'
+              .$recurringPlanRow['due_date']
+            .'</td>'
+          .'</tr>';
+    }
+    $html .= '</table>';
+
+    return $html;
   }
 
   /**

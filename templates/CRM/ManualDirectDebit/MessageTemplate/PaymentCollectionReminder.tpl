@@ -117,21 +117,8 @@
 
     <!-- Start of code block for generating recurring contribution installments -->
     {if $recurringContributionData.installments gt 0}
-      <div>
-        {foreach from=$recurringContributionData.recurringContributionRows.recurringContributionInstallments item=recurringPlanRow}
-          <div>
-            <span style="padding-left: 10px;">
-              {$recurringPlanRow.index}
-            </span>
-            <span style="padding-left: 10px;">
-              {$recurringPlanRow.amount}
-            </span>
-            <span style="padding-left: 10px;">
-              {$recurringPlanRow.due_date}
-            </span>
-          </div>
-        {/foreach}
-      </div>
+      <p>You can find your installment schedule below:</p>
+      {$recurringContributionData.recurringContributionRows.recurringInstallmentsTable}
     {/if}
     <!-- End of code block for generating recurring contribution installments -->
 
