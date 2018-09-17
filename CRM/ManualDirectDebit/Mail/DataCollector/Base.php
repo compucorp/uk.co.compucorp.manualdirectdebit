@@ -193,16 +193,9 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $recurringContributionPlan = array();
     foreach ($recurringContributionRows as $index => $recurringContributionRow) {
       $total += $recurringContributionRow['amount'];
-      if ($index == 0) {
-        $dateStr = explode(' ', $recurringContributionRow['recur_start_date']);
-        $dueDate = DateTime::createFromFormat('Y-m-d', $dateStr[0]);
-      }
-      else {
-        $dueDate = DateTime::createFromFormat('Y-m-d', $recurringContributionPlan[$index-1]['due_date']);
-        $dueDate->modify('+'.$recurringContributionRow['recur_interval'].' '.$recurringContributionRow['recur_frequency_unit']);
-      }
+      $dueDate = DateTime::createFromFormat('Y-m-d H:i:s', $recurringContributionRow['receive_date']);
       $recurringContributionPlan[$index]['index'] = $index+1;
-      $recurringContributionPlan[$index]['amount'] = $recurringContributionRow['recur_amount'];
+      $recurringContributionPlan[$index]['amount'] = $recurringContributionRow['amount'];
       $recurringContributionPlan[$index]['due_date'] = $dueDate->format('Y-m-d');
     }
     $recurringContributionRows['recurringInstallmentsTable'] = $this->buildRecuringContributionTable($recurringContributionPlan);
@@ -218,33 +211,17 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
 
   /**
    * Builds a HTML table for recurring contribution installments
+   * Note: If we build this table in mail template, there is an issue
+   * with using loops within tables because of the WYSIWYG editor
+   * to which the mail templates are loaded into
    *
    * @param $recurringContributionPlan
    * @return string
    */
   private function buildRecuringContributionTable($recurringContributionPlan) {
-    $html = '<table>'
-        .'<tr>'
-          .'<th style="padding-left: 10px;"><strong>Installment No.</strong></th>'
-          .'<th style="padding-left: 10px;"><strong>Amount</strong></th>'
-          .'<th style="padding-left: 10px;"><strong>Due Date</strong></th>'
-        .'</tr>';
-    foreach ($recurringContributionPlan as $recurringPlanRow) {
-      $html .= '<tr>'
-            .'<td>'
-              .$recurringPlanRow['index']
-            .'</td>'
-            .'<td>'
-              .$recurringPlanRow['amount']
-            .'</td>'
-            .'<td>'
-              .$recurringPlanRow['due_date']
-            .'</td>'
-          .'</tr>';
-    }
-    $html .= '</table>';
-
-    return $html;
+    $smarty = CRM_Core_Smarty::singleton();
+    $smarty->assign('installments', $recurringContributionPlan);
+    return $smarty->fetch('CRM/ManualDirectDebit/MessageTemplate/InstallmentList.tpl');
   }
 
   /**
@@ -281,6 +258,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $query = "
       SELECT 
         contribution.total_amount AS amount,
+        contribution.receive_date AS receive_date,
         financial_type.name AS financial_type_name,
         contribution_recur.amount AS recur_amount,
         contribution_recur.currency AS recur_currency,
@@ -305,6 +283,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
       $rows[] = [
         'type' => $dao->financial_type_name,
         'amount' => $dao->amount,
+        'receive_date' => $dao->receive_date,
         'recur_amount' => $dao->recur_amount,
         'recur_currency' => $dao->recur_currency,
         'recur_frequency_unit' => $dao->recur_frequency_unit,
