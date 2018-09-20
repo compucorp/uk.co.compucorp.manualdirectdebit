@@ -3,16 +3,17 @@
   <downloadUrl>https://github.com/compucorp/uk.co.compucorp.manualdirectdebit/master</downloadUrl>
   <file>manualdirectdebit</file>
   <name>Manual Direct Debit</name>
-  <description>Manual Direct Debit</description>
+  <description>This extension provides a back-office Direct Debit management process that is compatible to AUDDIS based Direct Debit processing platforms such as PT-X. Please note this extension requires https://github.com/compucorp/uk.co.compucorp.membershipextras as a dependency.</description>
   <license>AGPL-3.0</license>
   <maintainer>
-    <author>Compucorp</author>
+    <author>Compucorp Ltd.</author>
+    <email>info@compucorp.co.uk</email>
   </maintainer>
   <urls>
     <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
-  <releaseDate>2018-02-20</releaseDate>
-  <version>1.0</version>
+  <releaseDate>2018-09-20</releaseDate>
+  <version>v1.0alpha1</version>
   <develStage>alpha</develStage>
   <compatibility>
     <ver>4.7</ver>
