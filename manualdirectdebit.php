@@ -294,8 +294,10 @@ function manualdirectdebit_civicrm_buildForm($formName, &$form) {
     }
   }
   if ($formName == 'CRM_Contact_Form_CustomData') {
-    $customData = new CRM_ManualDirectDebit_Hook_BuildForm_CustomData($form);
-    $customData->run();
+    if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($form->getVar('_groupID'))) {
+      $customData = new CRM_ManualDirectDebit_Hook_BuildForm_CustomData($form);
+      $customData->run();
+    }
   }
 
   if ($formName == 'CRM_Custom_Form_CustomDataByType') {
