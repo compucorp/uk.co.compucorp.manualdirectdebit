@@ -10,7 +10,7 @@
                 {$recurringPlanRow.index}
             </td>
             <td style="padding-left: 10px;">
-                {$recurringPlanRow.amount}
+                £{$recurringPlanRow.amount}
             </td>
             <td style="padding-left: 10px;">
                 {$recurringPlanRow.due_date}
