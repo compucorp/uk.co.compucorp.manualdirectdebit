@@ -190,9 +190,15 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $recurringContributionBao = CRM_Contribute_BAO_ContributionRecur::findById($this->recurringContributionId);
     $recurringContributionRows = $this->collectRecurringContributionRows();
     $total = 0;
-    foreach ($recurringContributionRows as $recurringContributionRow ) {
+    $recurringContributionPlan = array();
+    foreach ($recurringContributionRows as $index => $recurringContributionRow) {
       $total += $recurringContributionRow['amount'];
+      $dueDate = DateTime::createFromFormat('Y-m-d H:i:s', $recurringContributionRow['receive_date']);
+      $recurringContributionPlan[$index]['index'] = $index+1;
+      $recurringContributionPlan[$index]['amount'] = $recurringContributionRow['amount'];
+      $recurringContributionPlan[$index]['due_date'] = $dueDate->format('Y-m-d');
     }
+    $recurringContributionRows['recurringInstallmentsTable'] = $this->buildRecuringContributionTable($recurringContributionPlan);
     $total = round($total, 2);
 
     $this->tplParams['recurringContributionData'] = [
@@ -201,6 +207,21 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
       'installments' => $recurringContributionBao->installments,
       'installments_paid' => $recurringContributionBao->amount
     ];
+  }
+
+  /**
+   * Builds a HTML table for recurring contribution installments
+   * Note: If we build this table in mail template, there is an issue
+   * with using loops within tables because of the WYSIWYG editor
+   * to which the mail templates are loaded into
+   *
+   * @param $recurringContributionPlan
+   * @return string
+   */
+  private function buildRecuringContributionTable($recurringContributionPlan) {
+    $smarty = CRM_Core_Smarty::singleton();
+    $smarty->assign('installments', $recurringContributionPlan);
+    return $smarty->fetch('CRM/ManualDirectDebit/MessageTemplate/InstallmentList.tpl');
   }
 
   /**
@@ -237,10 +258,19 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $query = "
       SELECT 
         contribution.total_amount AS amount,
-        financial_type.name AS financial_type_name
+        contribution.receive_date AS receive_date,
+        financial_type.name AS financial_type_name,
+        contribution_recur.amount AS recur_amount,
+        contribution_recur.currency AS recur_currency,
+        contribution_recur.frequency_unit AS recur_frequency_unit,
+        contribution_recur.frequency_interval AS recur_interval,
+        contribution_recur.installments AS recur_installments,
+        contribution_recur.start_date AS recur_start_date
       FROM civicrm_contribution AS contribution
       LEFT JOIN civicrm_financial_type AS financial_type
         ON contribution.financial_type_id = financial_type.id
+      LEFT JOIN civicrm_contribution_recur AS contribution_recur
+        ON contribution.contribution_recur_id = contribution_recur.id  
       WHERE contribution.contribution_recur_id = %1
     ";
 
@@ -252,7 +282,14 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     while ($dao->fetch()) {
       $rows[] = [
         'type' => $dao->financial_type_name,
-        'amount' => $dao->amount
+        'amount' => $dao->amount,
+        'receive_date' => $dao->receive_date,
+        'recur_amount' => $dao->recur_amount,
+        'recur_currency' => $dao->recur_currency,
+        'recur_frequency_unit' => $dao->recur_frequency_unit,
+        'recur_interval' => $dao->recur_interval,
+        'recur_installments' => $dao->recur_installments,
+        'recur_start_date' =>$dao->recur_start_date,
       ];
     }
 
