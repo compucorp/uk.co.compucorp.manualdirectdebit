@@ -3,6 +3,7 @@
 require_once 'manualdirectdebit.civix.php';
 
 use CRM_ManualDirectDebit_ExtensionUtil as E;
+use Symfony\Component\DependencyInjection\Definition;
 
 /**
  * Implements hook_civicrm_config().
@@ -378,4 +379,16 @@ function manualdirectdebit_civicrm_searchTasks( $objectName, &$tasks ){
     ];
   }
 
+}
+
+function manualdirectdebit_civicrm_container($container) {
+  $priorityHigherThanCoreServices = -1;
+  $container->findDefinition('dispatcher')
+    ->addMethodCall('addListener',
+      array('civi.token.render', '_manualdirectdebit_civicrm_tokenRenderEventListener', $priorityHigherThanCoreServices));
+}
+
+function _manualdirectdebit_civicrm_tokenRenderEventListener($event) {
+  $tokenRenderListener = new CRM_ManualDirectDebit_Event_Listener_TokenRender($event);
+  $tokenRenderListener->replaceDirectDebitTokens();
 }
