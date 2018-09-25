@@ -17,19 +17,19 @@ class CRM_ManualDirectDebit_Mail_Task_PDFLetterCommon extends CRM_Member_Form_Ta
 
     $generatedHtmlList = [];
     foreach ($membershipIDs as $membershipId) {
-      $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Membership($membershipId);
-      $smartyParams = $dataCollector->retrieve();
-      $htmlMessageSmartyHandled = self::handleHtmlBySmarty($html_message, $smartyParams);
-
-      $generatedHtmlList[] = self::generateHTML(
+      $html = static::generateHTML(
         [$membershipId],
         $returnProperties,
         $skipOnHold,
         $skipDeceased,
         $messageToken,
-        $htmlMessageSmartyHandled,
+        $html_message,
         $categories
       )[0];
+
+      $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Membership($membershipId);
+      $smartyParams = $dataCollector->retrieve();
+      $generatedHtmlList[] = self::handleHtmlBySmarty($html, $smartyParams);
     }
 
     self::createActivities($form, $html_message, $contactIDs, $formValues['subject'], CRM_Utils_Array::value('campaign_id', $formValues));
@@ -58,6 +58,50 @@ class CRM_ManualDirectDebit_Mail_Task_PDFLetterCommon extends CRM_Member_Form_Ta
     $htmlMessageSmartyHandled = $smarty->fetch("string:$html");
 
     return $htmlMessageSmartyHandled;
+  }
+
+  /**
+   * Generate htmlfor pdf letters.
+   *
+   * @param array $membershipIDs
+   * @param array $returnProperties
+   * @param bool $skipOnHold
+   * @param bool $skipDeceased
+   * @param array $messageToken
+   * @param $html_message
+   * @param $categories
+   *
+   * @return array
+   */
+  public static function generateHTML($membershipIDs, $returnProperties, $skipOnHold, $skipDeceased, $messageToken, $html_message, $categories) {
+    $memberships = CRM_Utils_Token::getMembershipTokenDetails($membershipIDs);
+    $html = array();
+
+    foreach ($membershipIDs as $membershipID) {
+      $membership = $memberships[$membershipID];
+      //get contact information
+      $contactId = $membership['contact_id'];
+      $params = array('contact_id' => $contactId);
+      //getTokenDetails is much like calling the api contact.get function - but - with some minor
+      //special handlings. It precedes the existence of the api
+      list($contacts) = CRM_Utils_Token::getTokenDetails(
+        $params,
+        $returnProperties,
+        $skipOnHold,
+        $skipDeceased,
+        NULL,
+        $messageToken,
+        'CRM_Contribution_Form_Task_PDFLetterCommon'
+      );
+
+      $tokenHtml = CRM_Utils_Token::replaceContactTokens($html_message, $contacts[$contactId], TRUE, $messageToken);
+      $tokenHtml = CRM_Utils_Token::replaceEntityTokens('membership', $membership, $tokenHtml, $messageToken);
+      $tokenHtml = CRM_Utils_Token::replaceHookTokens($tokenHtml, $contacts[$contactId], $categories, TRUE);
+
+      $html[] = $tokenHtml;
+    }
+
+    return $html;
   }
 
 }
