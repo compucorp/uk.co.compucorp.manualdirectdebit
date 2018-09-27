@@ -297,7 +297,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       'api_action' => 'run',
       'run_frequency' => 'Daily',
       'domain_id' => $domainID,
-      'is_active' => '0',
+      'is_active' => 0,
       'parameters' => '',
     ];
 
