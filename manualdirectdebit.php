@@ -3,6 +3,7 @@
 require_once 'manualdirectdebit.civix.php';
 
 use CRM_ManualDirectDebit_ExtensionUtil as E;
+use Symfony\Component\DependencyInjection\Definition;
 
 /**
  * Implements hook_civicrm_config().
@@ -306,8 +307,11 @@ function manualdirectdebit_civicrm_buildForm($formName, &$form) {
   }
 
   if ($formName === 'CRM_Member_Form_Membership' || $formName === 'CRM_Member_Form_MembershipRenewal') {
-    $customGroupInjector = new CRM_ManualDirectDebit_Hook_BuildForm_InjectCustomGroup($form);
-    $customGroupInjector->buildForm();
+    $formBuilder = new CRM_ManualDirectDebit_Hook_BuildForm_InjectCustomGroup($form);
+    $formBuilder->buildForm();
+
+    $formBuilder = new CRM_ManualDirectDebit_Hook_BuildForm_Membership($form);
+    $formBuilder->buildForm();
   }
 }
 
@@ -378,4 +382,16 @@ function manualdirectdebit_civicrm_searchTasks( $objectName, &$tasks ){
     ];
   }
 
+}
+
+function manualdirectdebit_civicrm_container($container) {
+  $priorityHigherThanCoreServices = -1;
+  $container->findDefinition('dispatcher')
+    ->addMethodCall('addListener',
+      array('civi.token.render', '_manualdirectdebit_civicrm_tokenRenderEventListener', $priorityHigherThanCoreServices));
+}
+
+function _manualdirectdebit_civicrm_tokenRenderEventListener($event) {
+  $tokenRenderListener = new CRM_ManualDirectDebit_Event_Listener_TokenRender($event);
+  $tokenRenderListener->replaceDirectDebitTokens();
 }

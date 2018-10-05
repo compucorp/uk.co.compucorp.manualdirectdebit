@@ -115,6 +115,13 @@
     </div>
     <!-- End of code block for generating membership information. -->
 
+    <!-- Start of code block for generating recurring contribution installments -->
+    {if $recurringContributionData.installments gt 0}
+      <p>You can find your installment schedule below:</p>
+      {$recurringContributionData.recurringContributionRows.recurringInstallmentsTable nofilter}
+    {/if}
+    <!-- End of code block for generating recurring contribution installments -->
+
     {if isset($nextMembershipPayment) and $nextMembershipPayment}
       <!-- Start of 4th section for custom text.  -->
       <div>
