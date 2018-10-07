@@ -1,5 +1,7 @@
 <?php
 
+use CRM_ManualDirectDebit_Common_MessageTemplate as MessageTemplate;
+
 /**
 * Sends mails
 */
@@ -74,8 +76,9 @@ class CRM_ManualDirectDebit_Mail_Notification {
    */
   public function sendPaymentSignUpNotify($recurringContributionId) {
     $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution($recurringContributionId);
+    $templateId = MessageTemplate::getTemplateIdByName(MessageTemplate::SIGN_UP_MSG_NAME);
 
-    return $this->sendEmail($dataCollector, CRM_ManualDirectDebit_Common_MessageTemplate::SIGN_UP_MSG_TITLE);
+    return $this->sendEmail($dataCollector, $templateId);
   }
 
   /**
@@ -87,8 +90,9 @@ class CRM_ManualDirectDebit_Mail_Notification {
    */
   public function sendPaymentUpdateNotification($recurringContributionId) {
     $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution($recurringContributionId);
+    $templateId = MessageTemplate::getTemplateIdByName(MessageTemplate::PAYMENT_UPDATE_MSG_NAME);
 
-    return $this->sendEmail($dataCollector, CRM_ManualDirectDebit_Common_MessageTemplate::PAYMENT_UPDATE_MSG_TITLE);
+    return $this->sendEmail($dataCollector, $templateId);
   }
 
   /**
@@ -100,8 +104,9 @@ class CRM_ManualDirectDebit_Mail_Notification {
    */
   public function sendPaymentCollectionReminder($contributionId) {
     $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Contribution($contributionId);
+    $templateId = MessageTemplate::getTemplateIdByName(MessageTemplate::COLLECTION_REMINDER_MSG_NAME);
 
-    return $this->sendEmail($dataCollector, CRM_ManualDirectDebit_Common_MessageTemplate::COLLECTION_REMINDER_MSG_TITLE);
+    return $this->sendEmail($dataCollector, $templateId);
   }
 
   /**
@@ -113,8 +118,9 @@ class CRM_ManualDirectDebit_Mail_Notification {
    */
   public function sendAutoRenewNotification($recurringContributionId) {
     $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution($recurringContributionId);
+    $templateId = MessageTemplate::getTemplateIdByName(MessageTemplate::AUTO_RENEW_MSG_NAME);
 
-    return $this->sendEmail($dataCollector, CRM_ManualDirectDebit_Common_MessageTemplate::AUTO_RENEW_MSG_TITLE);
+    return $this->sendEmail($dataCollector, $templateId);
   }
 
   /**
@@ -126,8 +132,9 @@ class CRM_ManualDirectDebit_Mail_Notification {
    */
   public function sendMandateUpdateNotification($mandateId) {
     $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Mandate($mandateId);
+    $templateId = MessageTemplate::getTemplateIdByName(MessageTemplate::MANDATE_UPDATE_MSG_NAME);
 
-    return $this->sendEmail($dataCollector, CRM_ManualDirectDebit_Common_MessageTemplate::MANDATE_UPDATE_MSG_TITLE);
+    return $this->sendEmail($dataCollector, $templateId);
   }
 
   /**
@@ -140,9 +147,7 @@ class CRM_ManualDirectDebit_Mail_Notification {
    */
   public function notifyByContributionId($contributionId, $messageTemplateId) {
     $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Contribution($contributionId);
-    $messageTemplateTitle = CRM_ManualDirectDebit_Common_MessageTemplate::getMessageTemplateTitle($messageTemplateId);
-
-    return $this->sendEmail($dataCollector, $messageTemplateTitle);
+    return $this->sendEmail($dataCollector, $messageTemplateId);
   }
 
   /**
@@ -155,9 +160,7 @@ class CRM_ManualDirectDebit_Mail_Notification {
    */
   public function notifyByMembershipId($membershipId, $messageTemplateId) {
     $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Membership($membershipId);
-    $messageTemplateTitle = CRM_ManualDirectDebit_Common_MessageTemplate::getMessageTemplateTitle($messageTemplateId);
-
-    return $this->sendEmail($dataCollector, $messageTemplateTitle);
+    return $this->sendEmail($dataCollector, $messageTemplateId);
   }
 
   /**
@@ -170,9 +173,7 @@ class CRM_ManualDirectDebit_Mail_Notification {
    */
   public function notifyByRecurContributionId($recurContributionId, $messageTemplateId) {
     $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution($recurContributionId);
-    $messageTemplateTitle = CRM_ManualDirectDebit_Common_MessageTemplate::getMessageTemplateTitle($messageTemplateId);
-
-    return $this->sendEmail($dataCollector, $messageTemplateTitle);
+    return $this->sendEmail($dataCollector, $messageTemplateId);
   }
 
   /**
@@ -185,22 +186,19 @@ class CRM_ManualDirectDebit_Mail_Notification {
    */
   public function notifyByMandateId($mandateId, $messageTemplateId) {
     $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Mandate($mandateId);
-    $messageTemplateTitle = CRM_ManualDirectDebit_Common_MessageTemplate::getMessageTemplateTitle($messageTemplateId);
-
-    return $this->sendEmail($dataCollector, $messageTemplateTitle);
+    return $this->sendEmail($dataCollector, $messageTemplateId);
   }
 
   /**
    * Sends mail
    *
    * @param CRM_ManualDirectDebit_Mail_DataCollector_Base $collector
-   * @param $templateTitle
+   * @param $templateId
    *
    * @return bool
    *
    */
-  private function sendEmail($collector, $templateTitle) {
-    $templateId = CRM_ManualDirectDebit_Common_MessageTemplate::getMessageTemplateId($templateTitle);
+  private function sendEmail($collector, $templateId) {
     $tplParams = $collector->retrieve();
     $contactEmailData = $collector->retrieveContactEmailData();
 

@@ -298,16 +298,20 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
 
     $installmentsCount = $this->tplParams['recurringContributionData']['installments'];
     $orderLineItems = [];
+    $total = 0;
     foreach ($lineItems['values'] as $lineItem) {
+      $price = $this->formatAmount($lineItem['line_total'] * $installmentsCount);
       $orderLineItems[] = [
         'label' => $lineItem['label'],
-        'price' => $this->formatAmount($lineItem['line_total'] * $installmentsCount),
+        'price' => $price,
         'entityTable' => $lineItem['entity_table'],
         'entityId' => $lineItem['entity_id'],
       ];
+      $total += (float) $price;
     }
 
     $this->tplParams['orderLineItems'] = $orderLineItems;
+    $this->tplParams['recurringContributionData']['total'] = $this->formatAmount($total);
   }
 
   private function collectPaymentPlanMembershipsData() {

@@ -5,13 +5,12 @@
 <div style="color: black;">
 
     {if isset($recurringContributionData) and $recurringContributionData}
-      <!-- Start of 1st section for custom text.  -->
+
       <div>
         <p style="color: black;">{ts}Thank you for making a recurring contribution. Your payment details are:{/ts}</p>
       </div>
-      <!-- End of 1st section for custom text.  -->
 
-      <!-- Start of code block for generating payment plan schedule information. Edit with caution. -->
+
       <table style="border-collapse: collapse;border: 1px solid black; max-width: 600px; width: 100%;">
         <tr style="border: 1px solid black;background: rgb(162,162,162)">
           <th style="padding-left: 10px;text-align: left"><p style="color: black;"><strong>{ts}Order Summary{/ts}<strong></p></th>
@@ -34,21 +33,16 @@
           <td style="padding-left: 10px;"><p></p></td>
         </tr>
       </table>
-      <!-- End of code block for generating payment plan schedule information. -->
     {/if}
 
-  <!-- if payment method = direct debit. -->
     {if isset($mandateData) and $mandateData}
 
-      <!-- Start of 2nd section for custom text.  -->
       <div style="max-width: 600px; width: 100%;" >
         <p style="color: black;">
             {ts}Thank you for choosing Direct Debit. Please check that your Direct Debit details below are correct. If they are not, please contact us. If your Direct Debit details are correct, you need do nothing and your Direct Debit will be collected as stated.{/ts}
         </p>
       </div>
-      <!-- End of 2nd section for custom text.  -->
 
-      <!-- Start of code block for generating mandate information. Edit with caution. -->
       <table>
         <tr>
           <td style="padding-left: 10px;"><span style="color: black;">{ts}Bank Name:{/ts}</span></td>
@@ -99,19 +93,15 @@
           <td style="padding-left: 10px;"><span style="color: black;">{$mandateData.authorisation_date}</span></td>
         </tr>
       </table>
-      <!-- End of code block for generating mandate information. -->
     {/if}
 
     {if isset($paymentPlanMemberships) and $paymentPlanMemberships}
-      <!-- Start of 3rd section for custom text.  -->
       <div>
         <p style="color: black;">
             {ts}Your order contains the following membership(s):{/ts}
         </p>
       </div>
-      <!-- End of 3rd section for custom text.  -->
 
-      <!-- Start of code block for generating membership information. Edit with caution. -->
       {foreach from=$paymentPlanMemberships item=membership}
       <div>
         <p style="color: black;">
@@ -119,27 +109,20 @@
         </p>
       </div>
       {/foreach}
-      <!-- End of code block for generating membership information. -->
 
-      <!-- Start of code block for generating recurring contribution installments -->
         {if $recurringContributionData.installments gt 0}
           <p>You can find your installment schedule below:</p>
             {$recurringContributionData.recurringContributionRows.recurringInstallmentsTable nofilter}
         {/if}
-      <!-- End of code block for generating recurring contribution installments -->
 
         {if isset($nextMembershipPayment) and $nextMembershipPayment}
-          <!-- Start of 4th section for custom text.  -->
           <div>
             <p style="color: black;">{ts}Please find the details of you next payment below:{/ts}</p>
           </div>
-          <!-- End of 4th section for custom text.  -->
 
-          <!-- Start of code block for generating next contribution information. Edit with caution. -->
           <div>
             <p style="color: black;">{ts 1=$nextMembershipPayment.amount 2=$nextMembershipPayment.date 3=$currency }Your next payment of %3%1 will be collected on %2{/ts}</p>
           </div>
-          <!-- End of code block for generating next contribution information. -->
         {/if}
     {/if}
 
@@ -166,7 +149,6 @@
     {/if}
 
     {if isset($mandateData) and $mandateData}
-      <!-- Start of Direct Debit Guarantee.  -->
       <div style="padding-top: 60px">
         <table style="border-collapse: collapse;border: 1px solid black;max-width: 600px;width: 100%;">
           <tr >
@@ -193,7 +175,6 @@
           </tr>
         </table>
       </div>
-      <!-- End of Direct Debit Guarantee.  -->
     {/if}
 </div>
 </body>
