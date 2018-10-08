@@ -405,7 +405,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
           break;
 
         case 'dd_payments':
-          $dataForExport[$mandateItems['contribute_id']] = $mandateItem;
+          $dataForExport[$mandateItem['contribute_id']] = $mandateItem;
           break;
       }
     }
