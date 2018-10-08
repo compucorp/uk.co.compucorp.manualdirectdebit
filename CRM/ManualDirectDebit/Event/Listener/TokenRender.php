@@ -1,7 +1,6 @@
 <?php
 
 use CRM_ManualDirectDebit_Common_MessageTemplate as MessageTemplate;
-use CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution as RecurringContributionDataCollector;
 
 class CRM_ManualDirectDebit_Event_Listener_TokenRender {
 
@@ -33,17 +32,40 @@ class CRM_ManualDirectDebit_Event_Listener_TokenRender {
   private function getTokenDataCollector() {
     $dataCollector = NULL;
 
-    $templateTitle = MessageTemplate::getMessageTemplateTitle($this->templateId);
-    $recurringContributionId = $this->event->context['actionSearchResult']->source_record_id;
-    switch ($templateTitle) {
-      case MessageTemplate::SIGN_UP_MSG_TITLE:
-      case MessageTemplate::PAYMENT_UPDATE_MSG_TITLE:
-      case MessageTemplate::AUTO_RENEW_MSG_TITLE:
-        $dataCollector = new RecurringContributionDataCollector($recurringContributionId);
+    $activityTypeId = $this->event->context['actionSearchResult']->activity_type_id;
+    $activityTypeName = $this->getActivityTypeNameById($activityTypeId);
+    switch ($activityTypeName) {
+      case 'new_direct_debit_recurring_payment':
+      case 'update_direct_debit_recurring_payment':
+      case 'offline_direct_debit_auto_renewal':
+      $recurringContributionId = $this->event->context['actionSearchResult']->source_record_id;
+        $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution($recurringContributionId);
+        break;
+      case 'direct_debit_payment_reminder':
+        $contributionId = $this->event->context['actionSearchResult']->source_record_id;
+        $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Contribution($contributionId);
+        break;
+      case 'direct_debit_mandate_update':
+        $mandateId= $this->event->context['actionSearchResult']->source_record_id;
+        $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Mandate($mandateId);
         break;
     }
 
     return $dataCollector;
+  }
+
+  private function getActivityTypeNameById($id) {
+    $optionValue = civicrm_api3('OptionValue', 'get', [
+      'sequential' => 1,
+      'option_group_id' => 'activity_type',
+      'value' => $id,
+    ]);
+
+    if (empty($optionValue['count'])) {
+      return NULL;
+    }
+
+    return $optionValue['values'][0]['name'];
   }
 
   private function replaceTemplateTokens($tokenDataCollector) {

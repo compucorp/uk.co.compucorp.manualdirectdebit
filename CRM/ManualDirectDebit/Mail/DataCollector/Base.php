@@ -13,13 +13,6 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
   protected $contributionId;
 
   /**
-   * Membership id
-   *
-   * @var int
-   */
-  protected $membershipId;
-
-  /**
    * Template params
    *
    * @var array
@@ -29,8 +22,10 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     'mandateData' => FALSE,
     'recurringContributionData' => FALSE,
     'currency' => FALSE,
-    'membershipData' => FALSE,
+    'paymentPlanMemberships' => FALSE,
+    'activeMemberships' => FALSE,
     'nextMembershipPayment' => FALSE,
+    'orderLineItems' => FALSE,
   ];
 
   /**
@@ -64,11 +59,13 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $this->loadContributionData();
     $this->setContactEmailData();
     $this->setRecurringContributionId();
-    $this->setMembershipId();
 
     $this->collectRecurringContributionData();
     $this->collectMandateData();
-    $this->collectMembershipData();
+    $this->collectOrderLineItems();
+    $this->collectPaymentPlanMembershipsData();
+    $this->collectActiveMembershipsData();
+    $this->collectNextMembershipPayment();
     $this->collectImageSrc();
     $this->collectCurrency();
 
@@ -119,19 +116,6 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
       $this->recurringContributionId = $this->contributionData['contribution_recur_id'];
     }
   }
-
-  /**
-   * Sets membership id
-   */
-  private function setMembershipId() {
-    $result = civicrm_api3('MembershipPayment', 'get', [
-      'sequential' => 1,
-      'contribution_id' => $this->contributionId,
-    ]);
-
-    $this->membershipId = $result['count'] == 1 ? $result['values'][0]['membership_id'] : FALSE;
-  }
-
   /**
    * Collects mandate data
    */
@@ -188,24 +172,25 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     }
 
     $recurringContributionBao = CRM_Contribute_BAO_ContributionRecur::findById($this->recurringContributionId);
-    $recurringContributionRows = $this->collectRecurringContributionRows();
+    $installmentsCount = empty($recurringContributionBao->installments) ? 1 : $recurringContributionBao->installments;
+    $recurringContributionRows = $this->collectRecurringContributionRows($installmentsCount);
     $total = 0;
     $recurringContributionPlan = array();
     foreach ($recurringContributionRows as $index => $recurringContributionRow) {
       $total += $recurringContributionRow['amount'];
       $dueDate = DateTime::createFromFormat('Y-m-d H:i:s', $recurringContributionRow['receive_date']);
       $recurringContributionPlan[$index]['index'] = $index+1;
-      $recurringContributionPlan[$index]['amount'] = $recurringContributionRow['amount'];
+      $recurringContributionPlan[$index]['amount'] = $this->formatAmount($recurringContributionRow['amount']);
       $recurringContributionPlan[$index]['due_date'] = $dueDate->format('Y-m-d');
     }
     $recurringContributionRows['recurringInstallmentsTable'] = $this->buildRecuringContributionTable($recurringContributionPlan);
-    $total = round($total, 2);
+    $total = $this->formatAmount($total);
 
     $this->tplParams['recurringContributionData'] = [
       'recurringContributionRows' => $recurringContributionRows,
       'total' => $total,
-      'installments' => $recurringContributionBao->installments,
-      'installments_paid' => $recurringContributionBao->amount
+      'installments' => $installmentsCount,
+      'installments_paid' => $this->formatAmount($recurringContributionBao->amount),
     ];
   }
 
@@ -254,7 +239,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
    *
    * @return array
    */
-  private function collectRecurringContributionRows() {
+  private function collectRecurringContributionRows($installmentsCount) {
     $query = "
       SELECT 
         contribution.total_amount AS amount,
@@ -273,6 +258,10 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
         ON contribution.contribution_recur_id = contribution_recur.id  
       WHERE contribution.contribution_recur_id = %1
     ";
+
+    if ($installmentsCount == 1) {
+      $query .= ' ORDER BY contribution.id DESC LIMIT 1 ';
+    }
 
     $dao = CRM_Core_DAO::executeQuery($query, [
       1 => [$this->recurringContributionId, 'Integer']
@@ -296,39 +285,93 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     return $rows;
   }
 
-  /**
-   * Collects membership data
-   */
-  private function collectMembershipData() {
-    if ($this->membershipId === FALSE) {
+  private function collectOrderLineItems() {
+    $lineItems = civicrm_api3('LineItem', 'get', [
+      'sequential' => 1,
+      'contribution_id' => $this->contributionId,
+      'options' => ['limit' => 0],
+    ]);
+
+    if (empty($lineItems['count'])) {
       return;
     }
 
-    $query = "
-      SELECT
-        membership_type.duration_unit AS duration_unit,
-        membership_type.name AS membership_name,
-        membership_type.minimum_fee AS amount_per_unit
-      FROM civicrm_membership AS membership 
-      LEFT JOIN civicrm_membership_type AS membership_type
-        ON membership.membership_type_id = membership_type.id
-      WHERE membership.id = %1
-      LIMIT 1
-    ";
+    $installmentsCount = $this->tplParams['recurringContributionData']['installments'];
+    $orderLineItems = [];
+    $total = 0;
+    foreach ($lineItems['values'] as $lineItem) {
+      $price = $this->formatAmount($lineItem['line_total'] * $installmentsCount);
+      $orderLineItems[] = [
+        'label' => $lineItem['label'],
+        'price' => $price,
+        'entityTable' => $lineItem['entity_table'],
+        'entityId' => $lineItem['entity_id'],
+      ];
+      $total += (float) $price;
+    }
 
-    $dao = CRM_Core_DAO::executeQuery($query, [
-      1 => [$this->membershipId, 'Integer']
+    $this->tplParams['orderLineItems'] = $orderLineItems;
+    $this->tplParams['recurringContributionData']['total'] = $this->formatAmount($total);
+  }
+
+  private function collectPaymentPlanMembershipsData() {
+    if (empty($this->tplParams['orderLineItems'])) {
+      return;
+    }
+
+    $paymentPlanMemberships = [];
+    $membershipIds = [];
+    foreach ($this->tplParams['orderLineItems'] as $lineItem) {
+      if ($lineItem['entityTable'] == 'civicrm_membership') {
+        $membershipIds[] = $lineItem['entityId'];
+        $paymentPlanMemberships[$lineItem['entityId']]['label'] = $lineItem['label'];
+        $paymentPlanMemberships[$lineItem['entityId']]['price'] = $lineItem['price'];
+      }
+    }
+
+    if (empty($membershipIds)) {
+      return;
+    }
+
+    $membershipsResponse = civicrm_api3('Membership', 'get', [
+      'sequential' => 1,
+      'id' => ['IN' => $membershipIds],
+      'options' => ['limit' => 0],
+      'api.MembershipType.get' => ['id' => '$value.membership_type_id'],
     ]);
 
-    while ($dao->fetch()) {
-      $this->tplParams['membershipData'] = [
-        'durationUnit' => $dao->duration_unit,
-        'amountPerUnit' => round($dao->amount_per_unit, 2),
-        'membershipName' => $dao->membership_name
+    foreach ($membershipsResponse['values'] as $membership) {
+      $paymentPlanMemberships[$membership['id']]['id'] = $membership['id'];
+      $paymentPlanMemberships[$membership['id']]['startDate'] = $membership['start_date'];
+      $paymentPlanMemberships[$membership['id']]['endDate'] = $membership['end_date'];
+      $paymentPlanMemberships[$membership['id']]['durationUnit'] = $membership['api.MembershipType.get']['values'][0]['duration_unit'];
+    }
+
+    $this->tplParams['paymentPlanMemberships'] = array_values($paymentPlanMemberships);
+  }
+
+  private function collectActiveMembershipsData() {
+    $activeMembershipsResponse = civicrm_api3('Membership', 'get', [
+      'sequential' => 1,
+      'contact_id' => $this->contributionData['contact_id'],
+      'active_only' => 1,
+    ]);
+
+    if (empty($activeMembershipsResponse['count'])) {
+      return;
+    }
+
+    $activeMemberships = [];
+    $i = 0;
+    foreach ($activeMembershipsResponse['values'] as $membership) {
+      $activeMemberships[] = [
+        'name' => $membership['membership_name'],
+        'startDate' => $membership['start_date'],
+        'endDate' => $membership['end_date'],
       ];
     }
 
-    $this->collectNextMembershipPayment();
+    $this->tplParams['activeMemberships'] = $activeMemberships;
   }
 
   /**
@@ -351,8 +394,12 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
       LIMIT 1
     ";
 
+    if (empty($this->tplParams['paymentPlanMemberships'])) {
+      return;
+    }
+
     $dao = CRM_Core_DAO::executeQuery($query, [
-      1 => [$this->membershipId, 'Integer'],
+      1 => [$this->tplParams['paymentPlanMemberships'][0]['id'], 'Integer'],
       2 => [$cancelledStatus, 'Integer'],
       3 => [$completedStatus, 'Integer'],
     ]);
@@ -406,6 +453,11 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     ]);
 
     return $result['values'][0]['api.OptionValue.getValue'];
+  }
+
+  private function formatAmount($amount) {
+    $roundedAmount = round($amount, 2);
+    return number_format($roundedAmount, 2);
   }
 
 }

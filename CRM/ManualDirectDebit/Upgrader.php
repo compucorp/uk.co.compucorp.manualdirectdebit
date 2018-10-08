@@ -127,22 +127,59 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   private $customGroups = [
     "direct_debit_mandate",
     "direct_debit_information",
+    "direct_debit_message_template",
   ];
-
-  /**
-   * Message template param list
-   *
-   * @var array
-   */
-  public $messageTemplateParamList = [];
 
   public function install() {
     $this->createScheduledJob();
+    $this->addMessageTemplateToCustomGroupEntities();
+    $this->addDDTemplateCustomGroup();
     $this->createMessageTemplates();
     $this->createDirectDebitNavigationMenu();
     $this->createDirectDebitPaymentInstrument();
     $this->createDirectDebitPaymentProcessorType();
     $this->createDirectDebitPaymentProcessor();
+  }
+
+  public function upgrade_0008() {
+    $this->addMessageTemplateToCustomGroupEntities();
+    $this->addDDTemplateCustomGroup();
+    $this->setDDTemplatesCustomFields();
+    return TRUE;
+  }
+
+  private function addMessageTemplateToCustomGroupEntities() {
+    $optionValueParams = [
+      'option_group_id' => 'cg_extend_objects',
+      'name' => 'civicrm_msg_template',
+      'label' => 'MessageTemplate',
+      'value' => 'MessageTemplate',
+    ];
+
+    $cgextendOptionValue = civicrm_api3('OptionValue', 'get', [
+      'option_group_id' => $optionValueParams['option_group_id'],
+      'name' => $optionValueParams['name'],
+    ]);
+
+    if (!$cgextendOptionValue['count']) {
+      civicrm_api3('OptionValue', 'create', $optionValueParams);
+    }
+  }
+
+  private function addDDTemplateCustomGroup() {
+    $customGroupsXMLFile = E::path('xml/DDTemplate_customgroup.xml');
+    $import = new CRM_Utils_Migrate_Import();
+    $import->run($customGroupsXMLFile);
+  }
+
+  private function setDDTemplatesCustomFields() {
+    $templates = CRM_ManualDirectDebit_Common_MessageTemplate::getDefaultDirectDebitTemplates();
+    foreach ($templates as $template) {
+      $templateId = CRM_ManualDirectDebit_Common_MessageTemplate::getMessageTemplateIdByTitle($template['title']);
+      if ($templateId) {
+        $this->fillDDTemplateCustomFieldsData($templateId, $template['name']);
+      }
+    }
   }
 
   public function upgrade_0007() {
@@ -202,37 +239,11 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   }
 
   /**
-   * Sets message template param list
-   */
-  public function setMessageTemplateParamList() {
-    $templates = [
-      CRM_ManualDirectDebit_Common_MessageTemplate::SIGN_UP_MSG_TITLE => 'PaymentSignUpNotification.tpl',
-      CRM_ManualDirectDebit_Common_MessageTemplate::PAYMENT_UPDATE_MSG_TITLE => 'PaymentUpdateNotification.tpl',
-      CRM_ManualDirectDebit_Common_MessageTemplate::COLLECTION_REMINDER_MSG_TITLE => 'PaymentCollectionReminder.tpl',
-      CRM_ManualDirectDebit_Common_MessageTemplate::AUTO_RENEW_MSG_TITLE => 'AutoRenewNotification.tpl',
-      CRM_ManualDirectDebit_Common_MessageTemplate::MANDATE_UPDATE_MSG_TITLE => 'MandateUpdateNotification.tpl',
-    ];
-
-    foreach ($templates as $title => $fileName) {
-      $this->messageTemplateParamList[] = [
-        'filePath' => $this->extensionDir . "/templates/CRM/ManualDirectDebit/MessageTemplate/$fileName",
-        'title' => $title,
-        'subject' => ts($title),
-      ];
-    }
-  }
-
-  /**
    * Creates message templates
    */
   private function createMessageTemplates() {
-    $this->setMessageTemplateParamList();
-
-    foreach ($this->messageTemplateParamList as $messageTemplateParam) {
-      if($this->isEntityAlreadyExist("MessageTemplate", $messageTemplateParam['title'], 'msg_title')){
-        $this->deleteMessageTemplate($messageTemplateParam['title']);
-      }
-
+    $templates = CRM_ManualDirectDebit_Common_MessageTemplate::getDefaultDirectDebitTemplates();
+    foreach ($templates as $messageTemplateParam) {
       $this->createMessageTemplate($messageTemplateParam);
     }
   }
@@ -241,29 +252,40 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
    * Creates message template
    *
    * @param $params
-   *
-   * @throws \CiviCRM_API3_Exception
    */
   private function createMessageTemplate($params) {
-    $messageHtml = '';
-    if (file_exists($params['filePath'])) {
-      $messageHtml = file_get_contents($params['filePath']);
-    }
-    else {
-      CRM_Core_Session::setStatus(
-        ts('Creating message template'),
-        ts("Couldn't find default template at '" . $params['filePath'] . "'"),
-        'alert'
-      );
-    }
+    $templatePath = $this->extensionDir . '/templates/CRM/ManualDirectDebit/MessageTemplate/' . $params['templateFile'];
+    $templateBodyHtml = file_get_contents($templatePath);
 
-    civicrm_api3('MessageTemplate', 'create', [
+    $messageTemplate = civicrm_api3('MessageTemplate', 'create', [
       'msg_title' => $params['title'],
-      'msg_subject' => $params['subject'],
+      'msg_subject' => $params['title'],
       'is_reserved' => 0,
-      'msg_html' => $messageHtml,
+      'msg_html' => $templateBodyHtml,
       'is_active' => 1,
       'msg_text' => 'N/A',
+    ]);
+
+    $this->fillDDTemplateCustomFieldsData($messageTemplate['id'], $params['name']);
+  }
+
+  private function fillDDTemplateCustomFieldsData($id, $machineName) {
+    $isDDTemplateCustomFieldId = civicrm_api3('CustomField', 'getvalue', [
+      'return' => 'id',
+      'custom_group_id' => 'direct_debit_message_template',
+      'name' => 'is_direct_debit_template',
+    ]);
+
+    $machineNameCustomFieldId = civicrm_api3('CustomField', 'getvalue', [
+      'return' => 'id',
+      'custom_group_id' => 'direct_debit_message_template',
+      'name' => 'template_machine_name',
+    ]);
+
+    civicrm_api3('MessageTemplate', 'create', [
+      'id' => $id,
+      'custom_' . $isDDTemplateCustomFieldId => 1,
+      'custom_' . $machineNameCustomFieldId => $machineName,
     ]);
   }
 
@@ -273,10 +295,9 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
    * @throws \CiviCRM_API3_Exception
    */
   private function deleteMessageTemplates() {
-    $this->setMessageTemplateParamList();
-
-    foreach ($this->messageTemplateParamList as $messageTemplateParam) {
-      $this->deleteMessageTemplate($messageTemplateParam['title']);
+    $templates = CRM_ManualDirectDebit_Common_MessageTemplate::getDefaultDirectDebitTemplates();
+    foreach ($templates as $templateParams) {
+      $this->deleteMessageTemplate($templateParams['name']);
     }
   }
 
@@ -490,9 +511,9 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   public function uninstall() {
     $this->deletePaymentProcessor();
     $this->alterEntitiesValues('uninstall');
-    $this->alterCustomGroups('uninstall');
     $this->deleteDirectDebitNavigationMenu();
     $this->deleteMessageTemplates();
+    $this->alterCustomGroups('uninstall');
   }
 
   public function onDisable() {
@@ -549,6 +570,10 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
    */
   private function alterCustomGroups($action) {
     foreach ($this->customGroups as $customGroup) {
+      if ($action == 'disable' && $customGroup == 'direct_debit_message_template') {
+        continue;
+      }
+
       $this->alterCustomGroup(
         $customGroup,
         $action
@@ -678,11 +703,17 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   /**
    * Deletes message templates
    *
-   * @param $messageTitle
+   * @param $machineName
    */
-  private function deleteMessageTemplate($messageTitle) {
+  private function deleteMessageTemplate($machineName) {
+    $machineNameCustomFieldId = civicrm_api3('CustomField', 'getvalue', [
+      'return' => 'id',
+      'custom_group_id' => 'direct_debit_message_template',
+      'name' => 'template_machine_name',
+    ]);
+
     civicrm_api3('MessageTemplate', 'get', [
-      'msg_title' => $messageTitle,
+      'custom_' . $machineNameCustomFieldId => $machineName,
       'api.MessageTemplate.delete' => ['id' => '$value.id'],
     ]);
   }
