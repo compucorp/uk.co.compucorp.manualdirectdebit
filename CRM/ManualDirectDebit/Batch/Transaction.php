@@ -392,6 +392,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $query = CRM_Utils_SQL_Select::from(self::DD_MANDATE_TABLE);
     $query->join('value_dd_information', 'LEFT JOIN civicrm_value_dd_information ON civicrm_value_dd_information.mandate_id = civicrm_value_dd_mandate.id');
     $query->join('contribution', 'LEFT JOIN civicrm_contribution ON civicrm_contribution.id = civicrm_value_dd_information.entity_id');
+    $query->join('contact', 'LEFT JOIN civicrm_contact ON civicrm_contribution.contact_id = civicrm_contact.id');
     $query->join('contribution_recur', 'LEFT JOIN civicrm_contribution_recur ON civicrm_contribution.contribution_recur_id = civicrm_contribution_recur.id');
     $query->join('entity_batch', 'LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . $this->params['entityTable'] . '.id AND civicrm_entity_batch.entity_table = \'' . $this->params['entityTable'] . '\'');
     $query->join('civicrm_option_group', 'LEFT JOIN civicrm_option_group ON civicrm_option_group.name = "direct_debit_codes"');
@@ -449,6 +450,9 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         $query->limit((int) $this->params['rowCount'], (int) $this->params['offset']);
       }
     }
+
+    $query->where('civicrm_contact.is_deleted IS NULL OR civicrm_contact.is_deleted = 0');
+    $query->where('civicrm_contribution.is_test IS NULL OR civicrm_contribution.is_test = 0');
 
     $mandateItems = CRM_Core_DAO::executeQuery($query->toSQL());
 
