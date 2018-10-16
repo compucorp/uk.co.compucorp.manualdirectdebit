@@ -146,12 +146,6 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     ]);
 
     while ($dao->fetch()) {
-      if (strlen($dao->ac_number) > 4) {
-        $accountNumber = str_repeat('*', strlen($dao->ac_number) - 4) . substr($dao->ac_number, -4);
-      } else {
-        $accountNumber = '****';
-      }
-
       $this->tplParams['mandateData'] = [
         'bank_name' => $dao->bank_name,
         'bank_street_address' => $dao->bank_street_address,
@@ -159,7 +153,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
         'bank_county' => $dao->bank_county,
         'bank_postcode' => $dao->bank_postcode,
         'account_holder_name' => $dao->account_holder_name,
-        'ac_number' => $accountNumber,
+        'ac_number' => $this->obfuscateAccountNumber($dao->ac_number),
         'sort_code' => $dao->sort_code,
         'dd_ref' => $dao->dd_ref,
         'dd_code' => $this->getDdCode($dao->dd_code),
@@ -167,6 +161,24 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
         'authorisation_date' => CRM_Utils_Date::customFormat($dao->authorisation_date, '%d/%m/%Y'),
       ];
     }
+  }
+
+  /**
+   * Replaces all but the last four charcters of the given number for '*'
+   * characters.
+   *
+   * @param string $accountNumber
+   *
+   * @return string
+   */
+  private function obfuscateAccountNumber($accountNumber) {
+    if (strlen($accountNumber) > 4) {
+      $accountNumber = str_repeat('*', strlen($accountNumber) - 4) . substr($accountNumber, -4);
+    } else {
+      $accountNumber = '****';
+    }
+
+    return $accountNumber;
   }
 
   /**
