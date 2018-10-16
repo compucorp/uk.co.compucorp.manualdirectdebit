@@ -146,6 +146,12 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     ]);
 
     while ($dao->fetch()) {
+      if (strlen($dao->ac_number) > 4) {
+        $accountNumber = str_repeat('*', strlen($dao->ac_number) - 4) . substr($dao->ac_number, -4);
+      } else {
+        $accountNumber = '****';
+      }
+
       $this->tplParams['mandateData'] = [
         'bank_name' => $dao->bank_name,
         'bank_street_address' => $dao->bank_street_address,
@@ -153,7 +159,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
         'bank_county' => $dao->bank_county,
         'bank_postcode' => $dao->bank_postcode,
         'account_holder_name' => $dao->account_holder_name,
-        'ac_number' => $dao->ac_number,
+        'ac_number' => $accountNumber,
         'sort_code' => $dao->sort_code,
         'dd_ref' => $dao->dd_ref,
         'dd_code' => $this->getDdCode($dao->dd_code),
