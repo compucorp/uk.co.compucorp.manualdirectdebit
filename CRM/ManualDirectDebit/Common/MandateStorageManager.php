@@ -320,8 +320,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
    *
    * @param $mandateID
    *
-   * @return boolean
-   *   True on success, false otw
+   * @throws \Exception
    */
   public function deleteMandate($mandateID) {
     $transaction = new CRM_Core_Transaction();
