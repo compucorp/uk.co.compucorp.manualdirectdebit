@@ -315,4 +315,40 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
     CRM_Core_DAO::executeQuery($query);
   }
 
+  /**
+   * Deletes mandate and all references to it.
+   *
+   * @param $mandateID
+   *
+   * @throws \Exception
+   */
+  public function deleteMandate($mandateID) {
+    $transaction = new CRM_Core_Transaction();
+
+    try {
+      $recurrMandateRef = new CRM_ManualDirectDebit_BAO_RecurrMandateRef();
+      $recurrMandateRef->mandate_id = $mandateID;
+      $recurrMandateRef->delete();
+
+      $query = '
+        DELETE FROM `civicrm_value_dd_information`
+        WHERE civicrm_value_dd_information.mandate_id = %1
+      ';
+      CRM_Core_DAO::executeQuery($query, [
+        1 => [$mandateID, 'Integer']
+      ]);
+
+      $dao = CRM_Core_BAO_CustomGroup::class;
+      $groupID = CRM_Core_DAO::getFieldValue($dao, 'direct_debit_mandate', 'id', 'name');
+      CRM_Core_BAO_CustomValue::deleteCustomValue($mandateID, $groupID);
+    } catch (Exception $e) {
+      $transaction->rollback();
+      $message = "An error occurred deleting mandate with id ({$mandateID}): " . $e->getMessage();
+
+      throw new Exception($message);
+    }
+
+    $transaction->commit();
+  }
+
 }

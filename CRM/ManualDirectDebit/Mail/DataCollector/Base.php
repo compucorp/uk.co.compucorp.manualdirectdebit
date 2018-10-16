@@ -153,7 +153,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
         'bank_county' => $dao->bank_county,
         'bank_postcode' => $dao->bank_postcode,
         'account_holder_name' => $dao->account_holder_name,
-        'ac_number' => $dao->ac_number,
+        'ac_number' => $this->obfuscateAccountNumber($dao->ac_number),
         'sort_code' => $dao->sort_code,
         'dd_ref' => $dao->dd_ref,
         'dd_code' => $this->getDdCode($dao->dd_code),
@@ -161,6 +161,24 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
         'authorisation_date' => CRM_Utils_Date::customFormat($dao->authorisation_date, '%d/%m/%Y'),
       ];
     }
+  }
+
+  /**
+   * Replaces all but the last four charcters of the given number for '*'
+   * characters.
+   *
+   * @param string $accountNumber
+   *
+   * @return string
+   */
+  private function obfuscateAccountNumber($accountNumber) {
+    if (strlen($accountNumber) > 4) {
+      $accountNumber = str_repeat('*', strlen($accountNumber) - 4) . substr($accountNumber, -4);
+    } else {
+      $accountNumber = '****';
+    }
+
+    return $accountNumber;
   }
 
   /**
