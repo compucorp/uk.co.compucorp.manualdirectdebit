@@ -5,15 +5,52 @@ CRM.$('document').ready(function () {
     CRM.$('.form-item a.button').parent().hide();
 
     CRM.$('.crm-hover-button.crm-custom-value-del').each(function () {
+      var that = this;
       var mandateTitle = CRM.$(this).attr('title').split(' ');
       var cgCount = mandateTitle[mandateTitle.length - 1];
 
       var isAlreadyEditButtonAdd = CRM.$(this).next('#edit_direct_debit_mandate_' + cgCount).length != 1;
       if (isAlreadyEditButtonAdd) {
         var mandateData = JSON.parse(CRM.$(this).attr('data-post'));
+        var editMandateURL = getUrlForUpdatingCurrentMandate(cgCount, mandateData.groupID, mandateData.contactId, mandateData.valueID);
+        var editButtonHTML =
+          '<a href="#" class="button edit" id="edit_direct_debit_mandate_' + cgCount + '" title="Edit Direct Debit Mandate" onclick="CRM.loadPage(\'' + editMandateURL + '\')">' +
+          '  <span><i class="crm-i fa-pencil"></i> Edit </span>' +
+          '</a>';
 
-        CRM.$('<a href=\"#\" class=\"button edit\" id="edit_direct_debit_mandate_' + cgCount + '" title=\"Edit Direct Debit Mandate\" onclick=\"CRM.loadPage(\'' + getUrlForUpdatingCurrentMandate(cgCount, mandateData.groupID, mandateData.contactId, mandateData.valueID) + '\')\"><span><i class="crm-i fa-pencil"></i> Edit </span></a>').insertAfter(CRM.$(this));
-        CRM.$(this).hide();
+        CRM.$(editButtonHTML).insertBefore(CRM.$(this));
+        CRM.$(this).addClass('button delete')
+          .removeClass('crm-hover-button')
+          .removeClass('crm-custom-value-del')
+        ;
+        CRM.$(this).click(function () {
+          CRM.confirm({
+            title: ts('Delete Mandate?'),
+            message: ts('Are you sure you want to delete this mandate? This action cannot be undone.'),
+            options: {
+              no: ts('Cancel'),
+              yes: ts('Apply')
+            }
+          }).on('crmConfirm:yes', function() {
+            var mandateData = JSON.parse(CRM.$(that).attr('data-post'));
+
+            CRM.api3('ManualDirectDebit', 'deletemandate', {
+              mandate_id: mandateData.valueID,
+            }).done(function(result) {
+              if (result.is_error) {
+                CRM.alert(result.error_message, null, 'error');
+              } else {
+                CRM.alert(ts('Mandate has been deleted.'), null, 'success');
+              }
+
+              CRM.refreshParent(that);
+            });
+          }).on('crmConfirm:no', function() {
+            return;
+          });
+
+          return false;
+        });
       }
     });
   }
