@@ -17,12 +17,12 @@
           <th><p></p></th>
         </tr>
 
-      {foreach from=$orderLineItems item=lineItem}
-        <tr style="border: 1px solid black;">
-          <td style="border: 1px solid black;padding-left: 10px;"><p style="color: black;"><strong>{$lineItem.label}</strong></p></td>
-          <td style="border: 1px solid black;padding-left: 10px;"><p style="color: black;"><strong>{$currency}{$lineItem.price}</strong></p></td>
-        </tr>
-      {/foreach}
+          {foreach from=$orderLineItems item=lineItem}
+            <tr style="border: 1px solid black;">
+              <td style="border: 1px solid black;padding-left: 10px;"><p style="color: black;"><strong>{$lineItem.label}</strong></p></td>
+              <td style="border: 1px solid black;padding-left: 10px;"><p style="color: black;"><strong>{$currency}{$lineItem.price}</strong></p></td>
+            </tr>
+          {/foreach}
 
         <tr style="border: 1px solid black;">
           <td style="border: 1px solid black;padding-left: 10px;"><p style="color: black;"><strong>{ts}Total{/ts}</strong></p></td>
@@ -102,13 +102,13 @@
         </p>
       </div>
 
-      {foreach from=$paymentPlanMemberships item=membership}
-      <div>
-        <p style="color: black;">
-            {ts 1=$membership.price 2=$membership.durationUnit 3=$currency }{$membership.label} at %3%1 per %2.{/ts}
-        </p>
-      </div>
-      {/foreach}
+        {foreach from=$paymentPlanMemberships item=membership}
+          <div>
+            <p style="color: black;">
+                {ts 1=$membership.price 2=$membership.durationUnit 3=$currency }{$membership.label} at %3%1 per %2.{/ts}
+            </p>
+          </div>
+        {/foreach}
 
         {if $recurringContributionData.installments gt 0}
           <p>You can find your installment schedule below:</p>

@@ -31,7 +31,7 @@ class CRM_ManualDirectDebit_Common_MessageTemplate {
         [
           'name' => self::COLLECTION_REMINDER_MSG_NAME,
           'templateFile' => 'PaymentCollectionReminder.tpl',
-          'title' => 'Direct Direct Debit Payment Collection Reminder'
+          'title' => 'Direct Debit Payment Collection Reminder'
         ],
         [
           'name' => self::AUTO_RENEW_MSG_NAME,
