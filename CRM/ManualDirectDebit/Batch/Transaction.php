@@ -401,10 +401,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     //select
     $query->select(implode(' , ', $this->returnValues));
 
-    $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID));
-    if ($batch->getBatchType() == 'instructions_batch') {
-      $query->distinct(TRUE);
-    }
+    $query->distinct(TRUE);
 
     foreach ($this->searchableFields as $k => $field) {
       if (isset($this->params[$k])) {
