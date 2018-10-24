@@ -26,6 +26,8 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     'activeMemberships' => FALSE,
     'nextMembershipPayment' => FALSE,
     'orderLineItems' => FALSE,
+    'orderSummaryTable' => FALSE,
+    'activeMembershipsTable' => FALSE,
   ];
 
   /**
@@ -68,6 +70,9 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $this->collectNextMembershipPayment();
     $this->collectImageSrc();
     $this->collectCurrency();
+
+    $this->generateOrderSummaryTable();
+    $this->generateActiveMembershipsTable();
 
     return $this->tplParams;
   }
@@ -224,7 +229,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
   private function buildRecuringContributionTable($recurringContributionPlan) {
     $smarty = CRM_Core_Smarty::singleton();
     $smarty->assign('installments', $recurringContributionPlan);
-    return $smarty->fetch('CRM/ManualDirectDebit/MessageTemplate/InstallmentList.tpl');
+    return $smarty->fetch('CRM/ManualDirectDebit/MessageTemplate/Snippets/InstallmentList.tpl');
   }
 
   /**
@@ -448,6 +453,23 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
       $contributionBao = CRM_Contribute_BAO_Contribution::findById($this->contributionId);
       $this->tplParams['currency'] = $this->getCurrencySymbol($contributionBao->currency);
     }
+  }
+
+  private function generateOrderSummaryTable() {
+    $smarty = CRM_Core_Smarty::singleton();
+    $paramsToAssign = ['orderLineItems', 'recurringContributionData', 'currency'];
+    foreach ($paramsToAssign as $param) {
+      $smarty->assign($param, $this->tplParams[$param]);
+    }
+
+    $this->tplParams['orderSummaryTable']  =  $smarty->fetch('CRM/ManualDirectDebit/MessageTemplate/Snippets/OrderSummary.tpl');
+  }
+
+  private function generateActiveMembershipsTable() {
+    $smarty = CRM_Core_Smarty::singleton();
+    $smarty->assign('activeMemberships', $this->tplParams['activeMemberships']);
+
+    $this->tplParams['activeMembershipsTable']  =  $smarty->fetch('CRM/ManualDirectDebit/MessageTemplate/Snippets/ActiveMemberships.tpl');
   }
 
   /**
