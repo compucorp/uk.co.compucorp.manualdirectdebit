@@ -1,0 +1,134 @@
+<?php
+
+/**
+ * Implements hook to alter CRM_Financial_Form_Payment form to add options
+ * related to DD when the payment method is chosen.
+ */
+class CRM_ManualDirectDebit_Hook_BuildForm_Payment {
+
+  /**
+   * Payment form object that is being altered.
+   *
+   * @var \CRM_Financial_Form_Payment
+   */
+  private $form;
+
+  /**
+   * Template path for the extension.
+   *
+   * @var string
+   */
+  private $templatePath;
+
+  /**
+   * CRM_ManualDirectDebit_Hook_BuildForm_Payment constructor.
+   *
+   * @param \CRM_Financial_Form_Payment $form
+   */
+  public function __construct(CRM_Financial_Form_Payment $form) {
+    $this->form = $form;
+    $this->templatePath = CRM_ManualDirectDebit_ExtensionUtil::path() . '/templates';
+  }
+
+  /**
+   * Alters the form if direct debit was chosen as payment method.
+   */
+  public function buildForm() {
+    if (!$this->isDirectDebitPaymentInstrument($this->form->paymentInstrumentID)) {
+      return;
+    }
+
+    $contactID = CRM_Utils_Request::retrieve('cid', 'Int');
+    if (empty($contactID)) {
+      CRM_Core_Session::setStatus(
+        "In order to use Direct Debit as payment method, a contact must first be selected! ",
+        "Error - No Contact Selected",
+        'error'
+      );
+
+      return;
+    }
+
+    $this->addMandateSelectionField();
+    $this->addJSCreateMandateEventHandler();
+  }
+
+  /**
+   * Adds select field to choose mandates.
+   */
+  private function addMandateSelectionField() {
+    $templateVars = $this->form->get_template_vars();
+
+    $paymentFields = $templateVars['paymentFields'];
+    $paymentFields[] = 'mandate_id';
+    $this->form->assign('paymentFields', $paymentFields);
+
+    $requiredFields = $templateVars['requiredPaymentFields'];
+    $requiredFields[] = 'mandate_id';
+    $this->form->assign('requiredPaymentFields', $requiredFields);
+
+    $contactID = CRM_Utils_Request::retrieve('cid', 'Int');
+    $this->form->add(
+      'select',
+      'mandate_id',
+      'Mandate',
+      $this->getMandateOptionsForContact($contactID),
+      TRUE,
+      []
+    );
+  }
+
+  /**
+   * Inject JS logic to show mandate creation modal.
+   */
+  private function addJSCreateMandateEventHandler() {
+    CRM_Core_Region::instance('billing-block-post')->add([
+      'template' => "{$this->templatePath}/CRM/ManualDirectDebit/Form/Payment.tpl",
+    ]);
+  }
+
+  /**
+   * Obtains mandates for given contact.
+   *
+   * @param int $contactID
+   *
+   * @return array
+   */
+  private function getMandateOptionsForContact($contactID) {
+    $mandateStorage = new CRM_ManualDirectDebit_Common_MandateStorageManager();
+    $mandates = $mandateStorage->getMandatesForContact($contactID);
+
+    $result = ['-' => ' - select - '];
+    foreach ($mandates as $currentMandate) {
+      $result[$currentMandate['id']] =
+        $currentMandate['dd_ref'] . ' - ' .
+        $currentMandate['dd_code'] . ' - ' .
+        $currentMandate['ac_number'] . ' - ' .
+        $currentMandate['start_date']
+      ;
+    }
+
+    $result[0] = 'Create New Mandate...';
+
+    return $result;
+  }
+
+  /**
+   * Checks if given payment instrument corresponds to Direct Debit.
+   */
+  private function isDirectDebitPaymentInstrument($paymentIsntrumentID) {
+    $result = civicrm_api3('OptionValue', 'getsingle', [
+      'sequential' => 1,
+      'option_group_id' => 'payment_instrument',
+      'value' => $paymentIsntrumentID,
+      'options' => ['limit' => 0],
+    ]);
+
+    if ($result['name'] === 'direct_debit') {
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+  
+}

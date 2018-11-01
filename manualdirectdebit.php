@@ -212,7 +212,7 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
 
     case "CRM_Member_Form_Membership":
       if ($action == CRM_Core_Action::ADD) {
-        $paymentInstrumentId = $form->getVar('_submitValues') ['payment_instrument_id'];
+        $paymentInstrumentId = $form->getVar('_submitValues')['payment_instrument_id'];
         if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($paymentInstrumentId)) {
           $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate($form);
           $manualDirectDebit->saveMandateData();
@@ -255,6 +255,11 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
   if (get_class($page) == 'CRM_Contact_Page_View_CustomData') {
     CRM_Core_Resources::singleton()
       ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/mandateEdit.js');
+  }
+
+  if (get_class($page) == 'CRM_Member_Page_Tab') {
+    CRM_Core_Resources::singleton()
+      ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/paymentMethodMandateSelection.js');
   }
 }
 
@@ -307,10 +312,12 @@ function manualdirectdebit_civicrm_buildForm($formName, &$form) {
   }
 
   if ($formName === 'CRM_Member_Form_Membership' || $formName === 'CRM_Member_Form_MembershipRenewal') {
-    $formBuilder = new CRM_ManualDirectDebit_Hook_BuildForm_InjectCustomGroup($form);
-    $formBuilder->buildForm();
-
     $formBuilder = new CRM_ManualDirectDebit_Hook_BuildForm_Membership($form);
+    $formBuilder->buildForm();
+  }
+
+  if ($formName === 'CRM_Financial_Form_Payment') {
+    $formBuilder = new CRM_ManualDirectDebit_Hook_BuildForm_Payment($form);
     $formBuilder->buildForm();
   }
 }

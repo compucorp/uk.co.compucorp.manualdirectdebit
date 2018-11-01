@@ -71,6 +71,9 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
    *
    * @param $currentContactId
    * @param $mandateValues
+   *
+   * @return \CRM_Core_DAO|object
+   * @throws \Exception
    */
   public function saveDirectDebitMandate($currentContactId, $mandateValues) {
     // protect Data from SQL injection
@@ -100,7 +103,6 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
       CRM_Core_DAO::executeQuery($sqlInsertInDirectDebitMandate, $values);
 
       $mandateId = $this->getLastInsertedMandateId($currentContactId);
-
     } catch (Exception $exception) {
       $transaction->rollback();
 
@@ -108,9 +110,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
     }
     $transaction->commit();
 
-    $this->assignMandate($mandateId, $currentContactId);
-
-    $this->launchCustomHook($currentContactId, $mandateValues);
+    return $this->getMandate($mandateId);
   }
 
   /**
@@ -119,7 +119,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
    * @param $currentContactId
    * @param $mandateValues
    */
-  private function launchCustomHook($currentContactId, $mandateValues) {
+  public function launchCustomHook($currentContactId, $mandateValues) {
     $directDebitMandateId = civicrm_api3('CustomGroup', 'getvalue', [
       'return' => "id",
       'name' => "direct_debit_mandate",
@@ -145,6 +145,8 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
    * Creates a new empty direct debit mandate
    *
    * @param $currentContactId
+   *
+   * @throws \Exception
    */
   public function createEmptyMandate($currentContactId) {
     $transaction = new CRM_Core_Transaction();
@@ -212,7 +214,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
    * @param $mandateId
    * @param $contactId
    */
-  private function assignMandate($mandateId, $contactId) {
+  public function assignMandate($mandateId, $contactId) {
     $sqlSelectDebitMandateID = "SELECT MAX(`id`) AS id FROM civicrm_contribution_recur WHERE `contact_id` = %1";
     $queryResult = CRM_Core_DAO::executeQuery($sqlSelectDebitMandateID, [
       1 => [
@@ -362,6 +364,52 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
     }
 
     $transaction->commit();
+  }
+
+  /**
+   * Returns an object with the mandates data.
+   *
+   * @param int $mandateID
+   *
+   * @return \CRM_Core_DAO|object
+   */
+  public function getMandate($mandateID) {
+    $sqlSelectDebitMandateID = '
+      SELECT * 
+      FROM ' . self::DIRECT_DEBIT_TABLE_NAME . ' 
+      WHERE id = %1
+    ';
+    $queryResult = CRM_Core_DAO::executeQuery($sqlSelectDebitMandateID, [
+      1 => [$mandateID, 'Int'],
+    ]);
+    $queryResult->fetch();
+
+    return $queryResult;
+  }
+
+  /**
+   * Obtains mandates for given contact ID.
+   *
+   * @param int $contactID
+   *
+   * @return array
+   */
+  public function getMandatesForContact($contactID) {
+    $sqlSelectDebitMandateID = '
+      SELECT * 
+      FROM ' . self::DIRECT_DEBIT_TABLE_NAME . ' 
+      WHERE `entity_id` = %1
+    ';
+    $queryResult = CRM_Core_DAO::executeQuery($sqlSelectDebitMandateID, [
+      1 => [$contactID, 'String'],
+    ]);
+
+    $result = [];
+    while ($queryResult->fetch()) {
+      $result[] = $queryResult->toArray();
+    }
+
+    return $result;
   }
 
 }
