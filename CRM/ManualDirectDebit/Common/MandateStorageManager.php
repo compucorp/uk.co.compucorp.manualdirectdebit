@@ -83,6 +83,10 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
 
     $i = 0;
     foreach ($mandateValues as $key => $value) {
+      if (!isset($value)) {
+        continue;
+      }
+
       $columnName[] = $key;
       $valuesId[] = "%" . $i;
       $values[$i] = [
@@ -202,7 +206,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
    *
    * @param $mandateId
    */
-  private function setMandateForCreatingDependency($mandateId) {
+  public function setMandateForCreatingDependency($mandateId) {
     $mandateContributionConnector = CRM_ManualDirectDebit_Hook_MandateContributionConnector::getInstance();
     $mandateContributionConnector->setMandateId($mandateId);
   }

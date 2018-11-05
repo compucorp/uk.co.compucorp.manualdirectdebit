@@ -21,6 +21,13 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Payment {
   private $templatePath;
 
   /**
+   * List of DD codes in the system.
+   *
+   * @var
+   */
+  private static $ddCodes;
+
+  /**
    * CRM_ManualDirectDebit_Hook_BuildForm_Payment constructor.
    *
    * @param \CRM_Financial_Form_Payment $form
@@ -95,6 +102,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Payment {
    * @return array
    */
   private function getMandateOptionsForContact($contactID) {
+    $config = CRM_Core_Config::singleton();
     $mandateStorage = new CRM_ManualDirectDebit_Common_MandateStorageManager();
     $mandates = $mandateStorage->getMandatesForContact($contactID);
 
@@ -102,15 +110,30 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Payment {
     foreach ($mandates as $currentMandate) {
       $result[$currentMandate['id']] =
         $currentMandate['dd_ref'] . ' - ' .
-        $currentMandate['dd_code'] . ' - ' .
+        $this->getMandateCode($currentMandate['dd_code']) . ' - ' .
         $currentMandate['ac_number'] . ' - ' .
-        $currentMandate['start_date']
+        CRM_Utils_Date::customFormat($currentMandate['start_date'], $config->dateformatFull)
       ;
     }
 
     $result[0] = 'Create New Mandate...';
 
     return $result;
+  }
+
+  /**
+   * Given a dd_code value, returns its corresponding label.
+   *
+   * @param string $codeID
+   *
+   * @return string
+   */
+  private function getMandateCode($codeID) {
+    if (empty(self::$ddCodes)) {
+      self::$ddCodes = CRM_Core_OptionGroup::values('direct_debit_codes');
+    }
+
+    return CRM_Utils_Array::value($codeID, self::$ddCodes, '');
   }
 
   /**
