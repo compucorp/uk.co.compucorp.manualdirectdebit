@@ -56,6 +56,13 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
     }
   }
 
+  public function saveMandateData() {
+    $mandateID = $this->form->getSubmitValue('mandate_id');
+
+    $mandateContributionConnector = CRM_ManualDirectDebit_Hook_MandateContributionConnector::getInstance();
+    $mandateContributionConnector->setMandateId($mandateID);
+  }
+
   /**
    * Checks if payment option appropriate for creating mandate
    */

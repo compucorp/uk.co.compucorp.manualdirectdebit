@@ -181,52 +181,42 @@ function manualdirectdebit_civicrm_navigationMenu(&$menu) {
 
 /**
  * Implements hook_civicrm_postProcess().
- *
  */
 function manualdirectdebit_civicrm_postProcess($formName, &$form) {
-
   $action = $form->getAction();
+  $mandateID = $form->getSubmitValue('mandate_id');
+  $paymentInstrumentId = CRM_Utils_Array::value('payment_instrument_id', $form->getVar('_submitValues'));
+  $isDirectDebit = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($paymentInstrumentId);
 
-  switch ($formName) {
-    case "CRM_Contribute_Form_UpdateSubscription":
-      if ($action == CRM_Core_Action::UPDATE) {
-        $activity = new CRM_ManualDirectDebit_Hook_Post_RecurContribution_Activity($form->getVar('contributionRecurID'), 'edit');
-        $activity->process();
-      }
+  switch (true) {
+    case $formName == 'CRM_Contribute_Form_UpdateSubscription' && $action == CRM_Core_Action::UPDATE:
+      $activity = new CRM_ManualDirectDebit_Hook_Post_RecurContribution_Activity($form->getVar('contributionRecurID'), 'edit');
+      $activity->process();
       break;
 
-    case "CRM_Contact_Form_CustomData":
-      if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($form->getVar('_groupID'))) {
+    case $formName == 'CRM_Member_Form_Membership' && $action == CRM_Core_Action::ADD && $isDirectDebit:
+      $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate($form);
+      $manualDirectDebit->saveMandateData();
+      break;
+
+    case $formName == 'CRM_Member_Form_MembershipRenewal' && $action == CRM_Core_Action::RENEW && $isDirectDebit:
+      $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate($form);
+      $manualDirectDebit->saveMandateData();
+      break;
+
+    case $formName == 'CRM_Contribute_Form_Contribution' && $action == CRM_Core_Action::ADD:
+    case $action == CRM_Core_Action::ADD && !empty($mandateID) && $isDirectDebit:
+    case $action == CRM_Core_Action::UPDATE && !empty($mandateID) && $isDirectDebit:
+      $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
+      $manualDirectDebit->setCurrentContactId($form->getVar('_contactID'));
+      $manualDirectDebit->saveMandateData();
+      break;
+
+    case $formName == 'CRM_Contact_Form_CustomData':
+      $isDirectDebitGroup = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($form->getVar('_groupID'));
+      if ($isDirectDebitGroup) {
         $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
         $manualDirectDebit->run();
-      }
-      break;
-
-    case "CRM_Contribute_Form_Contribution":
-      if ($action == CRM_Core_Action::ADD) {
-        $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
-        $manualDirectDebit->setCurrentContactId($form->getVar('_contactID'));
-        $manualDirectDebit->checkPaymentOptionToCreateMandate();
-      }
-      break;
-
-    case "CRM_Member_Form_Membership":
-      if ($action == CRM_Core_Action::ADD) {
-        $paymentInstrumentId = $form->getVar('_submitValues')['payment_instrument_id'];
-        if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($paymentInstrumentId)) {
-          $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate($form);
-          $manualDirectDebit->saveMandateData();
-        }
-      }
-      break;
-
-    case "CRM_Member_Form_MembershipRenewal":
-      if ($action == CRM_Core_Action::RENEW) {
-        $paymentInstrumentId = $form->getVar('_submitValues') ['payment_instrument_id'];
-        if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($paymentInstrumentId)) {
-          $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Membership_DirectDebitMandate($form);
-          $manualDirectDebit->saveMandateData();
-        }
       }
       break;
   }
@@ -237,29 +227,34 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
  *
  */
 function manualdirectdebit_civicrm_pageRun(&$page) {
-  if (get_class($page) == 'CRM_Contribute_Page_Tab') {
-    $contributionId = $page->getVar('_id');
-    $pageProcessor = new CRM_ManualDirectDebit_Hook_PageRun_TabPage();
-    $pageProcessor->setContributionId($contributionId);
-    $pageProcessor->hideDirectDebitFields();
+  switch(get_class($page)) {
 
-    CRM_Core_Resources::singleton()
-      ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/openContribution.js');
-  }
+    case 'CRM_Contribute_Page_ContributionRecur':
+      $injectCustomGroup = new CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInjector($page);
+      $injectCustomGroup->inject();
+      break;
 
-  if (get_class($page) == 'CRM_Contribute_Page_ContributionRecur') {
-    $injectCustomGroup = new CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInjector($page);
-    $injectCustomGroup->inject();
-  }
+    case 'CRM_Contact_Page_View_CustomData':
+      CRM_Core_Resources::singleton()
+        ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/mandateEdit.js');
+      break;
 
-  if (get_class($page) == 'CRM_Contact_Page_View_CustomData') {
-    CRM_Core_Resources::singleton()
-      ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/mandateEdit.js');
-  }
+    case 'CRM_Contribute_Page_Tab':
+      $contributionId = $page->getVar('_id');
+      $pageProcessor = new CRM_ManualDirectDebit_Hook_PageRun_TabPage();
+      $pageProcessor->setContributionId($contributionId);
+      $pageProcessor->hideDirectDebitFields();
 
-  if (get_class($page) == 'CRM_Member_Page_Tab') {
-    CRM_Core_Resources::singleton()
-      ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/paymentMethodMandateSelection.js');
+      CRM_Core_Resources::singleton()
+        ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/openContribution.js')
+        ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/paymentMethodMandateSelection.js');
+      break;
+
+    case 'CRM_Member_Page_Tab':
+    case 'CRM_Event_Page_Tab':
+      CRM_Core_Resources::singleton()
+        ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/paymentMethodMandateSelection.js');
+      break;
   }
 }
 
