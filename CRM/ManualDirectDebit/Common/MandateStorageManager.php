@@ -125,7 +125,20 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
       'name' => "direct_debit_mandate",
     ]);
 
-    CRM_Utils_Hook::custom('update', $directDebitMandateId, $currentContactId, $mandateValues);
+    $mandateFields = civicrm_api3('CustomField', 'get', [
+      'sequential' => 1,
+      'custom_group_id' => "direct_debit_mandate",
+    ])['values'];
+
+    foreach ($mandateFields as &$currentField) {
+      if (isset($mandateValues[$currentField['column_name']])) {
+        $currentField['value'] = $mandateValues[$currentField['column_name']];
+      }
+    }
+
+    unset($currentField);
+
+    CRM_Utils_Hook::custom('update', $directDebitMandateId, $currentContactId, $mandateFields);
   }
 
   /**
