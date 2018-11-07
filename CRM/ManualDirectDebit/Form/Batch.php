@@ -7,6 +7,8 @@ use CRM_ManualDirectDebit_ExtensionUtil as E;
  */
 class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
 
+  private $batchType;
+
   /**
    * PreProcess function.
    */
@@ -14,19 +16,19 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     parent::preProcess();
 
     $batchTypeID = CRM_Utils_Request::retrieveValue('type_id', 'String', NULL);
-    $batchType = CRM_Core_OptionGroup::getRowValues('batch_type', $batchTypeID, 'value', 'String', FALSE);
+    $this->batchType =  CRM_Core_OptionGroup::getRowValues('batch_type', $batchTypeID, 'value', 'String', FALSE);
 
     // Set the user context.
     $session = CRM_Core_Session::singleton();
-    $session->replaceUserContext(CRM_Utils_System::url('civicrm/direct_debit/batch', "reset=1&action=add&type_id=" . $batchType['value']));
+    $session->replaceUserContext(CRM_Utils_System::url('civicrm/direct_debit/batch', "reset=1&action=add&type_id=" . $this->batchType['value']));
 
-    CRM_Utils_System::setTitle(E::ts('Create %1', [1 => $batchType['label']]));
+    CRM_Utils_System::setTitle(E::ts('Create %1', [1 => $this->batchType['label']]));
 
     $newBatchID = CRM_ManualDirectDebit_Batch_BatchHandler::getMaxBatchId() + 1;
     $this->assign('batch_id', $newBatchID);
     $this->add('hidden', 'batch_id', $newBatchID);
-    $this->add('hidden', 'type_id', $batchType['value']);
-    $this->assign('batch_type', $batchType['label']);
+    $this->add('hidden', 'type_id', $this->batchType['value']);
+    $this->assign('batch_type', $this->batchType);
   }
 
   /**
@@ -42,6 +44,10 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
       ['' => ts('- select -')] + CRM_Core_OptionGroup::values('direct_debit_originator_number'),
       TRUE
     );
+
+    if ($this->batchType['name'] == 'dd_payments') {
+      $this->buildDateFilterFields();
+    }
 
     $this->addButtons([
       [
@@ -84,6 +90,11 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     return empty($errors) ? TRUE : $errors;
   }
 
+  private function buildDateFilterFields() {
+    $this->add('datepicker', 'start_date_filter', ts('Start Date'), '', FALSE, ['time' => FALSE]);
+    $this->add('datepicker', 'end_date_filter', ts('End Date'), '', FALSE, ['time' => FALSE]);
+  }
+
   /**
    * Sets defaults for form.
    *
@@ -98,12 +109,13 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     $batchTypeID = CRM_Utils_Request::retrieveValue('type_id', 'String', NULL);
     $batchType = CRM_Core_OptionGroup::getRowValues('batch_type', $batchTypeID, 'value', 'String', FALSE);
 
-    if ($batchType['name'] == 'instructions_batch') {
+    if ($this->batchType['name'] == 'instructions_batch') {
       $defaults['title'] = ts('New Instruction Batch - %1', [1 => $batchNo]);
     }
 
-    if ($batchType['name'] == 'dd_payments') {
+    if ($this->batchType['name'] == 'dd_payments') {
       $defaults['title'] = ts('Direct Debit Batch - %1', [1 => $batchNo]);
+      $defaults['end_date_filter'] = (new DateTime())->format('Y-m-d');
     }
 
 
@@ -118,7 +130,14 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     $batchStatus = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id');
     $params = $this->controller->exportValues($this->_name);
 
-    $params['data'] = json_encode(['values' => ['originator_number' => $params['originator_number']]]);
+    $params['data'] = json_encode(
+      ['values' => [
+        'originator_number' => $params['originator_number'],
+        'start_date_filter' => CRM_Utils_Array::value('start_date_filter', $params),
+        'end_date_filter' => CRM_Utils_Array::value('end_date_filter', $params),
+      ]]
+    );
+
     $params['modified_date'] = date('YmdHis');
     $params['modified_id'] = $session->get('userID');
     $batchMode = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'mode_id', ['labelColumn' => 'name']);

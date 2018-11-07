@@ -149,8 +149,12 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
         ],
       ],
       [
-        'name' => 'receive_date',
-        'value' => $this->getBatchContributionsInAdvanceDate(),
+        'name' => 'receive_date_start',
+        'value' => $batchData['values']['start_date_filter'],
+      ],
+      [
+        'name' => 'receive_date_end',
+        'value' => $batchData['values']['end_date_filter'],
       ],
       [
         'name' => 'recur_status',
