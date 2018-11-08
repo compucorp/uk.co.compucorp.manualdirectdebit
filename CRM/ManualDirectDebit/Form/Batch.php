@@ -106,9 +106,6 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     $sql = "SELECT max(id) FROM civicrm_batch";
     $batchNo = CRM_Core_DAO::singleValueQuery($sql) + 1;
 
-    $batchTypeID = CRM_Utils_Request::retrieveValue('type_id', 'String', NULL);
-    $batchType = CRM_Core_OptionGroup::getRowValues('batch_type', $batchTypeID, 'value', 'String', FALSE);
-
     if ($this->batchType['name'] == 'instructions_batch') {
       $defaults['title'] = ts('New Instruction Batch - %1', [1 => $batchNo]);
     }
