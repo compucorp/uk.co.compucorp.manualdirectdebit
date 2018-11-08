@@ -107,6 +107,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
       CRM_Core_DAO::executeQuery($sqlInsertInDirectDebitMandate, $values);
 
       $mandateId = $this->getLastInsertedMandateId($currentContactId);
+      $this->launchCustomHook($currentContactId, $mandateValues);
     } catch (Exception $exception) {
       $transaction->rollback();
 
@@ -125,13 +126,13 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
    */
   public function launchCustomHook($currentContactId, $mandateValues) {
     $directDebitMandateId = civicrm_api3('CustomGroup', 'getvalue', [
-      'return' => "id",
-      'name' => "direct_debit_mandate",
+      'return' => 'id',
+      'name' => 'direct_debit_mandate',
     ]);
 
     $mandateFields = civicrm_api3('CustomField', 'get', [
       'sequential' => 1,
-      'custom_group_id' => "direct_debit_mandate",
+      'custom_group_id' => 'direct_debit_mandate',
     ])['values'];
 
     foreach ($mandateFields as &$currentField) {
@@ -315,8 +316,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
 
     return $amountOfInstallments == $amountOfContributions ? TRUE : FALSE;
   }
-
-
+  
   /**
    * Changes mandate id for contribution
    *
