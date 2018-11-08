@@ -180,10 +180,6 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'op' => 'IN',
         'field' => 'civicrm_contribution.contribution_status_id',
       ],
-      'receive_date' => [
-        'op' => '<=',
-        'field' => 'civicrm_contribution.receive_date',
-      ],
       'recur_status' => [
         'op' => 'IN',
         'field' => 'civicrm_contribution_recur.contribution_status_id',
@@ -412,6 +408,14 @@ class CRM_ManualDirectDebit_Batch_Transaction {
           $query->where($field['field'] . ' ' . $field['op'] . ' @' . $k, [$k => $this->params[$k]]);
         }
       }
+    }
+
+    if (!empty($this->params['receive_date_start'])) {
+      $query->where('civicrm_contribution.receive_date >= @receive_date_start', ['receive_date_start' => $this->params['receive_date_start']]);
+    }
+
+    if (!empty($this->params['receive_date_end'])) {
+      $query->where('civicrm_contribution.receive_date <= @receive_date_end', ['receive_date_end' => $this->params['receive_date_end']]);
     }
 
     if ($this->notPresent) {
