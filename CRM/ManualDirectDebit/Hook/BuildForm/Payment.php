@@ -64,6 +64,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Payment {
    * Adds select field to choose mandates.
    */
   private function addMandateSelectionField() {
+    $this->form->assign('paymentTypeLabel', ts('Direct Debit Mandate'));
     $templateVars = $this->form->get_template_vars();
 
     $paymentFields = $templateVars['paymentFields'];
