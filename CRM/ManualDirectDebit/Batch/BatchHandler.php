@@ -291,15 +291,35 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
   }
 
   /**
-   * Updates Contributes status.
+   * Updates Contributes status and calls transition components to update
+   * related entities (like memberships).
    *
    * @param string $status
    * @param string $mandateId
    */
   private function updateContribute($status, $mandateId) {
-    $contributeStatuses = CRM_Core_PseudoConstant::get('CRM_Contribute_DAO_Contribution', 'contribution_status_id', ['labelColumn' => 'name']);
-    $query = 'UPDATE civicrm_contribution SET civicrm_contribution.contribution_status_id = ' . array_search($status, $contributeStatuses) . ' WHERE civicrm_contribution.id = ' . $mandateId;
-    CRM_Core_DAO::executeQuery($query);
+    $originalStatusID = civicrm_api3('Contribution', 'getvalue', [
+      'return' => 'contribution_status_id',
+      'id' => $mandateId,
+    ])['result'];
+
+    $contributeStatuses = CRM_Core_PseudoConstant::get(
+      'CRM_Contribute_DAO_Contribution',
+      'contribution_status_id',
+      ['labelColumn' => 'name']
+    );
+
+    $result = civicrm_api3('Contribution', 'create', [
+      'id' => $mandateId,
+      'contribution_status_id' => array_search($status, $contributeStatuses),
+    ]);
+    $contribution = array_shift($result['values']);
+
+    CRM_Contribute_BAO_Contribution::transitionComponentWithReturnMessage($contribution['id'],
+      $contribution['contribution_status_id'],
+      $originalStatusID,
+      $contribution['receive_date']
+    );
   }
 
   /**
@@ -381,11 +401,11 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
     foreach ($mandateItems as $mandateItem) {
       switch ($this->getBatchType()) {
         case 'instructions_batch':
-        $dataForExport[$mandateItem['mandate_id']] = $mandateItem;
+          $dataForExport[$mandateItem['mandate_id']] = $mandateItem;
           break;
 
         case 'dd_payments':
-        $dataForExport[$mandateItems['contribute_id']] = $mandateItem;
+          $dataForExport[$mandateItem['contribute_id']] = $mandateItem;
           break;
       }
     }

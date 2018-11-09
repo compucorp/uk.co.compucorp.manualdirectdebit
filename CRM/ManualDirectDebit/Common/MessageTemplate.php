@@ -5,15 +5,46 @@
  */
 class CRM_ManualDirectDebit_Common_MessageTemplate {
 
-  const SIGN_UP_MSG_TITLE = 'Direct Debit Payment Sign Up Notification';
+  const SIGN_UP_MSG_NAME = 'payment_sign_up_notification';
 
-  const PAYMENT_UPDATE_MSG_TITLE = 'Direct Debit Payment Update Notification';
+  const PAYMENT_UPDATE_MSG_NAME = 'payment_update_notification';
 
-  const COLLECTION_REMINDER_MSG_TITLE = 'Direct Debit Payment Collection Reminder';
+  const COLLECTION_REMINDER_MSG_NAME = 'payment_collection_reminder';
 
-  const AUTO_RENEW_MSG_TITLE = 'Direct Debit Auto-renew Notification';
+  const AUTO_RENEW_MSG_NAME = 'auto_renew_notification';
 
-  const MANDATE_UPDATE_MSG_TITLE = 'Direct Debit Mandate Update Notification';
+  const MANDATE_UPDATE_MSG_NAME = 'mandate_update_notification';
+
+
+  public static function getDefaultDirectDebitTemplates() {
+    return [
+        [
+          'name' => self::SIGN_UP_MSG_NAME,
+          'templateFile' => 'PaymentSignUpNotification.tpl',
+          'title' => 'Direct Debit Payment Sign Up Notification'
+        ],
+        [
+          'name' => self::PAYMENT_UPDATE_MSG_NAME,
+          'templateFile' => 'PaymentUpdateNotification.tpl',
+          'title' => 'Direct Debit Payment Update Notification'
+        ],
+        [
+          'name' => self::COLLECTION_REMINDER_MSG_NAME,
+          'templateFile' => 'PaymentCollectionReminder.tpl',
+          'title' => 'Direct Debit Payment Collection Reminder'
+        ],
+        [
+          'name' => self::AUTO_RENEW_MSG_NAME,
+          'templateFile' => 'AutoRenewNotification.tpl',
+          'title' => 'Direct Debit Auto-renew Notification'
+        ],
+        [
+          'name' => self::MANDATE_UPDATE_MSG_NAME,
+          'templateFile' => 'MandateUpdateNotification.tpl',
+          'title' => 'Direct Debit Mandate Update Notification'
+        ],
+    ];
+  }
 
   /**
    * Checks if template is direct debit template
@@ -23,61 +54,53 @@ class CRM_ManualDirectDebit_Common_MessageTemplate {
    * @return bool
    */
   public static function isDirectDebitTemplate($templateId) {
-    $query = "
-      SELECT template.id
-      FROM civicrm_msg_template AS template
-      WHERE template.id = %1 
-        AND template.msg_title in (%2, %3, %4, %5, %6)
-    ";
-
-    $dao = CRM_Core_DAO::executeQuery($query, [
-      1 => [$templateId, 'Integer'],
-      2 => [self::SIGN_UP_MSG_TITLE, 'String'],
-      3 => [self::PAYMENT_UPDATE_MSG_TITLE, 'String'],
-      4 => [self::COLLECTION_REMINDER_MSG_TITLE, 'String'],
-      5 => [self::AUTO_RENEW_MSG_TITLE, 'String'],
-      6 => [self::MANDATE_UPDATE_MSG_TITLE, 'String'],
+    $isDDTemplateCustomFieldId = civicrm_api3('CustomField', 'getvalue', [
+      'return' => 'id',
+      'custom_group_id' => 'direct_debit_message_template',
+      'name' => 'is_direct_debit_template',
     ]);
 
-    while ($dao->fetch()) {
-      return TRUE;
+    $template = civicrm_api3('MessageTemplate', 'get', [
+      'sequential' => 1,
+      'id' => $templateId,
+      'custom_' . $isDDTemplateCustomFieldId => 1,
+    ]);
+
+    if(empty($template['id'])) {
+      return FALSE;
     }
 
-    return FALSE;
+
+    return TRUE;
   }
 
-  /**
-   * Gets 'message template id' by title
-   *
-   * @param $title
-   *
-   * @return int|bool
-   */
-  public static function getMessageTemplateId($title) {
+  public static function getMessageTemplateIdByTitle($title) {
     $messageTemplate = civicrm_api3('MessageTemplate', 'get', [
       'sequential' => 1,
-      'return' => ["id"],
+      'return' => ['id'],
       'msg_title' => $title
     ]);
 
     return $messageTemplate['count'] == 1 ? $messageTemplate['values'][0]['id'] : FALSE;
   }
 
-  /**
-   * Gets 'message template title' by id
-   *
-   * @param $idMessageTemplate
-   *
-   * @return int|bool
-   */
-  public static function getMessageTemplateTitle($idMessageTemplate) {
-    $messageTemplate = civicrm_api3('MessageTemplate', 'get', [
-      'sequential' => 1,
-      'return' => ["msg_title"],
-      'id' => $idMessageTemplate
+  public static function getTemplateIdByName($templateName) {
+    $machineNameCustomFieldId = civicrm_api3('CustomField', 'getvalue', [
+      'return' => 'id',
+      'custom_group_id' => 'direct_debit_message_template',
+      'name' => 'template_machine_name',
     ]);
 
-    return $messageTemplate['count'] == 1 ? $messageTemplate['values'][0]['msg_title'] : FALSE;
+    $template = civicrm_api3('MessageTemplate', 'get', [
+      'sequential' => 1,
+      'custom_' . $machineNameCustomFieldId => $templateName,
+    ]);
+
+    if (empty($template['id'])) {
+      return NULL;
+    }
+
+    return $template['id'];
   }
 
 }

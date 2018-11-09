@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<CustomData>
+    <CustomGroups>
+        <CustomGroup>
+            <name>direct_debit_message_template</name>
+            <title>Direct Debit</title>
+            <extends>MessageTemplate</extends>
+            <style>Inline</style>
+            <collapse_display>1</collapse_display>
+            <is_active>1</is_active>
+            <table_name>civicrm_value_direct_debit_message_template</table_name>
+            <is_multiple>0</is_multiple>
+            <collapse_adv_display>0</collapse_adv_display>
+            <is_reserved>0</is_reserved>
+            <is_public>1</is_public>
+        </CustomGroup>
+    </CustomGroups>
+    <CustomFields>
+        <CustomField>
+            <name>is_direct_debit_template</name>
+            <label>Is Direct Debit Template?</label>
+            <data_type>Boolean</data_type>
+            <html_type>Radio</html_type>
+            <default>0</default>
+            <is_required>0</is_required>
+            <is_searchable>1</is_searchable>
+            <is_search_range>0</is_search_range>
+            <is_active>1</is_active>
+            <is_view>0</is_view>
+            <text_length>64</text_length>
+            <note_columns>60</note_columns>
+            <note_rows>4</note_rows>
+            <column_name>is_direct_debit_template</column_name>
+            <custom_group_name>direct_debit_message_template</custom_group_name>
+            <in_selector>1</in_selector>
+        </CustomField>
+        <CustomField>
+            <name>template_machine_name</name>
+            <label>Template Machine Name</label>
+            <data_type>String</data_type>
+            <html_type>Text</html_type>
+            <is_required>0</is_required>
+            <is_searchable>0</is_searchable>
+            <is_search_range>0</is_search_range>
+            <is_active>1</is_active>
+            <is_view>1</is_view>
+            <text_length>255</text_length>
+            <note_columns>60</note_columns>
+            <note_rows>4</note_rows>
+            <column_name>template_machine_name</column_name>
+            <custom_group_name>direct_debit_message_template</custom_group_name>
+            <in_selector>1</in_selector>
+        </CustomField>
+    </CustomFields>
+</CustomData>

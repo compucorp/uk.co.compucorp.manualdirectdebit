@@ -104,13 +104,6 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
     $recurringContributionId = $this->form->getVar('_submitValues')['recurrId'];
 
     $oldMandateId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($recurringContributionId);
-
-    if (is_null($oldMandateId)) {
-      CRM_Core_Session::setStatus(t("Mandate doesn't exist"), $title = 'Error', $type = 'alert');
-
-      return FALSE;
-    }
-
     $this->mandateId = $this->mandateStorage->getLastInsertedMandateId($this->currentContactId);
 
     $params = [
@@ -119,16 +112,45 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
     ];
     CRM_ManualDirectDebit_BAO_RecurrMandateRef::create($params);
 
-    $this->mandateStorage->changeMandateForContribution($this->mandateId, $oldMandateId);
+    if (!empty($oldMandateId)) {
+      $this->mandateStorage->changeMandateForContribution($this->mandateId, $oldMandateId);
+    }
+    else {
+      $this->relateMandateToExistingContributions($recurringContributionId, $this->mandateId);
+    }
 
     $this->redirectToContributionTab();
+  }
+
+  /**
+   * Relates the given mandate to all the contributions under the given
+   * recurring contribution ID.
+   *
+   * @param int $recurringContributionId
+   * @param int $mandateID
+   */
+  private function relateMandateToExistingContributions($recurringContributionId, $mandateID) {
+    $contributions = civicrm_api3('Contribution', 'get', [
+      'sequential' => 1,
+      'contribution_recur_id' => $recurringContributionId,
+      'options' => ['limit' => 0],
+    ]);
+
+    if ($contributions['count'] < 1) {
+      return;
+    }
+
+    foreach ($contributions['values'] as $payment) {
+      $this->mandateStorage->assignContributionMandate($payment['id'], $mandateID);
+    }
   }
 
   /**
    * Redirects to contribution tab
    */
   private function redirectToContributionTab() {
-    $this->form->controller->setDestination(CRM_Utils_System::url('civicrm/contact/view', http_build_query([
+    $this->form->controller->setDestination(
+      CRM_Utils_System::url('civicrm/contact/view', http_build_query([
         'action' => 'browse',
         'reset' => 1,
         'cid' => $this->currentContactId,

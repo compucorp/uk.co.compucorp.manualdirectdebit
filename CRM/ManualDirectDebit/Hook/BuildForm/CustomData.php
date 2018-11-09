@@ -38,7 +38,10 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomData {
   public function run() {
     if ($this->checkIfDirectDebitMandateInGroupTree()) {
       $this->hideSaveAndNewButton();
-      $this->hideDdRef();
+
+      if ($this->isAddOperation()) {
+        $this->hideDdRef();
+      }
     }
 
     $this->checkRecurringContribution();
@@ -70,13 +73,17 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomData {
     }
   }
 
+  private function isAddOperation() {
+    $mode = CRM_Utils_Request::retrieve('mode', 'String', $this->form);
+    return $mode === 'add';
+  }
+
   /**
    *  Hides 'DD ref' custom field
    */
   private function hideDdRef() {
     $customFieldId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName("dd_ref");
     $ddRefElementNameId = $this->form->_groupTree[$this->directDebitMandateId]['fields'][$customFieldId]['element_name'];
-
     unset($this->form->_groupTree[$this->directDebitMandateId]['fields'][$customFieldId]);
     foreach ($this->form->_required as $requiredFieldsId => $requiredFieldsName){
       if ($requiredFieldsName == $ddRefElementNameId){

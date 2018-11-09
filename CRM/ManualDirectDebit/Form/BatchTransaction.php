@@ -150,7 +150,7 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
       ],
       [
         'name' => 'receive_date',
-        'value' => date('Y-m-d H:i:s'),
+        'value' => $this->getBatchContributionsInAdvanceDate(),
       ],
       [
         'name' => 'recur_status',
@@ -168,6 +168,16 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
         'value' => array_search('direct_debit', $paymentInstrument),
       ],
     ];
+  }
+
+  private function getBatchContributionsInAdvanceDate() {
+    $settingsManager = new CRM_ManualDirectDebit_Common_SettingsManager();
+    $settings = $settingsManager->getManualDirectDebitSettings();
+    $daysToBatchContributionsInAdvance = (int) $settings['days_to_batch_contributions_in_advance'];
+    $date = new DateTime();
+    $date->modify('+' . $daysToBatchContributionsInAdvance . ' day');
+    $date->format('Y-m-d H:i:s');
+    return $date->format('Y-m-d H:i:s');
   }
 
   /**
