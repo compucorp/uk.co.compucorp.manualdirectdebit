@@ -29,4 +29,10 @@
     <page_callback>CRM_ManualDirectDebit_Page_AJAX::export</page_callback>
     <weight>610</weight>
   </item>
+  <item>
+    <path>civicrm/direct_debit/mandate/create</path>
+    <page_callback>CRM_ManualDirectDebit_Form_Mandate_Create</page_callback>
+    <title>Mandate_Create</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
 </menu>

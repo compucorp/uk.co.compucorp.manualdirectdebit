@@ -53,7 +53,6 @@ class CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator {
 
   /**
    * Finds which of necessary fields have to be generated
-   *
    */
   public function generateMandateFieldsValues() {
     foreach ($this->savedFields as $field) {
