@@ -15,21 +15,27 @@ class CRM_ManualDirectDebit_Mail_Task_PDFLetterCommon extends CRM_Member_Form_Ta
     $formValues = $form->controller->exportValues($form->getName());
     list($formValues, $categories, $html_message, $messageToken, $returnProperties) = self::processMessageTemplate($formValues);
 
+    $failedMembershipIds = [];
     $generatedHtmlList = [];
     foreach ($membershipIDs as $membershipId) {
-      $html = static::generateHTML(
-        [$membershipId],
-        $returnProperties,
-        $skipOnHold,
-        $skipDeceased,
-        $messageToken,
-        $html_message,
-        $categories
-      )[0];
+      try {
+        $html = static::generateHTML(
+          [$membershipId],
+          $returnProperties,
+          $skipOnHold,
+          $skipDeceased,
+          $messageToken,
+          $html_message,
+          $categories
+        )[0];
 
-      $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Membership($membershipId);
-      $smartyParams = $dataCollector->retrieve();
-      $generatedHtmlList[] = self::handleHtmlBySmarty($html, $smartyParams);
+        $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Membership($membershipId);
+        $smartyParams = $dataCollector->retrieve();
+        $generatedHtmlList[] = self::handleHtmlBySmarty($html, $smartyParams);
+      }
+      catch (Exception $e) {
+        $failedMembershipIds[] = $membershipId;
+      }
     }
 
     self::createActivities($form, $html_message, $contactIDs, $formValues['subject'], CRM_Utils_Array::value('campaign_id', $formValues));
@@ -37,6 +43,11 @@ class CRM_ManualDirectDebit_Mail_Task_PDFLetterCommon extends CRM_Member_Form_Ta
     CRM_Utils_PDF_Utils::html2pdf($generatedHtmlList, "DirectDebitLetter.pdf", FALSE, $formValues);
 
     $form->postProcessHook();
+
+    if (!empty($failedMembershipIds)) {
+      $membershipIdsMessagePart = implode(', ', $failedMembershipIds);
+      CRM_Core_Session::setStatus('No Letters where generated for the membership(s) with the following Id(s):' . $membershipIdsMessagePart);
+    }
 
     CRM_Utils_System::civiExit(1);
   }
