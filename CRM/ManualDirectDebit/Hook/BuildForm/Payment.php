@@ -76,6 +76,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Payment {
     $this->form->assign('requiredPaymentFields', $requiredFields);
 
     $contactID = CRM_Utils_Request::retrieve('cid', 'Int');
+    $this->form->setDefaults(['mandate_id' => $this->getNewlyCreatedMandateID($contactID)]);
     $this->form->add(
       'select',
       'mandate_id',
@@ -84,6 +85,32 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Payment {
       TRUE,
       []
     );
+  }
+
+  /**
+   * Obtains ID or most recently created mandate not used on any contributions.
+   *
+   * @param int $contactID
+   */
+  private function getNewlyCreatedMandateID($contactID) {
+    $sqlSelectDebitMandateID = "
+      SELECT MAX(`id`) AS id 
+      FROM " . CRM_ManualDirectDebit_Common_MandateStorageManager::DIRECT_DEBIT_TABLE_NAME . " 
+      WHERE `entity_id` = %1
+      AND id NOT IN (
+        SELECT mandate_id
+        FROM civicrm_value_dd_information
+      )
+    ";
+    $queryResult = CRM_Core_DAO::executeQuery($sqlSelectDebitMandateID, [
+      1 => [
+        $contactID,
+        'String',
+      ],
+    ]);
+    $queryResult->fetch();
+
+    return $queryResult->id;
   }
 
   /**
