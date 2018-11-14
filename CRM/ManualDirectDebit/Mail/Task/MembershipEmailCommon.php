@@ -111,31 +111,42 @@ class CRM_ManualDirectDebit_Mail_Task_MembershipEmailCommon extends CRM_Contact_
       $membershipIds = $form->getVar('_memberIds');
     }
 
+    $failedMembershipIds = [];
     foreach ($formattedContactDetails as $formattedContactDetail) {
       $contactId = $formattedContactDetail['contact_id'];
       $selectedMembershipIdsForCurrentContact = self::getSelectedMembershipIdsForCurrentContact($contactId, $membershipIds);
       foreach ($selectedMembershipIdsForCurrentContact as $membershipId) {
-        $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Membership($membershipId);
-        $tplParams = $dataCollector->retrieve();
-        $contactDetail = [$formattedContactDetail];
-        CRM_ManualDirectDebit_Mail_Task_Mail::sendEmail(
-          $contactDetail,
-          $subject,
-          $formValues['text_message'],
-          $formValues['html_message'],
-          NULL,
-          NULL,
-          $from,
-          $attachments,
-          $cc,
-          $bcc,
-          array_keys($form->_toContactDetails),
-          $additionalDetails,
-          $contributionIds,
-          CRM_Utils_Array::value('campaign_id', $formValues),
-          $tplParams
-        );
+        try {
+          $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Membership($membershipId);
+          $tplParams = $dataCollector->retrieve();
+          $contactDetail = [$formattedContactDetail];
+          CRM_ManualDirectDebit_Mail_Task_Mail::sendEmail(
+            $contactDetail,
+            $subject,
+            $formValues['text_message'],
+            $formValues['html_message'],
+            NULL,
+            NULL,
+            $from,
+            $attachments,
+            $cc,
+            $bcc,
+            array_keys($form->_toContactDetails),
+            $additionalDetails,
+            $contributionIds,
+            CRM_Utils_Array::value('campaign_id', $formValues),
+            $tplParams
+          );
+        }
+        catch (Exception $e) {
+          $failedMembershipIds[] = $membershipId;
+        }
       }
+    }
+
+    if (!empty($failedMembershipIds)) {
+      $membershipIdsMessagePart = implode(', ', $failedMembershipIds);
+      CRM_Core_Session::setStatus('No Emails where sent for the membership(s) with the following Id(s):' . $membershipIdsMessagePart);
     }
 
   }
