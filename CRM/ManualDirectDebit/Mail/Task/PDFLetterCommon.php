@@ -46,7 +46,7 @@ class CRM_ManualDirectDebit_Mail_Task_PDFLetterCommon extends CRM_Member_Form_Ta
 
     if (!empty($failedMembershipIds)) {
       $membershipIdsMessagePart = implode(', ', $failedMembershipIds);
-      CRM_Core_Session::setStatus('No Letters were generated for the membership(s) with the following Id(s):' . $membershipIdsMessagePart);
+      Civi::log()->warning('No Letters were generated for the membership(s) with the following Id(s):' . $membershipIdsMessagePart);
     }
 
     CRM_Utils_System::civiExit(1);

@@ -146,7 +146,7 @@ class CRM_ManualDirectDebit_Mail_Task_MembershipEmailCommon extends CRM_Contact_
 
     if (!empty($failedMembershipIds)) {
       $membershipIdsMessagePart = implode(', ', $failedMembershipIds);
-      CRM_Core_Session::setStatus('No Emails were sent for the membership(s) with the following Id(s):' . $membershipIdsMessagePart);
+      Civi::log()->warning('No Emails were sent for the membership(s) with the following Id(s):' . $membershipIdsMessagePart);
     }
 
   }
