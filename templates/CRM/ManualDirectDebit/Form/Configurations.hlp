@@ -27,6 +27,3 @@ Mandates and contributions that link to mandates with these
 codes will not be included in the batch.{/ts}
 {/htxt}
 
-{htxt id="manualdirectdebit_days_to_batch_contributions_in_advance-title"}
-  {ts}Days in advance of received day that Direct Debit contributions can be added to "Direct Debit payment batch".{/ts}
-{/htxt}

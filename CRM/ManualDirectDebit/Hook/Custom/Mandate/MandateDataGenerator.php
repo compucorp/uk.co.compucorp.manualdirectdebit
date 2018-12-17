@@ -53,7 +53,6 @@ class CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator {
 
   /**
    * Finds which of necessary fields have to be generated
-   *
    */
   public function generateMandateFieldsValues() {
     foreach ($this->savedFields as $field) {
@@ -68,7 +67,7 @@ class CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator {
       }
     }
 
-    if ($this->fieldsToGenerate['dd_ref'] == FALSE) {
+    if ($this->fieldsToGenerate['dd_ref'] == FALSE || $this->fieldsToGenerate['dd_ref'] == 'DD Ref') {
       $this->fieldsToGenerate['dd_ref'] = $this->generateDirectDebitReference();
     }
 

@@ -141,6 +141,15 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->createDirectDebitPaymentProcessor();
   }
 
+  public function upgrade_0009() {
+    $this->removeDaysToBatchContributionsInAdvanceSetting();
+    return TRUE;
+  }
+
+  private function removeDaysToBatchContributionsInAdvanceSetting() {
+    CRM_Core_DAO::executeQuery('DELETE FROM civicrm_setting WHERE name = "manualdirectdebit_days_to_batch_contributions_in_advance"');
+  }
+
   public function upgrade_0008() {
     $this->addMessageTemplateToCustomGroupEntities();
     $this->addDDTemplateCustomGroup();
@@ -180,19 +189,6 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
         $this->fillDDTemplateCustomFieldsData($templateId, $template['name']);
       }
     }
-  }
-
-  public function upgrade_0007() {
-    $this->setDefaultDaysToBatchContributionsInAdvanceSetting();
-    return TRUE;
-  }
-
-  private function setDefaultDaysToBatchContributionsInAdvanceSetting() {
-    $configFields = CRM_ManualDirectDebit_Common_SettingsManager::getConfigFields();
-    civicrm_api3('setting', 'create', [
-      'manualdirectdebit_days_to_batch_contributions_in_advance' =>
-        $configFields['manualdirectdebit_days_to_batch_contributions_in_advance']['default']
-    ]);
   }
 
   public function upgrade_0006() {
