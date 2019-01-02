@@ -224,7 +224,6 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
 
 /**
  * Implements hook_civicrm_pageRun().
- *
  */
 function manualdirectdebit_civicrm_pageRun(&$page) {
   switch(get_class($page)) {
@@ -313,6 +312,11 @@ function manualdirectdebit_civicrm_buildForm($formName, &$form) {
 
   if ($formName === 'CRM_Financial_Form_Payment') {
     $formBuilder = new CRM_ManualDirectDebit_Hook_BuildForm_Payment($form);
+    $formBuilder->buildForm();
+  }
+
+  if ($formName === 'CRM_Contribute_Form_UpdateSubscription') {
+    $formBuilder = new CRM_ManualDirectDebit_Hook_BuildForm_UpdateSubscription($form);
     $formBuilder->buildForm();
   }
 }
