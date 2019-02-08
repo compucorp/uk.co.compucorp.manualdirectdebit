@@ -18,6 +18,13 @@
         });
       }
     });
+
+    if (typeof CRM.vars.coreForm != 'undefined') {
+      if (typeof CRM.vars.coreForm.selected_mandate_id != 'undefined') {
+        var optionSelector = '#mandate_id option[value=' + CRM.vars.coreForm.selected_mandate_id + ']';
+        CRM.$(optionSelector).attr('selected', 'selected');
+      }
+    }
   });
   {/literal}
 </script>

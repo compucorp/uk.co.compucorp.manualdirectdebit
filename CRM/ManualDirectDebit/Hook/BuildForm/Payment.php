@@ -41,7 +41,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Payment {
    * Alters the form if direct debit was chosen as payment method.
    */
   public function buildForm() {
-    if (!$this->isDirectDebitPaymentInstrument($this->form->paymentInstrumentID)) {
+    if (!$this->form->paymentInstrumentID || !$this->isDirectDebitPaymentInstrument($this->form->paymentInstrumentID)) {
       return;
     }
 
