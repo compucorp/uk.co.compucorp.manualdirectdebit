@@ -4,6 +4,12 @@
   <file>manualdirectdebit</file>
   <name>Manual Direct Debit</name>
   <description>This extension provides a back-office Direct Debit management process that is compatible to AUDDIS based Direct Debit processing platforms such as PT-X. Please note this extension requires https://github.com/compucorp/uk.co.compucorp.membershipextras as a dependency.</description>
+  <urls>
+    <url desc="Main Extension Page">https://civicrm.org/extensions/manual-direct-debit</url>
+    <url desc="Documentation">https://github.com/compucorp/uk.co.compucorp.manualdirectdebit</url>
+    <url desc="Support">https://www.compucorp.co.uk/#section-contact</url>
+    <url desc="Licensing">http://civicrm.org/licensing</url>
+  </urls>
   <license>AGPL-3.0</license>
   <maintainer>
     <author>Compucorp Ltd.</author>
@@ -13,7 +19,7 @@
     <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
   <releaseDate>2018-09-20</releaseDate>
-  <version>v1.0alpha1</version>
+  <version>1.0-alpha1</version>
   <develStage>alpha</develStage>
   <compatibility>
     <ver>4.7</ver>
