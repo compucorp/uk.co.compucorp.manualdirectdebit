@@ -2,7 +2,7 @@
 <extension key="uk.co.compucorp.manualdirectdebit" type="module">
   <downloadUrl>https://github.com/compucorp/uk.co.compucorp.manualdirectdebit/master</downloadUrl>
   <file>manualdirectdebit</file>
-  <name>Manual Direct Debit</name>
+  <name>Direct Debit for Membership Extras</name>
   <description>This extension provides a back-office Direct Debit management process that is compatible to AUDDIS based Direct Debit processing platforms such as PT-X. Please note this extension requires https://github.com/compucorp/uk.co.compucorp.membershipextras as a dependency.</description>
   <license>AGPL-3.0</license>
   <maintainer>
