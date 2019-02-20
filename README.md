@@ -1,13 +1,13 @@
-# Manual Direct Debit
-## Is Manual Direct Debit for me?
+# Direct Debit for Membership Extras
+## Is Direct Debit for Membership Extras for me?
 If you are a UK-based organisation that collects Direct Debit from your customers in a regular basis, this could be the right extension for you. This extension could potentially work with EU based SEPA too.
 
-Manual Direct Debit is designed to give organisations control over every step of a typical Direct Debit process while help automating the repetitive tasks.
+Direct Debit for Membership Extras is designed to give organisations control over every step of a typical Direct Debit process while help automating the repetitive tasks.
 
-Please note that Manual Direct Debit is a companion extension of our [Membership Extras extension](https://github.com/compucorp/uk.co.compucorp.membershipextras). Membership Extras is designed to overcome many challenges that prevent CiviCRM from being a great membership management system. It is required as an dependency of Manual Direct Debit.
+Please note that Direct Debit for Membership Extras is a companion extension of our [Membership Extras extension](https://github.com/compucorp/uk.co.compucorp.membershipextras). Membership Extras is designed to overcome many challenges that prevent CiviCRM from being a great membership management system. It is required as an dependency of Direct Debit for Membership Extras.
 
 #### Direct Debit batch management
-Direct Debit batch is a very cost-efficient way for processing Direct Debit transactions. Manual Direct Debit operates on the Direct Debit batch process. Two types of batches are included in the extension for different transaction types:
+Direct Debit batch is a very cost-efficient way for processing Direct Debit transactions. Direct Debit for Membership Extras operates on the Direct Debit batch process. Two types of batches are included in the extension for different transaction types:
 
 * New instruction batch - allow selecting and batching any newly submitted Direct Debit mandates
 * Payment collection batch - allow selecting and batching any Direct Debit contributions that link to approved Direct Debit mandates
@@ -15,10 +15,10 @@ Direct Debit batch is a very cost-efficient way for processing Direct Debit tran
 An AUDDIS standard export can be generated for any type of batch so that they can be submitted to online Direct Debit processing portals such as PT-X.
 
 #### Multi-originator support
-Manual Direct Debit understands the common structure which multiple business entities exist in one organisation. Therefore, the extension supports multiple originators throughout it’s whole process. This allows organisations to manage their income stream for all business entities within a single CRM.
+Direct Debit for Membership Extras understands the common structure which multiple business entities exist in one organisation. Therefore, the extension supports multiple originators throughout it’s whole process. This allows organisations to manage their income stream for all business entities within a single CRM.
 
 #### Direct Debit emails and letters
-With Manual Direct Debit, the following actions in the Direct Debit process will also be recorded as activities in the system:
+With Direct Debit for Membership Extras, the following actions in the Direct Debit process will also be recorded as activities in the system:
 
 * New Direct Debit Recurring Payment
 * Update Direct Debit Recurring Payment
@@ -31,22 +31,23 @@ Scheduled reminders can be created basing on these activities to automate the co
 Staff can also choose to manually send Direct Debit emails or download Direct Debit letters in Contribution/ Membership search results by using Direct Debit bulk actions and selecting any of the five templates.
 
 #### Smart Debit integration (coming soon)
-We are also planning to integrate Manual Direct Debit with Smart Debit soon which will probably make the extension “less manual” :)
+We are also planning to integrate Direct Debit for Membership Extras with Smart Debit soon which will probably make the extension “less manual” :)
 
-## How do I get Manual Direct Debit?
+## How do I get Direct Debit for Membership Extras?
 Manual is designed to work with CiviCRM 4.7.x or 5.x plus. If you are on an earlier version of CiviCRM, you will need to upgrade your site first or contact info@compucorp.co.uk if you needs assistance to do so.
 
 If your CiviCRM is already on CiviCRM 4.7.x or 5.x plus and this is the first time you use an extension,  please see [Here](http://wiki.civicrm.org/confluence/display/CRMDOC/Extensions "CiviCRM Extensions Installation") for full instructions and information on how to set and configure extensions.
 
-To use Manual Direct Debit, you will need to firstly install a dependency extension - Membership Extras. You can get the latest release of Membership Extras from [CiviCRM extension directory page](https://civicrm.org/extensions/membership-extras) or our [Github repository release page](https://github.com/compucorp/uk.co.compucorp.membershipextras/releases).
+To use Direct Debit for Membership Extras, you will need to firstly install a dependency extension - Membership Extras. You can get the latest release of Membership Extras from [CiviCRM extension directory page](https://civicrm.org/extensions/membership-extras) or our [Github repository release page](https://github.com/compucorp/uk.co.compucorp.membershipextras/releases).
 
-The latest release of Manual Direct Debit can be found on [CiviCRM extension directory page](https://civicrm.org/extensions/manual-direct-debit) or our [Github repository release page](https://github.com/compucorp/uk.co.compucorp.manualdirectdebit/releases).
+The latest release of Direct Debit for Membership Extras can be found on [CiviCRM extension directory page](https://civicrm.org/extensions/manual-direct-debit) or our [Github repository release page](https://github.com/compucorp/uk.co.compucorp.manualdirectdebit/releases).
 
-#### Webform integration
-If you are using Drupal and you would like to use Manual Direct Debit with Webform CiviCRM, you can simply download and install [the Membership Extras companion Drupal module](https://github.com/compucorp/webform_civicrm_membership_extras/releases)  and [the Manual Direct Debit companion Drupal module](https://github.com/compucorp/webform-manualdd/releases) and there you have it!
+#### 
+integration
+If you are using Drupal and you would like to use Manual Direct Debit with Webform CiviCRM, you can simply download and install [the Membership Extras companion Drupal module](https://github.com/compucorp/webform_civicrm_membership_extras/releases)  and [the Direct Debit for Membership Extras companion Drupal module](https://github.com/compucorp/webform-manualdd/releases) and there you have it!
 
-## How to configure Manual Direct Debit?
-Every organisation have their own Direct Debit related information and different Direct Debit process. Manual Direct Debit have some basic settings that can be adjusted to largely improve your process efficiency and profitability. 
+## How to configure Direct Debit for Membership Extras?
+Every organisation have their own Direct Debit related information and different Direct Debit process. Direct Debit for Membership Extras have some basic settings that can be adjusted to largely improve your process efficiency and profitability. 
 
 #### 1. Mandate settings
 A few configurations need to be set In order for the system to correctly generate mandate information.
@@ -65,10 +66,10 @@ In a typical example where your organisation’s mandate always starts with “M
 
 * 100,000th mandate: “M” + “100000” = M100000 (minimum length met by concatenating prefix and sequence hence no filling “0”s)
 
-Please note that you might want to change to use a different prefix if you have been taking Direct Debit payments before installing Manual Direct Debit to avoid a reference clash.
+Please note that you might want to change to use a different prefix if you have been taking Direct Debit payments before installing Direct Debit for Membership Extras to avoid a reference clash.
 
 #### 2. Batch settings
-Whenever a collection day is not specified during the creation of a Direct Debit payment plan, Manual Direct Debit will calculate the optimal cycle day (collection day) of a month for you based on your current batching process.
+Whenever a collection day is not specified during the creation of a Direct Debit payment plan, Direct Debit for Membership Extras will calculate the optimal cycle day (collection day) of a month for you based on your current batching process.
 
 There are three pieces of information of your batching process that the extension needs to collect in order to perform the best calculation. Go to **Administer -> Direct Debit -> Direct Debit Configuration** payment configuration section and you will find the following three settings:
 
@@ -94,7 +95,7 @@ With admin permissions,  go to **Administer -> System Settings -> Scheduled Jobs
 You can also tell the system, to send out the notification a number of days in advance of the expected payment receive date by going to **Administer -> Direct Debit -> Direct Debit Configurations** and specify the number of days you want the automated notification to be sent out in advance in the “Days in advance for Collection Reminder” setting.
 
 #### 5. Direct Debit accounting code
-Manual Direct Debit provides a Direct Debit payment method which is then used for all Direct Debit payment processor. Contact your accountant to find out which Financial Account should Direct Debit payment method use in order to ensure the income via this payment method is allocated to the correct accounting code.
+Direct Debit for Membership Extras provides a Direct Debit payment method which is then used for all Direct Debit payment processor. Contact your accountant to find out which Financial Account should Direct Debit payment method use in order to ensure the income via this payment method is allocated to the correct accounting code.
 
 To create the code, go to **Administer -> CiviContribute -> Financial Accounts** and add a new financial account with “Revenue” type and the accounting code your accountant suggested.
 
