@@ -104,7 +104,6 @@ Once the account is created, you can link the account to the Direct Debit paymen
 ## Support
 CiviCRM extension directory page: [https://civicrm.org/extensions/manual-direct-debit](https://civicrm.org/extensions/manual-direct-debit)
 
-Please contact the follow email if you have any question:
-<guanhuan@compucorp.co.uk>, <info@compucorp.co.uk>
+Please contact the follow email if you have any question: <hello@compucorp.co.uk>
 
-Paid support for this extension is available, please contact us either via Github or at <info@compucorp.co.uk>
+Paid support for this extension is available, please contact us either via Github or at <hello@compucorp.co.uk>
