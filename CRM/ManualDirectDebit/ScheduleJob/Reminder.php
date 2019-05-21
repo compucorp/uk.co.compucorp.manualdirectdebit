@@ -1,5 +1,7 @@
 <?php
 
+use CRM_ManualDirectDebit_Common_CollectionReminderSendFlagManager as CollectionReminderSendFlagManager;
+
 /**
  * Run reminder
  */
@@ -111,10 +113,15 @@ class CRM_ManualDirectDebit_ScheduleJob_Reminder {
 
     if ($result) {
       $this->setLog(ts("Email was sent."));
+      $this->updateNotificationSentFlag($contributionId);
     }
     else {
       $this->setLog(ts("Email was not sent."));
     }
+  }
+
+  private function updateNotificationSentFlag($contributionId) {
+    CollectionReminderSendFlagManager::setIsNotificationSentToSent($contributionId);
   }
 
 }
