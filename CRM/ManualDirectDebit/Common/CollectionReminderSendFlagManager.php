@@ -20,7 +20,6 @@ class CRM_ManualDirectDebit_Common_CollectionReminderSendFlagManager {
     }
   }
 
-
   private static function getIsNotificationSentCustomFieldId() {
     try {
       return civicrm_api3('CustomField', 'getvalue', [
