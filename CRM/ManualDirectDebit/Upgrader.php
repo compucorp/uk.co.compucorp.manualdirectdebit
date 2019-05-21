@@ -136,6 +136,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->addMessageTemplateToCustomGroupEntities();
     $this->addDDTemplateCustomGroup();
     $this->addCollectionReminderFlagCustomGroup();
+    $this->createCollectionReminderFlagRecords();
     $this->createMessageTemplates();
     $this->createDirectDebitNavigationMenu();
     $this->createDirectDebitPaymentInstrument();
@@ -145,7 +146,15 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
 
   public function upgrade_0010() {
     $this->addCollectionReminderFlagCustomGroup();
+    $this->createCollectionReminderFlagRecords();
     return TRUE;
+  }
+
+  private function createCollectionReminderFlagRecords() {
+    CRM_Core_DAO::executeQuery("
+      INSERT INTO civicrm_value_direct_debit_collectionreminder_sendflag 
+      (entity_id, is_notification_sent) SELECT id,0 FROM civicrm_contribution
+      ");
   }
 
   public function upgrade_0009() {
