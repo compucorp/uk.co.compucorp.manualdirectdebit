@@ -128,17 +128,24 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     "direct_debit_mandate",
     "direct_debit_information",
     "direct_debit_message_template",
+    "direct_debit_collection_reminder_sendflag"
   ];
 
   public function install() {
     $this->createScheduledJob();
     $this->addMessageTemplateToCustomGroupEntities();
     $this->addDDTemplateCustomGroup();
+    $this->addCollectionReminderFlagCustomGroup();
     $this->createMessageTemplates();
     $this->createDirectDebitNavigationMenu();
     $this->createDirectDebitPaymentInstrument();
     $this->createDirectDebitPaymentProcessorType();
     $this->createDirectDebitPaymentProcessor();
+  }
+
+  public function upgrade_0010() {
+    $this->addCollectionReminderFlagCustomGroup();
+    return TRUE;
   }
 
   public function upgrade_0009() {
@@ -176,7 +183,15 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   }
 
   private function addDDTemplateCustomGroup() {
-    $customGroupsXMLFile = E::path('xml/DDTemplate_customgroup.xml');
+    $this->importCustomGroupXML('DDTemplate_customgroup.xml');
+  }
+
+  private function addCollectionReminderFlagCustomGroup() {
+    $this->importCustomGroupXML('collectionReminderSendFlag_customgroup.xml');
+  }
+
+  private function importCustomGroupXML($fileName) {
+    $customGroupsXMLFile = E::path('xml/' . $fileName);
     $import = new CRM_Utils_Migrate_Import();
     $import->run($customGroupsXMLFile);
   }

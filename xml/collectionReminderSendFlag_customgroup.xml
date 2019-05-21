@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<CustomData>
+    <CustomGroups>
+        <CustomGroup>
+            <name>direct_debit_collection_reminder_sendflag</name>
+            <title>Collection Reminder Send Flag</title>
+            <extends>Contribution</extends>
+            <style>Inline</style>
+            <collapse_display>1</collapse_display>
+            <is_active>1</is_active>
+            <table_name>civicrm_value_direct_debit_collectionreminder_sendflag</table_name>
+            <is_multiple>0</is_multiple>
+            <collapse_adv_display>0</collapse_adv_display>
+            <is_reserved>0</is_reserved>
+            <is_public>1</is_public>
+        </CustomGroup>
+    </CustomGroups>
+    <CustomFields>
+        <CustomField>
+            <name>is_notification_sent</name>
+            <label>Is Collection Reminder Notification sent ?</label>
+            <data_type>Boolean</data_type>
+            <html_type>Radio</html_type>
+            <default>0</default>
+            <is_required>0</is_required>
+            <is_searchable>1</is_searchable>
+            <is_search_range>0</is_search_range>
+            <is_active>1</is_active>
+            <is_view>1</is_view>
+            <text_length>64</text_length>
+            <note_columns>60</note_columns>
+            <note_rows>4</note_rows>
+            <column_name>is_notification_sent</column_name>
+            <custom_group_name>direct_debit_collection_reminder_sendflag</custom_group_name>
+            <in_selector>1</in_selector>
+        </CustomField>
+    </CustomFields>
+</CustomData>
