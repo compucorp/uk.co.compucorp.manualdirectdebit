@@ -37,7 +37,7 @@ class CRM_ManualDirectDebit_ScheduleJob_TargetContribution {
         contribution.receipt_date IS NULL
         AND contribution.payment_instrument_id = %2
         AND (contribution.contribution_status_id = %3 OR contribution.contribution_status_id = %4)
-        AND contribution.receive_date <= (now() - INTERVAL %1 DAY) 
+        AND (DATE(contribution.receive_date) - INTERVAL %1 DAY) <= CURDATE() 
         AND sendflag_customgroup.is_notification_sent = 0 
     ";
 
