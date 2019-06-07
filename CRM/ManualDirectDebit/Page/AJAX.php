@@ -20,6 +20,7 @@ class CRM_ManualDirectDebit_Page_AJAX {
       5 => 'amount',
       6 => 'reference_number',
       7 => 'transaction_type',
+      8 => 'receive_date',
     ];
 
     $sEcho = CRM_Utils_Request::retrieveValue('sEcho', 'Integer');
@@ -66,6 +67,7 @@ class CRM_ManualDirectDebit_Page_AJAX {
       'amount',
       'reference_number',
       'transaction_type',
+      'receive_date',
       'action',
     ];
 
