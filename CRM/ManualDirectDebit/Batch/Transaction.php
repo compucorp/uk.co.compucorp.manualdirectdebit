@@ -234,7 +234,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0.00) as amount',
         'reference_number' => self::DD_MANDATE_TABLE . '.dd_ref as reference_number',
         'transaction_type' => 'civicrm_option_value.label as transaction_type',
-        'receive_date' => self::DD_MANDATE_TABLE . '.start_date as receive_date',
+        'receive_date' => 'civicrm_contribution.receive_date as receive_date',
       ];
     }
 
