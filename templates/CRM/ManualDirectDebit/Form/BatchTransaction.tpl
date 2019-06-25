@@ -17,6 +17,7 @@
             <th class="crm-amount">{ts}Amount{/ts}</th>
             <th class="crm-reference-number">{ts}Reference Number{/ts}</th>
             <th class="crm-transaction-type">{ts}Transaction Type{/ts}</th>
+            <th class="crm-receive-date">{ts}Receive Date{/ts}</th>
             <th class="crm-action">{ts}Action{/ts}</th>
           </tr>
           </thead>
@@ -43,6 +44,7 @@
           <th class="crm-amount">{ts}Amount{/ts}</th>
           <th class="crm-reference-number">{ts}Reference Number{/ts}</th>
           <th class="crm-transaction-type">{ts}Transaction Type{/ts}</th>
+          <th class="crm-receive-date">{ts}Receive Date{/ts}</th>
           <th class="crm-action">{ts}Action{/ts}</th>
         </tr>
         </thead>
@@ -149,6 +151,7 @@ function buildTransactionSelectorAssign() {
       {sClass:'crm-amount', mData: "amount"},
       {sClass:'crm-reference-number', mData: "reference_number"},
       {sClass:'crm-transaction-type', mData: "transaction_type"},
+      {sClass:'crm-receive-date', mData: "receive_date"},
       {sClass:'crm-action', mData: "action"}
     ],
     "bProcessing": true,
@@ -210,6 +213,7 @@ function buildTransactionSelectorRemove( ) {
       {sClass:'crm-amount', mData: "amount"},
       {sClass:'crm-reference-number', mData: "reference_number"},
       {sClass:'crm-transaction-type', mData: "transaction_type"},
+      {sClass:'crm-receive-date', mData: "receive_date"},
       {sClass:'action', mData: "action"}
     ],
     "bProcessing": true,
