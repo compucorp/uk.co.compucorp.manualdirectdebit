@@ -172,10 +172,6 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'op' => '=',
         'field' => self::DD_MANDATE_TABLE . '.originator_number',
       ],
-      'payment_instrument' => [
-        'op' => 'IN',
-        'field' => 'civicrm_contribution.payment_instrument_id',
-      ],
       'contribution_status' => [
         'op' => 'IN',
         'field' => 'civicrm_contribution.contribution_status_id',
@@ -183,6 +179,46 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       'recur_status' => [
         'op' => 'IN',
         'field' => 'civicrm_contribution_recur.contribution_status_id',
+      ],
+      'financial_type_id' => [
+        'op' => 'IN',
+        'field' => 'civicrm_contribution.financial_type_id',
+      ],
+      'contribution_currency_type' => [
+        'op' => 'IN',
+        'field' => 'civicrm_contribution.currency',
+      ],
+      'contribution_payment_instrument_id' => [
+        'op' => 'IN',
+        'field' => 'civicrm_contribution.payment_instrument_id',
+      ],
+      'contribution_test' => [
+        'op' => '=',
+        'field' => 'civicrm_contribution.is_test',
+      ],
+      'contribution_trxn_id' => [
+        'op' => '=',
+        'field' => 'civicrm_contribution.trxn_id',
+      ],
+      'invoice_number' => [
+        'op' => '=',
+        'field' => 'civicrm_contribution.invoice_number',
+      ],
+      'contribution_pay_later' => [
+        'op' => '=',
+        'field' => 'civicrm_contribution.is_pay_later',
+      ],
+      'cancel_reason' => [
+        'op' => '=',
+        'field' => 'civicrm_contribution.cancel_reason',
+      ],
+      'contribution_source' => [
+        'op' => '=',
+        'field' => 'civicrm_contribution.source',
+      ],
+      'contribution_page_id' => [
+        'op' => '=',
+        'field' => 'civicrm_contribution.contribution_page_id',
       ],
     ];
   }
@@ -412,13 +448,23 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       }
     }
 
-    if (!empty($this->params['receive_date_start'])) {
-      $query->where('civicrm_contribution.receive_date >= @receive_date_start', ['receive_date_start' => $this->params['receive_date_start']]);
+    // handle date received field.
+    if (!empty($this->params['contribution_date_relative'])) {
+      $relativeDate = explode('.', $this->params['contribution_date_relative']);
+      $date = CRM_Utils_Date::relativeToAbsolute($relativeDate[0], $relativeDate[1]);
+      $query->where('civicrm_contribution.receive_date >= @receive_date_start', ['receive_date_start' => $date['from']]);
+      $query->where('civicrm_contribution.receive_date <= @receive_date_end', ['receive_date_end' => $date['to']]);
     }
 
-    if (!empty($this->params['receive_date_end'])) {
-      $query->where('civicrm_contribution.receive_date <= @receive_date_end', ['receive_date_end' => $this->params['receive_date_end']]);
+    // handle cancel date field.
+    if (!empty($this->params['contribution_cancel_date_relative'])) {
+      $relativeDate = explode('.', $this->params['contribution_cancel_date_relative']);
+      $date = CRM_Utils_Date::relativeToAbsolute($relativeDate[0], $relativeDate[1]);
+      $query->where('civicrm_contribution.cancel_date >= @cancel_date_start', ['cancel_date_start' => $date['from']]);
+      $query->where('civicrm_contribution.cancel_date <= @cancel_date_end', ['cancel_date_end' => $date['to']]);
     }
+
+    if(!empty($this->params['contribution']))
 
     if ($this->notPresent) {
       $batchStatus = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id', ['labelColumn' => 'name']);

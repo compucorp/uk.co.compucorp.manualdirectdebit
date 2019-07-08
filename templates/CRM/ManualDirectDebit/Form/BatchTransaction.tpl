@@ -171,7 +171,6 @@ function hideSearchFields() {
   ];
 
   CRM.$.each(fieldsToHide, function (index, field) {
-    console.log(field);
     CRM.$(field).parent('td').hide();
   });
 }
