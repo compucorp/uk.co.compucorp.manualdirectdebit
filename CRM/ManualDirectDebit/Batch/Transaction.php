@@ -464,8 +464,6 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       $query->where('civicrm_contribution.cancel_date <= @cancel_date_end', ['cancel_date_end' => $date['to']]);
     }
 
-    if(!empty($this->params['contribution']))
-
     if ($this->notPresent) {
       $batchStatus = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id', ['labelColumn' => 'name']);
       $excluded = CRM_Utils_SQL_Select::from(self::DD_MANDATE_TABLE);
