@@ -448,21 +448,14 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       }
     }
 
-    // handle date received field.
     if (!empty($this->params['contribution_date_relative'])) {
-      $relativeDate = explode('.', $this->params['contribution_date_relative']);
-      $date = CRM_Utils_Date::relativeToAbsolute($relativeDate[0], $relativeDate[1]);
-      $query->where('civicrm_contribution.receive_date >= @receive_date_start', ['receive_date_start' => $date['from']]);
-      $query->where('civicrm_contribution.receive_date <= @receive_date_end', ['receive_date_end' => $date['to']]);
+      $this->addContributionReceiveDateCondition($query);
     }
 
-    // handle cancel date field.
     if (!empty($this->params['contribution_cancel_date_relative'])) {
-      $relativeDate = explode('.', $this->params['contribution_cancel_date_relative']);
-      $date = CRM_Utils_Date::relativeToAbsolute($relativeDate[0], $relativeDate[1]);
-      $query->where('civicrm_contribution.cancel_date >= @cancel_date_start', ['cancel_date_start' => $date['from']]);
-      $query->where('civicrm_contribution.cancel_date <= @cancel_date_end', ['cancel_date_end' => $date['to']]);
+      $this->addContributionCancelDateCondition($query);
     }
+
 
     if ($this->notPresent) {
       $batchStatus = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id', ['labelColumn' => 'name']);
@@ -625,6 +618,30 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     );
 
     return $linkToRecurringContribution;
+  }
+
+  /**
+   * Add query where condition as per relative receive date.
+   *
+   * @param $query
+   */
+  private function addContributionReceiveDateCondition(&$query) {
+    $relativeDate = explode('.', $this->params['contribution_date_relative']);
+    $date = CRM_Utils_Date::relativeToAbsolute($relativeDate[0], $relativeDate[1]);
+    $query->where('civicrm_contribution.receive_date >= @receive_date_start', ['receive_date_start' => $date['from']]);
+    $query->where('civicrm_contribution.receive_date <= @receive_date_end', ['receive_date_end' => $date['to']]);
+  }
+
+  /**
+   * Add query where condition as per relative cancel date.
+   *
+   * @param $query
+   */
+  private function addContributionCancelDateCondition(&$query) {
+    $relativeDate = explode('.', $this->params['contribution_cancel_date_relative']);
+    $date = CRM_Utils_Date::relativeToAbsolute($relativeDate[0], $relativeDate[1]);
+    $query->where('civicrm_contribution.cancel_date >= @cancel_date_start', ['cancel_date_start' => $date['from']]);
+    $query->where('civicrm_contribution.cancel_date <= @cancel_date_end', ['cancel_date_end' => $date['to']]);
   }
 
 }
