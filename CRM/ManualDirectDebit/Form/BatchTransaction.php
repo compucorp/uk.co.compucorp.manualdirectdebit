@@ -80,6 +80,8 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
 
     if ($batchType['name'] == 'dd_payments') {
       $searchData = $this->assignDDPaymentsSearchProperties();
+      // Show filters only for create DD payments batch page.
+      $this->assign('showFilters', TRUE);
     }
 
     $this->assign('searchData', json_encode($searchData));

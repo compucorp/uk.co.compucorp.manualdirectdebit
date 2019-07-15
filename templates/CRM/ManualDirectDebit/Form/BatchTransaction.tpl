@@ -28,45 +28,47 @@
 <br/>
 
 {if in_array($batchStatus, array('Open', 'Reopened')) && $action eq 2}
-<div class="crm-form-block crm-search-form-block">
-  <div class="crm-accordion-wrapper crm-batch_transaction_search-accordion collapsed">
-    <div class="crm-accordion-header crm-master-accordion-header">
-      {ts}Edit Search Criteria{/ts}
-    </div>
-    <div class="crm-accordion-body">
-      <div id="searchForm" class="crm-block crm-form-block crm-contact-custom-search-activity-search-form-block">
-        <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="top"}</div>
-        <table class="form-layout-compressed">
-          <tr>
-            <td class="font-size12pt" colspan="2">
-              {$form.sort_name.label}<br>
-              {$form.sort_name.html|crmAddClass:'twenty'}
-            </td>
-          </tr>
-          <tr>
-          {if $form.contact_tags}
-            <td>
-              <label>{ts}Contributor Tag(s){/ts}</label><br>
-              {$form.contact_tags.html}
-            </td>
-            {else}
-            <td>&nbsp;</td>
-          {/if}
-          {if $form.group}
-            <td><label>{ts}Contributor Group(s){/ts}</label><br>
-              {$form.group.html}
-            </td>
-            {else}
-            <td>&nbsp;</td>
-          {/if}
-          </tr>
-          {include file="CRM/Contribute/Form/Search/Common.tpl"}
-        </table>
-	<div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>
+  {if $showFilters == TRUE}
+    <div class="crm-form-block crm-search-form-block">
+      <div class="crm-accordion-wrapper crm-batch_transaction_search-accordion collapsed">
+        <div class="crm-accordion-header crm-master-accordion-header">
+          {ts}Edit Search Criteria{/ts}
+        </div>
+        <div class="crm-accordion-body">
+          <div id="searchForm" class="crm-block crm-form-block crm-contact-custom-search-activity-search-form-block">
+            <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="top"}</div>
+            <table class="form-layout-compressed">
+              <tr>
+                <td class="font-size12pt" colspan="2">
+                  {$form.sort_name.label}<br>
+                  {$form.sort_name.html|crmAddClass:'twenty'}
+                </td>
+              </tr>
+              <tr>
+              {if $form.contact_tags}
+                <td>
+                  <label>{ts}Contributor Tag(s){/ts}</label><br>
+                  {$form.contact_tags.html}
+                </td>
+                {else}
+                <td>&nbsp;</td>
+              {/if}
+              {if $form.group}
+                <td><label>{ts}Contributor Group(s){/ts}</label><br>
+                  {$form.group.html}
+                </td>
+                {else}
+                <td>&nbsp;</td>
+              {/if}
+              </tr>
+              {include file="CRM/Contribute/Form/Search/Common.tpl"}
+            </table>
+      <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
+  {/if}
   <h3>{$tableTitle}:</h3>
   <div class="form-layout-compressed">{$form.trans_assign.html}&nbsp;{$form.submit.html}</div>
   <div id="ltype">
@@ -74,23 +76,23 @@
     {strip}
       <table id="crm-transaction-selector-assign-{$entityID}" cellpadding="0" cellspacing="0" border="0">
         <thead>
-        <tr>
-          <th class="crm-transaction-checkbox">{$form.toggleSelect.html}</th>
-          <th class="crm-contact-id">{ts}Contact ID{/ts}</th>
-          <th class="crm-name">{ts}Account Holder Name{/ts}</th>
-          <th class="crm-sort-code">{ts}Sort code{/ts}</th>
-          <th class="crm-account-number">{ts}Account Number{/ts}</th>
-          <th class="crm-amount">{ts}Amount{/ts}</th>
-          <th class="crm-reference-number">{ts}Reference Number{/ts}</th>
-          <th class="crm-transaction-type">{ts}Transaction Type{/ts}</th>
-          <th class="crm-receive-date">{ts}Receive Date{/ts}</th>
-          <th class="crm-action">{ts}Action{/ts}</th>
-        </tr>
+          <tr>
+            <th class="crm-transaction-checkbox">{$form.toggleSelect.html}</th>
+            <th class="crm-contact-id">{ts}Contact ID{/ts}</th>
+            <th class="crm-name">{ts}Account Holder Name{/ts}</th>
+            <th class="crm-sort-code">{ts}Sort code{/ts}</th>
+            <th class="crm-account-number">{ts}Account Number{/ts}</th>
+            <th class="crm-amount">{ts}Amount{/ts}</th>
+            <th class="crm-reference-number">{ts}Reference Number{/ts}</th>
+            <th class="crm-transaction-type">{ts}Transaction Type{/ts}</th>
+            <th class="crm-receive-date">{ts}Receive Date{/ts}</th>
+            <th class="crm-action">{ts}Action{/ts}</th>
+          </tr>
         </thead>
       </table>
     {/strip}
     </div>
-</div>
+  </div>
 {/if}
 
 {literal}
