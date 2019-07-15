@@ -26,22 +26,6 @@
         </td>
         <td>{$form.originator_number.html}</td>
       </tr>
-
-      {if $batch_type.name == 'dd_payments'}
-        <tr>
-          <td class="label">
-            <label>{$form.start_date_filter.label}</label>
-          </td>
-          <td>{$form.start_date_filter.html}</td>
-        </tr>
-        <tr>
-          <td class="label">
-            <label>{$form.end_date_filter.label}</label>
-          </td>
-          <td>{$form.end_date_filter.html}</td>
-        </tr>
-      {/if}
-
     </tbody>
   </table>
   <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>
