@@ -17,7 +17,9 @@
             <th class="crm-amount">{ts}Amount{/ts}</th>
             <th class="crm-reference-number">{ts}Reference Number{/ts}</th>
             <th class="crm-transaction-type">{ts}Transaction Type{/ts}</th>
+            {if $showReceiveDateColumn}
             <th class="crm-receive-date">{ts}Receive Date{/ts}</th>
+            {/if}
             <th class="crm-action">{ts}Action{/ts}</th>
           </tr>
           </thead>
@@ -85,7 +87,9 @@
             <th class="crm-amount">{ts}Amount{/ts}</th>
             <th class="crm-reference-number">{ts}Reference Number{/ts}</th>
             <th class="crm-transaction-type">{ts}Transaction Type{/ts}</th>
+            {if $showReceiveDateColumn}
             <th class="crm-receive-date">{ts}Receive Date{/ts}</th>
+            {/if}
             <th class="crm-action">{ts}Action{/ts}</th>
           </tr>
         </thead>
