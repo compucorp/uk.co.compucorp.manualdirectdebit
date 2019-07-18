@@ -162,6 +162,7 @@ CRM.$(function($) {
   {/literal}{/if}{literal}
 
   hideSearchFields();
+  setDefaultFilterValues();
 
 });
 
@@ -169,7 +170,6 @@ function hideSearchFields() {
   var fieldsToHide  = [
     '#s2id_contribution_batch_id',
     '#s2id_contribution_currency_type',
-    '#s2id_contribution_payment_instrument_id'
   ];
 
   CRM.$.each(fieldsToHide, function (index, field) {
@@ -395,6 +395,32 @@ function contactRecurContribution(recId, cid) {
   );
   CRM.loadPage(url);
   return false;
+}
+
+function setDefaultFilterValues() {
+  // Payment method
+  // Allow 'Direct debit' option only.
+  cj('#contribution_payment_instrument_id').select2('val', [6]);
+  cj('#contribution_payment_instrument_id').select2().enable(false);
+
+  // Contribution Status
+  // Allow 'Pending' and 'Cancelled' options only.
+  cj('#contribution_status_id').select2('val', [2, 3]);
+  cj('#contribution_status_id').select2().enable(false);
+
+  // Date received
+  // Set 'choose date range' and default option and disable the field.
+  cj('#contribution_date_relative').select2('val', [0]);
+  cj('#contribution_date_relative').trigger('change');
+  cj('#contribution_date_relative').select2().enable(false);
+  // Donot allow user to choose future dates.
+  cj('.hasDatepicker').datepicker('option', 'maxDate', '0');
+  cj('#contribution_date_high').next().datepicker('setDate', new Date());
+
+  // Contribution Recur Status
+  // Set all options except 'Cancelled'.
+  cj('#contribution_recur_contribution_status_id').select2('val', [1, 2, 4, 5, 6, 7, 8, 9, 10]);
+  cj('#contribution_recur_contribution_status_id').select2().enable(false);
 }
 
 </script>

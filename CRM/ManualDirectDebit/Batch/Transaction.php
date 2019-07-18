@@ -220,6 +220,10 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'op' => '=',
         'field' => 'civicrm_contribution.contribution_page_id',
       ],
+      'contribution_recur_contribution_status_id' => [
+        'op' => 'IN',
+        'field' => 'civicrm_contribution_recur.contribution_status_id',
+      ],
     ];
   }
 
