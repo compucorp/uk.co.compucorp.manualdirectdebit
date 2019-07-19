@@ -404,8 +404,15 @@ function contactRecurContribution(recId, cid) {
 function setDefaultFilterValues() {
   // Payment method
   // Allow 'Direct debit' option only.
-  cj('#contribution_payment_instrument_id').select2('val', [6]);
-  cj('#contribution_payment_instrument_id').select2().enable(false);
+  CRM.api3('OptionValue', 'getsingle', {
+    "return": ["value"],
+    "name": "direct_debit",
+    "option_group_id": "payment_instrument"
+  }).done(function(result) {
+    cj('#contribution_payment_instrument_id').select2('val', [result.value]);
+    cj('#contribution_payment_instrument_id').select2().enable(false);
+  });
+
 
   // Contribution Status
   // Allow 'Pending' and 'Cancelled' options only.
