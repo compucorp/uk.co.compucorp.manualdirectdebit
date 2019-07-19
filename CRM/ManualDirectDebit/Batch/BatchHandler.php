@@ -127,8 +127,11 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       ts('Amount'),
       ts('Reference Number'),
       ts('Transaction Type'),
-      ts('Receive Date'),
     ];
+
+    if($this->getBatchType() == 'dd_payments') {
+      $headers[] = ts('Receive Date');
+    }
 
     $fileName = 'Batch_' . $this->batchID . '_' . date('YmdHis') . '.csv';
     CRM_Utils_System::setHttpHeader('Content-Type', 'text/plain');
@@ -348,8 +351,11 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
         'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0.00) as amount',
         'reference_number' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.dd_ref as reference_number',
         'transaction_type' => 'CONCAT("\t",civicrm_option_value.label) as transaction_type',
-        'receive_date' => 'civicrm_contribution.receive_date as receive_date',
       ];
+
+      if($this->getBatchType() == 'dd_payments') {
+        $returnValues['receive_date'] = 'civicrm_contribution.receive_date as receive_date';
+      }
 
       $dataForExport = $this->getMandateCurrentState($returnValues);
     }

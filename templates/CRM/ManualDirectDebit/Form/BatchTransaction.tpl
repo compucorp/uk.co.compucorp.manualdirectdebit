@@ -211,24 +211,26 @@ function buildTransactionSelectorAssign(filterSearch) {
     var ZeroRecordText = '<div class="status messages">{/literal}{ts escape="js"}None found.{/ts}{literal}</li></ul></div>';
   }
 
+  var columns = [
+    {sClass:'crm-transaction-checkbox', bSortable:false, mData: "check"},
+    {sClass:'crm-contact-id', bSortable:false, mData: "contact_id"},
+    {sClass:'crm-name', mData: "name"},
+    {sClass:'crm-sort-code', mData: "sort_code"},
+    {sClass:'crm-account-number', mData: "account_number"},
+    {sClass:'crm-amount', mData: "amount"},
+    {sClass:'crm-reference-number', mData: "reference_number"},
+    {sClass:'crm-transaction-type', mData: "transaction_type"},
+    ('{/literal}{$showReceiveDateColumn}{literal}' ? {sClass:'crm-receive-date', mData: "receive_date"} : undefined),
+    {sClass:'crm-action', mData: "action"},
+  ].filter(Boolean);
+
   var crmBatchSelector = CRM.$('#crm-transaction-selector-assign-{/literal}{$entityID}{literal}').dataTable({
     "bDestroy"   : true,
     "bFilter"    : false,
     "bAutoWidth" : false,
     "lengthMenu": [ 10, 25, 50, 100, 250, 500, 1000, 2000 ],
     "aaSorting"  : [],
-    "aoColumns"  : [
-      {sClass:'crm-transaction-checkbox', bSortable:false, mData: "check"},
-      {sClass:'crm-contact-id', bSortable:false, mData: "contact_id"},
-      {sClass:'crm-name', mData: "name"},
-      {sClass:'crm-sort-code', mData: "sort_code"},
-      {sClass:'crm-account-number', mData: "account_number"},
-      {sClass:'crm-amount', mData: "amount"},
-      {sClass:'crm-reference-number', mData: "reference_number"},
-      {sClass:'crm-transaction-type', mData: "transaction_type"},
-      {sClass:'crm-receive-date', mData: "receive_date"},
-      {sClass:'crm-action', mData: "action"}
-    ],
+    "aoColumns"  : columns,
     "bProcessing": true,
     "asStripClasses" : [ "odd-row", "even-row" ],
     "sPaginationType": "full_numbers",
@@ -289,23 +291,25 @@ function buildTransactionSelectorAssign(filterSearch) {
 function buildTransactionSelectorRemove( ) {
   var sourceUrl = {/literal}'{crmURL p="civicrm/ajax/rest" h=0 q="className=CRM_ManualDirectDebit_Page_AJAX&fnName=getInstructionTransactionsList&snippet=4&context=financialBatch&entityID=$entityID&entityTable=$entityTable&statusID=$statusID"}'{literal};
 
+  var columns = [
+    {/literal} {if in_array($batchStatus, array('Open', 'Reopened')) && $action eq 2}{literal} {sClass:'crm-transaction-checkbox', bSortable:false, mData: "check"}, {/literal}{/if}{literal}
+    {sClass:'crm-contact-id', bSortable:false, mData: "contact_id"},
+    {sClass:'crm-name', mData: "name"},
+    {sClass:'crm-sort-code', mData: "sort_code"},
+    {sClass:'crm-account-number', mData: "account_number"},
+    {sClass:'crm-amount', mData: "amount"},
+    {sClass:'crm-reference-number', mData: "reference_number"},
+    {sClass:'crm-transaction-type', mData: "transaction_type"},
+    ('{/literal}{$showReceiveDateColumn}{literal}' ? {sClass:'crm-receive-date', mData: "receive_date"} : undefined),
+    {sClass:'action', mData: "action"}
+  ].filter(Boolean);
+
   var crmBatchSelector = CRM.$('#crm-transaction-selector-remove-{/literal}{$entityID}{literal}').dataTable({
     "bDestroy"   : true,
     "bFilter"    : false,
     "bAutoWidth" : false,
     "aaSorting"  : [],
-    "aoColumns"  : [
-      {/literal} {if in_array($batchStatus, array('Open', 'Reopened')) && $action eq 2}{literal} {sClass:'crm-transaction-checkbox', bSortable:false, mData: "check"}, {/literal}{/if}{literal}
-      {sClass:'crm-contact-id', bSortable:false, mData: "contact_id"},
-      {sClass:'crm-name', mData: "name"},
-      {sClass:'crm-sort-code', mData: "sort_code"},
-      {sClass:'crm-account-number', mData: "account_number"},
-      {sClass:'crm-amount', mData: "amount"},
-      {sClass:'crm-reference-number', mData: "reference_number"},
-      {sClass:'crm-transaction-type', mData: "transaction_type"},
-      {sClass:'crm-receive-date', mData: "receive_date"},
-      {sClass:'action', mData: "action"}
-    ],
+    "aoColumns"  : columns,
     "bProcessing": true,
     "asStripClasses" : [ "odd-row", "even-row" ],
     "sPaginationType": "full_numbers",

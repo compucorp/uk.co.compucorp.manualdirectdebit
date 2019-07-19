@@ -255,10 +255,10 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
         'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0.00) as amount',
         'reference_number' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.dd_ref as reference_number',
         'transaction_type' => 'civicrm_option_value.label as transaction_type',
-        'receive_date' => 'civicrm_contribution.receive_date as receive_date',
       ];
 
       if ($batchHandles->getBatchType() == 'dd_payments'){
+        $returnValues['receive_date'] = 'civicrm_contribution.receive_date as receive_date';
         $returnValues['contribute_id'] = 'civicrm_contribution.id as contribute_id';
       };
       $mandateCurrentState['values']['mandates'] = $batchHandles->getMandateCurrentState($returnValues);
