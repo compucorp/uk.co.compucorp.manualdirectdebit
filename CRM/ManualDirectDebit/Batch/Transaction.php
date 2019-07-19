@@ -235,7 +235,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @return array
    */
   private function setColumnHeader($columnHeader = []) {
-
+    $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID));
     if (empty($columnHeader)) {
       $columnHeader = [
         'contact_id' => ts('ID'),
@@ -245,9 +245,11 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'amount' => ts('Amount'),
         'reference_number' => ts('Reference Number'),
         'transaction_type' => ts('Transaction Type'),
-        'receive_date' => ts('Receive Date'),
       ];
 
+      if($batch->getBatchType() == 'dd_payments') {
+        $columnHeader['receive_date'] = ts('Receive Date');
+      }
     }
 
     $this->columnHeader = $columnHeader;
@@ -263,6 +265,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @return array
    */
   private function setReturnValues($returnValues = []) {
+    $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID));
     if (empty($returnValues) || !is_array($returnValues)) {
       $returnValues = [
         'id' => $this->params['entityTable'] . '.id as id',
@@ -274,8 +277,11 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0.00) as amount',
         'reference_number' => self::DD_MANDATE_TABLE . '.dd_ref as reference_number',
         'transaction_type' => 'civicrm_option_value.label as transaction_type',
-        'receive_date' => 'civicrm_contribution.receive_date as receive_date',
       ];
+
+      if($batch->getBatchType() == 'dd_payments') {
+        $returnValues['receive_date'] = 'civicrm_contribution.receive_date as receive_date';
+      }
     }
 
     $this->returnValues = $returnValues;
