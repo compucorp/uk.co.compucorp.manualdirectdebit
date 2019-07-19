@@ -80,6 +80,10 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
 
     if ($batchType['name'] == 'dd_payments') {
       $searchData = $this->assignDDPaymentsSearchProperties();
+      // Show filters only for create DD payments batch page.
+      $this->assign('showFilters', TRUE);
+      // Show "receive date" column only for DD payments batches.
+      $this->assign('showReceiveDateColumn', TRUE);
     }
 
     $this->assign('searchData', json_encode($searchData));
@@ -147,14 +151,6 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
           array_search('01', $ddCodes),
           array_search('17', $ddCodes),
         ],
-      ],
-      [
-        'name' => 'receive_date_start',
-        'value' => $batchData['values']['start_date_filter'],
-      ],
-      [
-        'name' => 'receive_date_end',
-        'value' => $batchData['values']['end_date_filter'],
       ],
       [
         'name' => 'recur_status',

@@ -17,7 +17,9 @@
             <th class="crm-amount">{ts}Amount{/ts}</th>
             <th class="crm-reference-number">{ts}Reference Number{/ts}</th>
             <th class="crm-transaction-type">{ts}Transaction Type{/ts}</th>
+            {if $showReceiveDateColumn}
             <th class="crm-receive-date">{ts}Receive Date{/ts}</th>
+            {/if}
             <th class="crm-action">{ts}Action{/ts}</th>
           </tr>
           </thead>
@@ -28,45 +30,47 @@
 <br/>
 
 {if in_array($batchStatus, array('Open', 'Reopened')) && $action eq 2}
-<div class="crm-form-block crm-search-form-block">
-  <div class="crm-accordion-wrapper crm-batch_transaction_search-accordion collapsed">
-    <div class="crm-accordion-header crm-master-accordion-header">
-      {ts}Edit Search Criteria{/ts}
-    </div>
-    <div class="crm-accordion-body">
-      <div id="searchForm" class="crm-block crm-form-block crm-contact-custom-search-activity-search-form-block">
-        <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="top"}</div>
-        <table class="form-layout-compressed">
-          <tr>
-            <td class="font-size12pt" colspan="2">
-              {$form.sort_name.label}<br>
-              {$form.sort_name.html|crmAddClass:'twenty'}
-            </td>
-          </tr>
-          <tr>
-          {if $form.contact_tags}
-            <td>
-              <label>{ts}Contributor Tag(s){/ts}</label><br>
-              {$form.contact_tags.html}
-            </td>
-            {else}
-            <td>&nbsp;</td>
-          {/if}
-          {if $form.group}
-            <td><label>{ts}Contributor Group(s){/ts}</label><br>
-              {$form.group.html}
-            </td>
-            {else}
-            <td>&nbsp;</td>
-          {/if}
-          </tr>
-          {include file="CRM/Contribute/Form/Search/Common.tpl"}
-        </table>
-	<div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>
+  {if $showFilters == TRUE}
+    <div class="crm-form-block crm-search-form-block">
+      <div class="crm-accordion-wrapper crm-batch_transaction_search-accordion collapsed">
+        <div class="crm-accordion-header crm-master-accordion-header">
+          {ts}Edit Search Criteria{/ts}
+        </div>
+        <div class="crm-accordion-body">
+          <div id="searchForm" class="crm-block crm-form-block crm-contact-custom-search-activity-search-form-block">
+            <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="top"}</div>
+            <table class="form-layout-compressed">
+              <tr>
+                <td class="font-size12pt" colspan="2">
+                  {$form.sort_name.label}<br>
+                  {$form.sort_name.html|crmAddClass:'twenty'}
+                </td>
+              </tr>
+              <tr>
+              {if $form.contact_tags}
+                <td>
+                  <label>{ts}Contributor Tag(s){/ts}</label><br>
+                  {$form.contact_tags.html}
+                </td>
+                {else}
+                <td>&nbsp;</td>
+              {/if}
+              {if $form.group}
+                <td><label>{ts}Contributor Group(s){/ts}</label><br>
+                  {$form.group.html}
+                </td>
+                {else}
+                <td>&nbsp;</td>
+              {/if}
+              </tr>
+              {include file="CRM/Contribute/Form/Search/Common.tpl"}
+            </table>
+      <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
+  {/if}
   <h3>{$tableTitle}:</h3>
   <div class="form-layout-compressed">{$form.trans_assign.html}&nbsp;{$form.submit.html}</div>
   <div id="ltype">
@@ -74,23 +78,25 @@
     {strip}
       <table id="crm-transaction-selector-assign-{$entityID}" cellpadding="0" cellspacing="0" border="0">
         <thead>
-        <tr>
-          <th class="crm-transaction-checkbox">{$form.toggleSelect.html}</th>
-          <th class="crm-contact-id">{ts}Contact ID{/ts}</th>
-          <th class="crm-name">{ts}Account Holder Name{/ts}</th>
-          <th class="crm-sort-code">{ts}Sort code{/ts}</th>
-          <th class="crm-account-number">{ts}Account Number{/ts}</th>
-          <th class="crm-amount">{ts}Amount{/ts}</th>
-          <th class="crm-reference-number">{ts}Reference Number{/ts}</th>
-          <th class="crm-transaction-type">{ts}Transaction Type{/ts}</th>
-          <th class="crm-receive-date">{ts}Receive Date{/ts}</th>
-          <th class="crm-action">{ts}Action{/ts}</th>
-        </tr>
+          <tr>
+            <th class="crm-transaction-checkbox">{$form.toggleSelect.html}</th>
+            <th class="crm-contact-id">{ts}Contact ID{/ts}</th>
+            <th class="crm-name">{ts}Account Holder Name{/ts}</th>
+            <th class="crm-sort-code">{ts}Sort code{/ts}</th>
+            <th class="crm-account-number">{ts}Account Number{/ts}</th>
+            <th class="crm-amount">{ts}Amount{/ts}</th>
+            <th class="crm-reference-number">{ts}Reference Number{/ts}</th>
+            <th class="crm-transaction-type">{ts}Transaction Type{/ts}</th>
+            {if $showReceiveDateColumn}
+            <th class="crm-receive-date">{ts}Receive Date{/ts}</th>
+            {/if}
+            <th class="crm-action">{ts}Action{/ts}</th>
+          </tr>
         </thead>
       </table>
     {/strip}
     </div>
-</div>
+  </div>
 {/if}
 
 {literal}
@@ -160,6 +166,7 @@ CRM.$(function($) {
   {/literal}{/if}{literal}
 
   hideSearchFields();
+  setDefaultFilterValues();
 
 });
 
@@ -167,7 +174,6 @@ function hideSearchFields() {
   var fieldsToHide  = [
     '#s2id_contribution_batch_id',
     '#s2id_contribution_currency_type',
-    '#s2id_contribution_payment_instrument_id'
   ];
 
   CRM.$.each(fieldsToHide, function (index, field) {
@@ -393,6 +399,32 @@ function contactRecurContribution(recId, cid) {
   );
   CRM.loadPage(url);
   return false;
+}
+
+function setDefaultFilterValues() {
+  // Payment method
+  // Allow 'Direct debit' option only.
+  cj('#contribution_payment_instrument_id').select2('val', [6]);
+  cj('#contribution_payment_instrument_id').select2().enable(false);
+
+  // Contribution Status
+  // Allow 'Pending' and 'Cancelled' options only.
+  cj('#contribution_status_id').select2('val', [2, 3]);
+  cj('#contribution_status_id').select2().enable(false);
+
+  // Date received
+  // Set 'choose date range' and default option and disable the field.
+  cj('#contribution_date_relative').select2('val', [0]);
+  cj('#contribution_date_relative').trigger('change');
+  cj('#contribution_date_relative').select2().enable(false);
+  // Donot allow user to choose future dates.
+  cj('.hasDatepicker').datepicker('option', 'maxDate', '0');
+  cj('#contribution_date_high').next().datepicker('setDate', new Date());
+
+  // Contribution Recur Status
+  // Set all options except 'Cancelled'.
+  cj('#contribution_recur_contribution_status_id').select2('val', [1, 2, 4, 5, 6, 7, 8, 9, 10]);
+  cj('#contribution_recur_contribution_status_id').select2().enable(false);
 }
 
 </script>

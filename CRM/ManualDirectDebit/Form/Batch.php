@@ -45,10 +45,6 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
       TRUE
     );
 
-    if ($this->batchType['name'] == 'dd_payments') {
-      $this->buildDateFilterFields();
-    }
-
     $this->addButtons([
       [
         'type' => 'cancel',
@@ -90,11 +86,6 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     return empty($errors) ? TRUE : $errors;
   }
 
-  private function buildDateFilterFields() {
-    $this->add('datepicker', 'start_date_filter', ts('Start Date'), '', FALSE, ['time' => FALSE]);
-    $this->add('datepicker', 'end_date_filter', ts('End Date'), '', FALSE, ['time' => FALSE]);
-  }
-
   /**
    * Sets defaults for form.
    *
@@ -130,8 +121,6 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     $params['data'] = json_encode(
       ['values' => [
         'originator_number' => $params['originator_number'],
-        'start_date_filter' => CRM_Utils_Array::value('start_date_filter', $params),
-        'end_date_filter' => CRM_Utils_Array::value('end_date_filter', $params),
       ]]
     );
 
