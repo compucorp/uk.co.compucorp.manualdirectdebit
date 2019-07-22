@@ -280,7 +280,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       ];
 
       if($batch->getBatchType() == 'dd_payments') {
-        $returnValues['receive_date'] = 'civicrm_contribution.receive_date as receive_date';
+        $returnValues['receive_date'] = 'DATE_FORMAT(civicrm_contribution.receive_date, "%d-%m-%Y") as receive_date';
       }
     }
 
