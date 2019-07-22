@@ -130,7 +130,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
     ];
 
     if($this->getBatchType() == 'dd_payments') {
-      $headers[] = ts('Receive Date');
+      $headers[] = ts('Received Date');
     }
 
     $fileName = 'Batch_' . $this->batchID . '_' . date('YmdHis') . '.csv';
@@ -354,7 +354,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       ];
 
       if($this->getBatchType() == 'dd_payments') {
-        $returnValues['receive_date'] = 'civicrm_contribution.receive_date as receive_date';
+        $returnValues['receive_date'] = 'DATE_FORMAT(civicrm_contribution.receive_date, "%d-%m-%Y") as receive_date';
       }
 
       $dataForExport = $this->getMandateCurrentState($returnValues);

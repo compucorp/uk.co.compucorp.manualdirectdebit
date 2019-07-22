@@ -258,7 +258,7 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
       ];
 
       if ($batchHandles->getBatchType() == 'dd_payments'){
-        $returnValues['receive_date'] = 'civicrm_contribution.receive_date as receive_date';
+        $returnValues['receive_date'] = 'DATE_FORMAT(civicrm_contribution.receive_date, "%d-%m-%Y") as receive_date';
         $returnValues['contribute_id'] = 'civicrm_contribution.id as contribute_id';
       };
       $mandateCurrentState['values']['mandates'] = $batchHandles->getMandateCurrentState($returnValues);

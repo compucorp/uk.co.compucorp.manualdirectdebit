@@ -248,7 +248,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       ];
 
       if($batch->getBatchType() == 'dd_payments') {
-        $columnHeader['receive_date'] = ts('Receive Date');
+        $columnHeader['receive_date'] = ts('Received Date');
       }
     }
 
@@ -280,7 +280,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       ];
 
       if($batch->getBatchType() == 'dd_payments') {
-        $returnValues['receive_date'] = 'civicrm_contribution.receive_date as receive_date';
+        $returnValues['receive_date'] = 'DATE_FORMAT(civicrm_contribution.receive_date, "%d-%m-%Y") as receive_date';
       }
     }
 
@@ -458,13 +458,9 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       }
     }
 
-    if (!empty($this->params['contribution_date_relative'])) {
-      $this->addContributionReceiveDateCondition($query);
-    }
+    $this->addContributionReceiveDateCondition($query);
 
-    if (!empty($this->params['contribution_cancel_date_relative'])) {
-      $this->addContributionCancelDateCondition($query);
-    }
+    $this->addContributionCancelDateCondition($query);
 
 
     if ($this->notPresent) {
@@ -636,10 +632,22 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @param $query
    */
   private function addContributionReceiveDateCondition(&$query) {
-    $relativeDate = explode('.', $this->params['contribution_date_relative']);
-    $date = CRM_Utils_Date::relativeToAbsolute($relativeDate[0], $relativeDate[1]);
-    $query->where('civicrm_contribution.receive_date >= @receive_date_start', ['receive_date_start' => $date['from']]);
-    $query->where('civicrm_contribution.receive_date <= @receive_date_end', ['receive_date_end' => $date['to']]);
+    if (!empty($this->params['contribution_date_relative'])) {
+      $relativeDate = explode('.', $this->params['contribution_date_relative']);
+      $date = CRM_Utils_Date::relativeToAbsolute($relativeDate[0], $relativeDate[1]);
+      $query->where('civicrm_contribution.receive_date >= @receive_date_start', ['receive_date_start' => $date['from']]);
+      $query->where('civicrm_contribution.receive_date <= @receive_date_end', ['receive_date_end' => $date['to']]);
+    }
+    if (!empty($this->params['contribution_date_low'])) {
+      $query->where('civicrm_contribution.receive_date >= @receive_date_start',
+                     ['receive_date_start' => date('Ymd', strtotime($this->params['contribution_date_low']))]
+                   );
+    }
+    if(!empty($this->params['contribution_date_high'])) {
+      $query->where('civicrm_contribution.receive_date <= @receive_date_end',
+                     ['receive_date_end' => date('Ymd', strtotime($this->params['contribution_date_high']))]
+                   );
+    }
   }
 
   /**
@@ -648,10 +656,22 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @param $query
    */
   private function addContributionCancelDateCondition(&$query) {
-    $relativeDate = explode('.', $this->params['contribution_cancel_date_relative']);
-    $date = CRM_Utils_Date::relativeToAbsolute($relativeDate[0], $relativeDate[1]);
-    $query->where('civicrm_contribution.cancel_date >= @cancel_date_start', ['cancel_date_start' => $date['from']]);
-    $query->where('civicrm_contribution.cancel_date <= @cancel_date_end', ['cancel_date_end' => $date['to']]);
+    if (!empty($this->params['contribution_cancel_date_relative'])) {
+      $relativeDate = explode('.', $this->params['contribution_cancel_date_relative']);
+      $date = CRM_Utils_Date::relativeToAbsolute($relativeDate[0], $relativeDate[1]);
+      $query->where('civicrm_contribution.cancel_date >= @cancel_date_start', ['cancel_date_start' => $date['from']]);
+      $query->where('civicrm_contribution.cancel_date <= @cancel_date_end', ['cancel_date_end' => $date['to']]);
+    }
+    if (!empty($this->params['contribution_cancel_date_low'])) {
+      $query->where('civicrm_contribution.cancel_date >= @cancel_date_start',
+                     ['cancel_date_start' => date('Ymd', strtotime($this->params['contribution_cancel_date_low']))]
+                   );
+    }
+    if(!empty(!empty($this->params['contribution_cancel_date_high']))) {
+      $query->where('civicrm_contribution.cancel_date <= @cancel_date_end',
+                     ['cancel_date_end' => date('Ymd', strtotime($this->params['contribution_cancel_date_high']))]
+                   );
+    }
   }
 
 }
