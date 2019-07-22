@@ -248,7 +248,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       ];
 
       if($batch->getBatchType() == 'dd_payments') {
-        $columnHeader['receive_date'] = ts('Receive Date');
+        $columnHeader['receive_date'] = ts('Received Date');
       }
     }
 
