@@ -31,6 +31,11 @@ class CRM_ManualDirectDebit_Page_AJAX {
     $entityTable = CRM_Utils_Request::retrieveValue('entityTable', 'String', NULL);
     $notPresent = CRM_Utils_Request::retrieveValue('notPresent', 'String', NULL);
 
+    $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($entityID));
+    if($batch->getBatchType() == 'dd_payments') {
+      $sortMapper[] = 'receive_date';
+    }
+
     $sort = CRM_Utils_Array::value(CRM_Utils_Request::retrieveValue('iSortCol_0', 'Integer', NULL), $sortMapper);
     $sortOrder = CRM_Utils_Request::retrieveValue('sSortDir_0', 'String', 'asc');
 
@@ -66,8 +71,12 @@ class CRM_ManualDirectDebit_Page_AJAX {
       'amount',
       'reference_number',
       'transaction_type',
-      'action',
     ];
+
+    if($batch->getBatchType() == 'dd_payments') {
+      $selectorElements[] = 'receive_date';
+    }
+    $selectorElements[] = 'action';
 
     if ($return) {
       return CRM_Utils_JSON::encodeDataTableSelector($mandateItems, $sEcho, $iTotal, $iFilteredTotal, $selectorElements);

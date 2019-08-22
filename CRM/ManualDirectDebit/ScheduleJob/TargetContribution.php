@@ -30,12 +30,15 @@ class CRM_ManualDirectDebit_ScheduleJob_TargetContribution {
         ) AS email
       FROM civicrm_contribution AS contribution
       LEFT JOIN civicrm_contact AS contact
-        ON contribution.contact_id = contact.id
+        ON contribution.contact_id = contact.id 
+      LEFT JOIN civicrm_value_direct_debit_collectionreminder_sendflag AS sendflag_customgroup 
+        ON sendflag_customgroup.entity_id = contribution.id 
       WHERE 
         contribution.receipt_date IS NULL
         AND contribution.payment_instrument_id = %2
         AND (contribution.contribution_status_id = %3 OR contribution.contribution_status_id = %4)
-        AND contribution.receive_date <= (now() - INTERVAL %1 DAY)
+        AND (DATE(contribution.receive_date) - INTERVAL %1 DAY) <= CURDATE() 
+        AND sendflag_customgroup.is_notification_sent = 0 
     ";
 
     $dao = CRM_Core_DAO::executeQuery($query, [

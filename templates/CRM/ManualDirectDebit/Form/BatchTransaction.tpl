@@ -17,6 +17,9 @@
             <th class="crm-amount">{ts}Amount{/ts}</th>
             <th class="crm-reference-number">{ts}Reference Number{/ts}</th>
             <th class="crm-transaction-type">{ts}Transaction Type{/ts}</th>
+            {if $showReceiveDateColumn}
+            <th class="crm-receive-date">{ts}Received Date{/ts}</th>
+            {/if}
             <th class="crm-action">{ts}Action{/ts}</th>
           </tr>
           </thead>
@@ -27,6 +30,47 @@
 <br/>
 
 {if in_array($batchStatus, array('Open', 'Reopened')) && $action eq 2}
+  {if $showFilters == TRUE}
+    <div class="crm-form-block crm-search-form-block">
+      <div class="crm-accordion-wrapper crm-batch_transaction_search-accordion collapsed">
+        <div class="crm-accordion-header crm-master-accordion-header">
+          {ts}Edit Search Criteria{/ts}
+        </div>
+        <div class="crm-accordion-body">
+          <div id="searchForm" class="crm-block crm-form-block crm-contact-custom-search-activity-search-form-block">
+            <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="top"}</div>
+            <table class="form-layout-compressed">
+              <tr>
+                <td class="font-size12pt" colspan="2">
+                  {$form.sort_name.label}<br>
+                  {$form.sort_name.html|crmAddClass:'twenty'}
+                </td>
+              </tr>
+              <tr>
+              {if $form.contact_tags}
+                <td>
+                  <label>{ts}Contributor Tag(s){/ts}</label><br>
+                  {$form.contact_tags.html}
+                </td>
+                {else}
+                <td>&nbsp;</td>
+              {/if}
+              {if $form.group}
+                <td><label>{ts}Contributor Group(s){/ts}</label><br>
+                  {$form.group.html}
+                </td>
+                {else}
+                <td>&nbsp;</td>
+              {/if}
+              </tr>
+              {include file="CRM/Contribute/Form/Search/Common.tpl"}
+            </table>
+      <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {/if}
   <h3>{$tableTitle}:</h3>
   <div class="form-layout-compressed">{$form.trans_assign.html}&nbsp;{$form.submit.html}</div>
   <div id="ltype">
@@ -34,22 +78,25 @@
     {strip}
       <table id="crm-transaction-selector-assign-{$entityID}" cellpadding="0" cellspacing="0" border="0">
         <thead>
-        <tr>
-          <th class="crm-transaction-checkbox">{$form.toggleSelect.html}</th>
-          <th class="crm-contact-id">{ts}Contact ID{/ts}</th>
-          <th class="crm-name">{ts}Account Holder Name{/ts}</th>
-          <th class="crm-sort-code">{ts}Sort code{/ts}</th>
-          <th class="crm-account-number">{ts}Account Number{/ts}</th>
-          <th class="crm-amount">{ts}Amount{/ts}</th>
-          <th class="crm-reference-number">{ts}Reference Number{/ts}</th>
-          <th class="crm-transaction-type">{ts}Transaction Type{/ts}</th>
-          <th class="crm-action">{ts}Action{/ts}</th>
-        </tr>
+          <tr>
+            <th class="crm-transaction-checkbox">{$form.toggleSelect.html}</th>
+            <th class="crm-contact-id">{ts}Contact ID{/ts}</th>
+            <th class="crm-name">{ts}Account Holder Name{/ts}</th>
+            <th class="crm-sort-code">{ts}Sort code{/ts}</th>
+            <th class="crm-account-number">{ts}Account Number{/ts}</th>
+            <th class="crm-amount">{ts}Amount{/ts}</th>
+            <th class="crm-reference-number">{ts}Reference Number{/ts}</th>
+            <th class="crm-transaction-type">{ts}Transaction Type{/ts}</th>
+            {if $showReceiveDateColumn}
+            <th class="crm-receive-date">{ts}Received Date{/ts}</th>
+            {/if}
+            <th class="crm-action">{ts}Action{/ts}</th>
+          </tr>
         </thead>
       </table>
     {/strip}
     </div>
-</div>
+  </div>
 {/if}
 
 {literal}
@@ -61,8 +108,19 @@ CRM.$(function($) {
   var batchStatus = {/literal}{$statusID}{literal};
   {/literal}{if $validStatus}{literal}
     // build transaction listing only for open/reopened batches
-    buildTransactionSelectorAssign();
+    var paymentInstrumentID = {/literal}{if $paymentInstrumentID neq null}{$paymentInstrumentID}{else}'null'{/if}{literal};
+    if (paymentInstrumentID != 'null') {
+      buildTransactionSelectorAssign( true );
+    }
+    else {
+      buildTransactionSelectorAssign( false );
+    }
     buildTransactionSelectorRemove();
+
+    CRM.$('#_qf_BatchTransaction_submit-bottom, #_qf_BatchTransaction_submit-top').click( function() {
+      buildTransactionSelectorAssign( true );
+      return false;
+    });
 
     CRM.$("#trans_assign").prop('disabled',true);
     CRM.$("#trans_remove").prop('disabled',true);
@@ -106,7 +164,22 @@ CRM.$(function($) {
   {/literal}{else}{literal}
     buildTransactionSelectorRemove();
   {/literal}{/if}{literal}
+
+  hideSearchFields();
+  setDefaultFilterValues();
+
 });
+
+function hideSearchFields() {
+  var fieldsToHide  = [
+    '#s2id_contribution_batch_id',
+    '#s2id_contribution_currency_type',
+  ];
+
+  CRM.$.each(fieldsToHide, function (index, field) {
+    CRM.$(field).parent('td').hide();
+  });
+}
 
 function enableActions( type ) {
   if (type == 'x') {
@@ -130,9 +203,26 @@ function toggleFinancialSelections(toggleID, toggleClass) {
   }
 }
 
-function buildTransactionSelectorAssign() {
+function buildTransactionSelectorAssign(filterSearch) {
   var sourceUrl = {/literal}'{crmURL p="civicrm/ajax/rest" h=0 q="className=CRM_ManualDirectDebit_Page_AJAX&fnName=getInstructionTransactionsList&snippet=4&context=instructionBatch&entityID=$entityID&entityTable=$entityTable&notPresent=1&statusID=$statusID"}'{literal};
-  var ZeroRecordText = '<div class="status messages">{/literal}{ts escape="js"}None found.{/ts}{literal}</li></ul></div>';
+
+  if ( filterSearch ) {
+    sourceUrl = sourceUrl+"&search=1";
+    var ZeroRecordText = '<div class="status messages">{/literal}{ts escape="js"}None found.{/ts}{literal}</li></ul></div>';
+  }
+
+  var columns = [
+    {sClass:'crm-transaction-checkbox', bSortable:false, mData: "check"},
+    {sClass:'crm-contact-id', bSortable:false, mData: "contact_id"},
+    {sClass:'crm-name', mData: "name"},
+    {sClass:'crm-sort-code', mData: "sort_code"},
+    {sClass:'crm-account-number', mData: "account_number"},
+    {sClass:'crm-amount', mData: "amount"},
+    {sClass:'crm-reference-number', mData: "reference_number"},
+    {sClass:'crm-transaction-type', mData: "transaction_type"},
+    ('{/literal}{$showReceiveDateColumn}{literal}' ? {sClass:'crm-receive-date', mData: "receive_date"} : undefined),
+    {sClass:'crm-action', mData: "action"},
+  ].filter(Boolean);
 
   var crmBatchSelector = CRM.$('#crm-transaction-selector-assign-{/literal}{$entityID}{literal}').dataTable({
     "bDestroy"   : true,
@@ -140,17 +230,7 @@ function buildTransactionSelectorAssign() {
     "bAutoWidth" : false,
     "lengthMenu": [ 10, 25, 50, 100, 250, 500, 1000, 2000 ],
     "aaSorting"  : [],
-    "aoColumns"  : [
-      {sClass:'crm-transaction-checkbox', bSortable:false, mData: "check"},
-      {sClass:'crm-contact-id', bSortable:false, mData: "contact_id"},
-      {sClass:'crm-name', mData: "name"},
-      {sClass:'crm-sort-code', mData: "sort_code"},
-      {sClass:'crm-account-number', mData: "account_number"},
-      {sClass:'crm-amount', mData: "amount"},
-      {sClass:'crm-reference-number', mData: "reference_number"},
-      {sClass:'crm-transaction-type', mData: "transaction_type"},
-      {sClass:'crm-action', mData: "action"}
-    ],
+    "aoColumns"  : columns,
     "bProcessing": true,
     "asStripClasses" : [ "odd-row", "even-row" ],
     "sPaginationType": "full_numbers",
@@ -179,6 +259,21 @@ function buildTransactionSelectorAssign() {
       var searchData = {/literal}{$searchData}{literal};
       aoData = aoData.concat(searchData);
 
+      if ( filterSearch ) {
+      CRM.$('#searchForm :input').each(function() {
+        if (CRM.$(this).val()) {
+          aoData.push(
+            {name:CRM.$(this).attr('id'), value: CRM.$(this).val()}
+          );
+          CRM.$(':radio, :checkbox').each(function() {
+            if (CRM.$(this).is(':checked')) {
+              aoData.push( { name: CRM.$(this).attr('name'), value: CRM.$(this).val() } );
+            }
+          });
+        }
+      });
+    }
+
       CRM.$.ajax({
       "dataType": 'json',
       "type": "POST",
@@ -196,22 +291,25 @@ function buildTransactionSelectorAssign() {
 function buildTransactionSelectorRemove( ) {
   var sourceUrl = {/literal}'{crmURL p="civicrm/ajax/rest" h=0 q="className=CRM_ManualDirectDebit_Page_AJAX&fnName=getInstructionTransactionsList&snippet=4&context=financialBatch&entityID=$entityID&entityTable=$entityTable&statusID=$statusID"}'{literal};
 
+  var columns = [
+    {/literal} {if in_array($batchStatus, array('Open', 'Reopened')) && $action eq 2}{literal} {sClass:'crm-transaction-checkbox', bSortable:false, mData: "check"}, {/literal}{/if}{literal}
+    {sClass:'crm-contact-id', bSortable:false, mData: "contact_id"},
+    {sClass:'crm-name', mData: "name"},
+    {sClass:'crm-sort-code', mData: "sort_code"},
+    {sClass:'crm-account-number', mData: "account_number"},
+    {sClass:'crm-amount', mData: "amount"},
+    {sClass:'crm-reference-number', mData: "reference_number"},
+    {sClass:'crm-transaction-type', mData: "transaction_type"},
+    ('{/literal}{$showReceiveDateColumn}{literal}' ? {sClass:'crm-receive-date', mData: "receive_date"} : undefined),
+    {sClass:'action', mData: "action"}
+  ].filter(Boolean);
+
   var crmBatchSelector = CRM.$('#crm-transaction-selector-remove-{/literal}{$entityID}{literal}').dataTable({
     "bDestroy"   : true,
     "bFilter"    : false,
     "bAutoWidth" : false,
     "aaSorting"  : [],
-    "aoColumns"  : [
-      {/literal} {if in_array($batchStatus, array('Open', 'Reopened')) && $action eq 2}{literal} {sClass:'crm-transaction-checkbox', bSortable:false, mData: "check"}, {/literal}{/if}{literal}
-      {sClass:'crm-contact-id', bSortable:false, mData: "contact_id"},
-      {sClass:'crm-name', mData: "name"},
-      {sClass:'crm-sort-code', mData: "sort_code"},
-      {sClass:'crm-account-number', mData: "account_number"},
-      {sClass:'crm-amount', mData: "amount"},
-      {sClass:'crm-reference-number', mData: "reference_number"},
-      {sClass:'crm-transaction-type', mData: "transaction_type"},
-      {sClass:'action', mData: "action"}
-    ],
+    "aoColumns"  : columns,
     "bProcessing": true,
     "asStripClasses" : [ "odd-row", "even-row" ],
     "sPaginationType": "full_numbers",
@@ -305,6 +403,37 @@ function contactRecurContribution(recId, cid) {
   );
   CRM.loadPage(url);
   return false;
+}
+
+function setDefaultFilterValues() {
+  // Payment method
+  // Allow 'Direct debit' option only.
+  CRM.api3('OptionValue', 'getsingle', {
+    "return": ["value"],
+    "name": "direct_debit",
+    "option_group_id": "payment_instrument"
+  }).done(function(result) {
+    cj('#contribution_payment_instrument_id').select2('val', [result.value]);
+    cj('#contribution_payment_instrument_id').select2().enable(false);
+  });
+
+  // Contribution Status
+  // Allow 'Pending' and 'Cancelled' options only.
+  cj('#contribution_status_id').select2('val', [2, 3]);
+  cj('#contribution_status_id').select2().enable(false);
+
+  // Date received
+  // set default end date to today's date if user chooses "Choose date range" option.
+  cj('#contribution_date_relative').on('change.select2', function(e){
+    if(e.val == 0) {
+      cj('#contribution_date_high').next().datepicker('setDate', new Date());
+    }
+  });
+
+  // Contribution Recur Status
+  // Set all options except 'Cancelled'.
+  cj('#contribution_recur_contribution_status_id').select2('val', [1, 2, 4, 5, 6, 7, 8, 9, 10]);
+  cj('#contribution_recur_contribution_status_id').select2().enable(false);
 }
 
 </script>

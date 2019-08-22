@@ -284,6 +284,16 @@ function manualdirectdebit_civicrm_postSave_civicrm_contribution($dao) {
 }
 
 /**
+ * Implements hook_civicrm_post.
+ */
+function manualdirectdebit_civicrm_post($op, $objectName, $objectId, &$objectRef) {
+  if ($op == 'create' && $objectName == 'Contribution') {
+    $postContributionHook = new CRM_ManualDirectDebit_Hook_Post_Contribution($objectId);
+    $postContributionHook->process();
+  }
+}
+
+/**
  * Implements hook_civicrm_buildForm()
  */
 function manualdirectdebit_civicrm_buildForm($formName, &$form) {
