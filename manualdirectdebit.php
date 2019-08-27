@@ -263,12 +263,12 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
  */
 function manualdirectdebit_civicrm_custom($op, $groupID, $entityID, &$params) {
   if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($groupID)) {
-    if ($op == 'create' || $op == 'edit') {
+    if ($op == 'create') {
       $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_DataGenerator($entityID, $params);
       $mandateDataGenerator->runDataGeneration();
     }
 
-    if ($op == 'update') {
+    if ($op == 'edit' || $op == 'update') {
       $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_DataGenerator($entityID, $params);
       $mandateDataGenerator->generateMandateData();
     }
