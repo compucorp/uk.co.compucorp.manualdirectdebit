@@ -322,6 +322,18 @@
           <is_reserved>0</is_reserved>
           <is_active>0</is_active>
         </OptionGroup>
+      <OptionGroup>
+        <name>batch_status</name>
+        <title>Batch Status</title>
+      </OptionGroup>
+      <OptionGroup>
+        <name>batch_type</name>
+        <title>Batch Type</title>
+      </OptionGroup>
+      <OptionGroup>
+        <name>activity_type</name>
+        <title>Activity Type</title>
+      </OptionGroup>
     </OptionGroups>
     <OptionValues>
         <OptionValue>
