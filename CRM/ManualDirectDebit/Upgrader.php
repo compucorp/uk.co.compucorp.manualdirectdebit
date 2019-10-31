@@ -142,6 +142,9 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->createDirectDebitPaymentInstrument();
     $this->createDirectDebitPaymentProcessorType();
     $this->createDirectDebitPaymentProcessor();
+    
+    // Reset columnSpecs cache to avoid re-creating fields on log tables.
+    unset(\Civi::$statics[CRM_Logging_Schema::class]['columnSpecs']);
   }
 
   public function upgrade_0010() {
