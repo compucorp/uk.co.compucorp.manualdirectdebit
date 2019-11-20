@@ -12,8 +12,24 @@ class CRM_ManualDirectDebit_Hook_ValidateForm_MandateValidator {
    */
   private $form;
 
-  public function __construct(&$form) {
-    $this->form = $form;
+  /**
+   * Fields POST'ed by the form.
+   *
+   * @var array
+   */
+  private $fields;
+
+  /**
+   * Array of errors found on form'a validation.
+   *
+   * @var array
+   */
+  private $errors;
+
+  public function __construct(&$form, &$fields, &$errors) {
+    $this->form =& $form;
+    $this->fields =& $fields;
+    $this->errors =& $errors;
   }
 
   /**
@@ -26,6 +42,7 @@ class CRM_ManualDirectDebit_Hook_ValidateForm_MandateValidator {
       $this->turnOffDirectDebitValidation();
     } else {
       $this->checkSettings();
+      $this->validateMandateIsNotEmpty();
     }
   }
 
@@ -70,6 +87,17 @@ class CRM_ManualDirectDebit_Hook_ValidateForm_MandateValidator {
       $currentError[] = ['directDebitMandate' => "Please, configure minimum days to first payment"];
       $this->form->setVar('_errors', $currentError);
       CRM_Core_Session::setStatus($error->getMessage(), $title = 'Error', $type = 'error');
+    }
+  }
+
+  /**
+   * Checks that mandate has been created or selected for the membership.
+   */
+  private function validateMandateIsNotEmpty() {
+    $mandateID = intval($this->fields['mandate_id']);
+
+    if ($mandateID === 0) {
+      $this->errors['payment_instrument_id'] = ts('Please create or select a mandate to use Direct Debit payment method.');
     }
   }
 

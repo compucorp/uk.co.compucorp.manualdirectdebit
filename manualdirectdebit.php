@@ -337,7 +337,7 @@ function manualdirectdebit_civicrm_buildForm($formName, &$form) {
 function manualdirectdebit_civicrm_validateForm($formName, &$fields, &$files, &$form, &$errors) {
 
   if ($formName == 'CRM_Member_Form_Membership' || $formName === 'CRM_Member_Form_MembershipRenewal') {
-    $directDebitValidator = new CRM_ManualDirectDebit_Hook_ValidateForm_MandateValidator($form);
+    $directDebitValidator = new CRM_ManualDirectDebit_Hook_ValidateForm_MandateValidator($form, $fields, $errors);
     $directDebitValidator->checkValidation();
   }
 }
