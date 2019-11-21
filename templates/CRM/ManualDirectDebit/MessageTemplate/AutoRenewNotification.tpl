@@ -128,11 +128,10 @@
           <tr>
             <td>
               <ul>
-                <li style="color: black;">{ts}Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s{/ts}</li>
-                <li style="color: black;">{ts}Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old.{/ts}</li>
-                <li style="color: black;">{ts}There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable.{/ts}</li>
-                <li style="color: black;">{ts}The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested.{/ts}</li>
-                <li style="color: black;">{ts}Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy.{/ts}</li>
+                <li style="color: black;">{ts}The Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.{/ts}</li>
+                <li style="color: black;">{ts}If there are any changes to the amount, date or frequency of your Direct Debit (Insert Your Organisation name) will notify you (Insert number of days) working days in advance of your account being debited or as otherwise agreed. If you request (Insert Your Organisation name)  to collect a payment, confirmation of the amount and date will be given to you at the time of the request.{/ts}</li>
+                <li style="color: black;">{ts}If an error is made in the payment of your Direct Debit, by (Insert Your Organisation name) or your bank or building society, you are entitled to a full and immediate refund of the amount paid from your bank or building society - If you receive a refund you are not entitled to, you must pay it back when (Insert Your Organisation name) asks you to.{/ts}</li>
+                <li style="color: black;">{ts}You can cancel a Direct Debit at any time by simply contacting your bank or building society. Written confirmation may be required. Please also notify us.{/ts}</li>
               </ul>
             </td>
             <td></td>
