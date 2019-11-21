@@ -94,9 +94,7 @@ class CRM_ManualDirectDebit_Hook_ValidateForm_MandateValidator {
    * Checks that mandate has been created or selected for the membership.
    */
   private function validateMandateIsNotEmpty() {
-    $mandateID = intval($this->fields['mandate_id']);
-
-    if ($mandateID === 0) {
+    if (empty($this->fields['mandate_id'])) {
       $this->errors['payment_instrument_id'] = ts('Please create or select a mandate to use Direct Debit payment method.');
     }
   }
