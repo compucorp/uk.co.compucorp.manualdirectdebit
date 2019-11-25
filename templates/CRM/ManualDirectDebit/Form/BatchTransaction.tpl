@@ -1,7 +1,7 @@
 
-<h3>{ts}Added to batch{/ts}:</h3>
+<h3 style="margin-top: 30px;">{ts}Added to batch{/ts}:</h3>
 {if in_array($batchStatus, array('Open', 'Reopened')) && $action eq 2} {* Add / remove transactions only allowed for Open/Reopened batches *}
-  <br /><div class="form-layout-compressed">{$form.trans_remove.html}&nbsp;{$form.rSubmit.html}</div><br/>
+  <div class="form-layout-compressed">{$form.trans_remove.html}&nbsp;{$form.rSubmit.html}</div>
 {/if}
 <div id="ltype">
   <div class="form-item">
