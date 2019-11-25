@@ -51,8 +51,7 @@
     bAutoWidth: false,
     bProcessing: false,
     bLengthChange: true,
-    sPaginationType: "full_numbers",
-    sDom: '<"crm-datatable-pager-top"lfp>rt<"crm-datatable-pager-bottom"ip>',
+    paging: false,
     bJQueryUI: true,
     order: []
   });
