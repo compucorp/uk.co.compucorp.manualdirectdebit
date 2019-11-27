@@ -49,7 +49,7 @@ class CRM_ManualDirectDebit_Mail_Task_PDFLetterCommon extends CRM_Member_Form_Ta
       Civi::log()->warning('No Letters were generated for the membership(s) with the following Id(s):' . $membershipIdsMessagePart);
     }
 
-    CRM_Utils_System::civiExit(1);
+    CRM_Utils_System::civiExit();
   }
 
   /**
