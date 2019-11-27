@@ -2,7 +2,7 @@ CRM.$(function ($) {
   let contactField = $("#contact_id");
   let paymentInstrumentField = $("#payment_instrument_id");
 
-  if (contactField.val() !== "" && typeof CRM.vars.coreForm !== "undefined") {
+  if (contactField.val() !== "" && contactField.val() != null  && typeof CRM.vars.coreForm !== "undefined") {
     CRM.vars.coreForm.contact_id = contactField.val();
   }
 
