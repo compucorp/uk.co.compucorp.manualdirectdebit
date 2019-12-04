@@ -86,7 +86,15 @@ class CRM_ManualDirectDebit_Hook_MandateContributionConnector {
    */
   public function setContributionProperties($dao) {
     $this->contributionId = $dao->id;
+
+    if ($dao->id == $this->contributionId && empty($dao->contribution_recur_id)) {
+      return;
+    }
     $this->contributionRecurId = $dao->contribution_recur_id;
+
+    if ($dao->id == $this->contributionId && empty($dao->payment_instrument_id)) {
+      return;
+    }
     $this->currentPaymentInstrumentId = $dao->payment_instrument_id;
   }
 
