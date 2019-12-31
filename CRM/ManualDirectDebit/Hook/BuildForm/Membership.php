@@ -22,7 +22,15 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Membership {
    *  Builds form
    */
   public function buildForm() {
+    $this->addMandateRelatedJSGlobalVariables();
     $this->changePaymentStatusOptionToPendingWhenDDPaymentMethodIsSelected();
+  }
+
+  /**
+   * Adds global variables required to maintain status of mandate field.
+   */
+  private function addMandateRelatedJSGlobalVariables() {
+    CRM_Core_Resources::singleton()->addVars('coreForm', array('empty_mandate_id' => FALSE));
   }
 
   private function changePaymentStatusOptionToPendingWhenDDPaymentMethodIsSelected() {
