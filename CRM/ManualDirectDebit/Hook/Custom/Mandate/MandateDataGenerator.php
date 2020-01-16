@@ -14,6 +14,7 @@ class CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator {
   private $fieldsToGenerate = [
     'dd_ref' => FALSE,
     'start_date' => FALSE,
+    'authorisation_date' => FALSE,
   ];
 
   /**
@@ -72,14 +73,17 @@ class CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator {
     }
 
     if ($this->fieldsToGenerate['start_date'] == FALSE) {
-      $this->fieldsToGenerate['start_date'] = $this->generateStartDate();
+      $this->fieldsToGenerate['start_date'] = $this->generateCurrentDateAndTime();
     }
     else {
-      $date = new DateTime();
+      $this->fieldsToGenerate['start_date'] = $this->formatDate($this->fieldsToGenerate['start_date']);
+    }
 
-      $this->fieldsToGenerate['start_date'] = $date->setTimestamp(
-        strtotime($this->fieldsToGenerate['start_date'])
-      )->format('Y-m-d H:i:s');
+    if ($this->fieldsToGenerate['authorisation_date'] == FALSE) {
+      $this->fieldsToGenerate['authorisation_date'] = $this->generateCurrentDateAndTime();
+    }
+    else {
+      $this->fieldsToGenerate['authorisation_date'] = $this->formatDate($this->fieldsToGenerate['authorisation_date']);
     }
   }
 
@@ -101,11 +105,30 @@ class CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator {
   }
 
   /**
+   * Formats given date in Y-m-d H:i:s format.
+   *
+   * @param string $dateString
+   *
+   * @return string
+   */
+  private function formatDate($dateString) {
+    try {
+      $date = new DateTime();
+      $date->setTimestamp(strtotime($dateString));
+      $formattedDate = $date->format('Y-m-d H:i:s');
+    } catch (\Exception $e) {
+      $formattedDate = date('Y-m-d H:i:s');
+    }
+
+    return $formattedDate;
+  }
+
+  /**
    * Gets current day and set it like authorization date
    *
    * @return string
    */
-  private function generateStartDate() {
+  private function generateCurrentDateAndTime() {
     return (new DateTime())->format('Y-m-d H:i:s');
   }
 
