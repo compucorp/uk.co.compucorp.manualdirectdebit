@@ -583,8 +583,8 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'view' => [
           'name' => ts('View'),
           'title' => ts('View Mandate'),
-          'url' => "civicrm/contact/view",
-          'qs' => "reset=1&cid=%%contact_id%%&selectedChild=custom_%%mandate_custom_group_id%%",
+          'url' => "civicrm/contact/view/cd",
+          'qs' => "reset=1&cid=%%contact_id%%&selectedChild=custom_%%mandate_custom_group_id%%&gid=%%mandate_custom_group_id%%",
         ],
       ],
       NULL,
@@ -612,8 +612,8 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'view' => [
           'name' => ts('View'),
           'title' => ts('View Contribution'),
-          'url' => "civicrm/contact/view",
-          'qs' => "reset=1&cid=%%contact_id%%&selectedChild=contribute&openContribution=%%contribution_id%%",
+          'url' => "civicrm/contact/view/contribution",
+          'qs' => "reset=1&id=%%contribution_id%%&cid=%%contact_id%%&action=view&context=contribution&selectedChild=contribute",
         ],
       ],
       NULL,

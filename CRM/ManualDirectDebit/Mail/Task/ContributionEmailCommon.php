@@ -30,7 +30,9 @@ class CRM_ManualDirectDebit_Mail_Task_ContributionEmailCommon extends CRM_Contac
   public static function submit(&$form, $formValues) {
     self::saveMessageTemplate($formValues);
 
-    $from = CRM_Utils_Array::value($formValues['fromEmailAddress'], $form->_emails);
+    $from = CRM_Utils_Array::value('from_email_address', $formValues);
+    $from = CRM_Utils_Mail::formatFromAddress($from);
+
     $subject = $formValues['subject'];
 
     // CRM-13378: Append CC and BCC information at the end of Activity Details and format cc and bcc fields

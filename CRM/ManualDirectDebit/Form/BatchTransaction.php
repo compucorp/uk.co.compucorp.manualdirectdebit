@@ -4,7 +4,7 @@
 /**
  * This class generates form components for Batch Transaction
  */
-class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form {
+class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Search {
 
   /**
    * The action links that we need to display for the browse screen.

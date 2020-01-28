@@ -46,24 +46,20 @@
       CRM.loadPage(url);
     });
 
-    CRM.$('#newDirectDebitMandate').click(function () {
-      var newUrl = CRM.url(
-        'civicrm/contact/view/cd/edit',
-        {
-          reset: '1',
-          type: 'Individual',
-          groupID: urlData.gid,
-          entityID: urlData.cid,
-          cgcount: urlData.cgcount,
-          multiRecordDisplay: 'single',
-          mode: 'add',
-          updatedRecId: urlData.recurringContribution,
-        }
-      );
-
-      CRM.loadPage(newUrl);
-    });
-
+    var newUrl = CRM.url(
+      'civicrm/contact/view/cd/edit',
+      {
+        reset: '1',
+        type: 'Individual',
+        groupID: urlData.gid,
+        entityID: urlData.cid,
+        cgcount: urlData.cgcount,
+        multiRecordDisplay: 'single',
+        mode: 'add',
+        updatedRecId: urlData.recurringContribution,
+      }
+    );
+    CRM.$('#newDirectDebitMandate').attr('href', newUrl);
   });
   {/literal}
 </script>
