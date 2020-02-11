@@ -30,19 +30,35 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
   /**
    * Assigns dependency between recurring contribution and mandate
    *
-   * @param $contributionId
+   * @param $contributionRecurId
    * @param $mandateId
    */
-  public function assignRecurringContributionMandate($contributionId, $mandateId) {
-    $rows = [
-      'recurr_id' => $contributionId,
-      'mandate_id' => $mandateId,
-    ];
+  public function assignRecurringContributionMandate($contributionRecurId, $mandateId) {
+    $existingMandateId= CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($contributionRecurId);
+    if ($existingMandateId && $existingMandateId == $mandateId) {
+      return;
+    }
 
-    CRM_ManualDirectDebit_BAO_RecurrMandateRef::create($rows);
+    if ($existingMandateId) {
+      $activityType = 'update';
 
-    // Creates "New Direct Debit Recurring Payment" activity
-    $activity = new CRM_ManualDirectDebit_Hook_Post_RecurContribution_Activity($contributionId, 'create');
+      $mandateReferenceId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateReferenceId($existingMandateId, $contributionRecurId);
+      CRM_ManualDirectDebit_BAO_RecurrMandateRef::create([
+        'id' => $mandateReferenceId,
+        'recurr_id' => $contributionRecurId,
+        'mandate_id' => $mandateId,
+      ]);
+    }
+    else {
+      $activityType = 'create';
+
+      CRM_ManualDirectDebit_BAO_RecurrMandateRef::create([
+        'recurr_id' => $contributionRecurId,
+        'mandate_id' => $mandateId,
+      ]);
+    }
+
+    $activity = new CRM_ManualDirectDebit_Hook_Post_RecurContribution_Activity($contributionRecurId, $activityType);
     $activity->process();
   }
 
@@ -316,7 +332,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
 
     return $amountOfInstallments == $amountOfContributions ? TRUE : FALSE;
   }
-  
+
   /**
    * Changes mandate id for contribution
    *

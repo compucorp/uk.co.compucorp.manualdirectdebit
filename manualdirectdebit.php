@@ -190,8 +190,8 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
 
   switch (true) {
     case $formName == 'CRM_Contribute_Form_UpdateSubscription' && $action == CRM_Core_Action::UPDATE:
-      $activity = new CRM_ManualDirectDebit_Hook_Post_RecurContribution_Activity($form->getVar('contributionRecurID'), 'edit');
-      $activity->process();
+      $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_RecurContribution_DirectDebitMandate($form);
+      $manualDirectDebit->saveMandateData();
       break;
 
     case $formName == 'CRM_Member_Form_Membership' && $action == CRM_Core_Action::ADD && $isDirectDebit:

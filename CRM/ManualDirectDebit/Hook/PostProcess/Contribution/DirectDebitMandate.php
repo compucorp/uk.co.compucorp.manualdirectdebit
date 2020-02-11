@@ -113,11 +113,8 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
     $oldMandateId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($recurringContributionId);
     $this->mandateId = $this->mandateStorage->getLastInsertedMandateId($this->currentContactId);
 
-    $params = [
-      'recurr_id' => $recurringContributionId,
-      'mandate_id' => $this->mandateId,
-    ];
-    CRM_ManualDirectDebit_BAO_RecurrMandateRef::create($params);
+    $mandateManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
+    $mandateManager->assignRecurringContributionMandate($recurringContributionId, $this->mandateId);
 
     if (!empty($oldMandateId)) {
       $this->mandateStorage->changeMandateForContribution($this->mandateId, $oldMandateId);
