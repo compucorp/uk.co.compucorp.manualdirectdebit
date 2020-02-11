@@ -39,24 +39,17 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
       return;
     }
 
+    $activityType = 'create';
+    $params = [
+      'recurr_id' => $contributionRecurId,
+      'mandate_id' => $mandateId,
+    ];
     if ($existingMandateId) {
       $activityType = 'update';
-
       $mandateReferenceId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateReferenceId($existingMandateId, $contributionRecurId);
-      CRM_ManualDirectDebit_BAO_RecurrMandateRef::create([
-        'id' => $mandateReferenceId,
-        'recurr_id' => $contributionRecurId,
-        'mandate_id' => $mandateId,
-      ]);
+      $params['id'] = $mandateReferenceId;
     }
-    else {
-      $activityType = 'create';
-
-      CRM_ManualDirectDebit_BAO_RecurrMandateRef::create([
-        'recurr_id' => $contributionRecurId,
-        'mandate_id' => $mandateId,
-      ]);
-    }
+    CRM_ManualDirectDebit_BAO_RecurrMandateRef::create($params);
 
     $activity = new CRM_ManualDirectDebit_Hook_Post_RecurContribution_Activity($contributionRecurId, $activityType);
     $activity->process();
@@ -160,34 +153,6 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
     unset($currentField);
 
     CRM_Utils_Hook::custom('update', $directDebitMandateId, $currentContactId, $mandateFields);
-  }
-
-  /**
-   * Creates a new empty direct debit mandate
-   *
-   * @param $currentContactId
-   *
-   * @throws \Exception
-   */
-  public function createEmptyMandate($currentContactId) {
-    $transaction = new CRM_Core_Transaction();
-    try {
-      $sqlInsertInDirectDebitMandate = "INSERT INTO " . self::DIRECT_DEBIT_TABLE_NAME . " (`entity_id`) VALUES (%1)";
-      CRM_Core_DAO::executeQuery($sqlInsertInDirectDebitMandate, [
-        1 => [
-          $currentContactId,
-          'String',
-        ],
-      ]);
-
-      $mandateId = $this->getLastInsertedMandateId($currentContactId);
-    } catch (Exception $exception) {
-      $transaction->rollback();
-      throw $exception;
-    }
-    $transaction->commit();
-
-    $this->setMandateForCreatingDependency($mandateId);
   }
 
   /**
