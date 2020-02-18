@@ -20,18 +20,28 @@ class CRM_ManualDirectDebit_Hook_Links_LinkProvider {
    * @param $recurringContributionId
    */
   public function alterRecurContributionLinks(&$values, $recurringContributionId) {
+    $contactId =  CRM_Utils_Request::retrieve('cid', 'Integer');
+    $contactType = $this->getContactType($contactId);
+
     $this->links[] = [
       'name' => ts('Use a new mandate'),
       'url' => 'civicrm/contact/view/cd/edit',
       'title' => 'Use a new mandate',
-      'qs' => 'reset=1&type=Individual&groupID=%%groupID%%&entityID=%%cid%%&cgcount=%%cgcount%%&multiRecordDisplay=single&mode=add&updatedRecId=%%updatedRecId%%',
+      'qs' => 'reset=1&type=' . $contactType . '&groupID=%%groupID%%&entityID=%%cid%%&cgcount=%%cgcount%%&multiRecordDisplay=single&mode=add&updatedRecId=%%updatedRecId%%',
       'class' => 'no-popup',
     ];
 
     $values['groupID'] = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getGroupIDByName("direct_debit_mandate");
-    $values['cid'] = CRM_Utils_Request::retrieve('cid', 'Integer');
+    $values['cid'] = $contactId;
     $values['cgcount'] = $this->getCgCount();
     $values['updatedRecId'] = $recurringContributionId;
+  }
+
+  private function getContactType($contactId) {
+    return civicrm_api3('Contact', 'getvalue', [
+      'return' => 'contact_type',
+      'id' => $contactId,
+    ]);
   }
 
   /**

@@ -60,7 +60,7 @@ CRM.$('document').ready(function () {
       'civicrm/contact/view/cd/edit',
       {
         reset: '1',
-        type: 'Individual',
+        type: CRM.vars['uk.co.compucorp.manualdirectdebit'].contactType,
         groupID: groupId,
         entityID: contactId,
         cgcount: cgCount,

@@ -50,7 +50,7 @@
       'civicrm/contact/view/cd/edit',
       {
         reset: '1',
-        type: 'Individual',
+        type: CRM.vars['uk.co.compucorp.manualdirectdebit'].contactType,
         groupID: urlData.gid,
         entityID: urlData.cid,
         cgcount: urlData.cgcount,

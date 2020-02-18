@@ -234,6 +234,10 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
       break;
 
     case 'CRM_Contact_Page_View_CustomData':
+      $contactId = $page->getVar('_contactId');
+      CRM_Core_Resources::singleton()->addVars('uk.co.compucorp.manualdirectdebit', [
+        'contactType' => _manualdirectdebit_getContactType($contactId),
+      ]);
       CRM_Core_Resources::singleton()
         ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/mandateEdit.js');
       break;
@@ -255,6 +259,13 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
         ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/paymentMethodMandateSelection.js');
       break;
   }
+}
+
+function _manualdirectdebit_getContactType($contactId) {
+  return civicrm_api3('Contact', 'getvalue', [
+    'return' => 'contact_type',
+    'id' => $contactId,
+  ]);
 }
 
 /**
