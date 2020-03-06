@@ -144,6 +144,17 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->createDirectDebitPaymentProcessor();
   }
 
+  /**
+   * Current Compuclient database does not have
+   * the message templates custom fields set for
+   * some reason, this upgrader fixes that.
+   * @return bool
+   */
+  public function upgrade_0011() {
+    $this->setDDTemplatesCustomFields();
+    return TRUE;
+  }
+
   public function upgrade_0010() {
     $this->addCollectionReminderFlagCustomGroup();
     $this->createCollectionReminderFlagRecords();
