@@ -64,28 +64,6 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
   }
 
   /**
-   * Checks if payment option appropriate for creating mandate
-   */
-  public function checkPaymentOptionToCreateMandate() {
-    $isRecurring = isset($this->form->getVar('_params')['is_recur']) && !empty($this->form->getVar('_params')['is_recur']);
-
-    if ($isRecurring) {
-      $selectedPaymentProcessor = $this->form->getVar('_params')['payment_processor_id'];
-
-      if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitPaymentProcessor($selectedPaymentProcessor)) {
-        $this->mandateStorage->createEmptyMandate($this->currentContactId);
-      }
-    }
-    else {
-      $selectedPaymentInstrument = $this->form->getVar('_params')['payment_instrument_id'];
-
-      if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($selectedPaymentInstrument)) {
-        $this->mandateStorage->createEmptyMandate($this->currentContactId);
-      }
-    }
-  }
-
-  /**
    *  Launches all required processes after saving mandate
    */
   public function run() {
@@ -113,11 +91,8 @@ class CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate {
     $oldMandateId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($recurringContributionId);
     $this->mandateId = $this->mandateStorage->getLastInsertedMandateId($this->currentContactId);
 
-    $params = [
-      'recurr_id' => $recurringContributionId,
-      'mandate_id' => $this->mandateId,
-    ];
-    CRM_ManualDirectDebit_BAO_RecurrMandateRef::create($params);
+    $mandateManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
+    $mandateManager->assignRecurringContributionMandate($recurringContributionId, $this->mandateId);
 
     if (!empty($oldMandateId)) {
       $this->mandateStorage->changeMandateForContribution($this->mandateId, $oldMandateId);

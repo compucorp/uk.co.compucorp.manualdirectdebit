@@ -30,19 +30,28 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
   /**
    * Assigns dependency between recurring contribution and mandate
    *
-   * @param $contributionId
+   * @param $contributionRecurId
    * @param $mandateId
    */
-  public function assignRecurringContributionMandate($contributionId, $mandateId) {
-    $rows = [
-      'recurr_id' => $contributionId,
+  public function assignRecurringContributionMandate($contributionRecurId, $mandateId) {
+    $existingMandateId= CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($contributionRecurId);
+    if ($existingMandateId && $existingMandateId == $mandateId) {
+      return;
+    }
+
+    $activityType = 'create';
+    $params = [
+      'recurr_id' => $contributionRecurId,
       'mandate_id' => $mandateId,
     ];
+    if ($existingMandateId) {
+      $activityType = 'update';
+      $mandateReferenceId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateReferenceId($existingMandateId, $contributionRecurId);
+      $params['id'] = $mandateReferenceId;
+    }
+    CRM_ManualDirectDebit_BAO_RecurrMandateRef::create($params);
 
-    CRM_ManualDirectDebit_BAO_RecurrMandateRef::create($rows);
-
-    // Creates "New Direct Debit Recurring Payment" activity
-    $activity = new CRM_ManualDirectDebit_Hook_Post_RecurContribution_Activity($contributionId, 'create');
+    $activity = new CRM_ManualDirectDebit_Hook_Post_RecurContribution_Activity($contributionRecurId, $activityType);
     $activity->process();
   }
 
@@ -144,34 +153,6 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
     unset($currentField);
 
     CRM_Utils_Hook::custom('update', $directDebitMandateId, $currentContactId, $mandateFields);
-  }
-
-  /**
-   * Creates a new empty direct debit mandate
-   *
-   * @param $currentContactId
-   *
-   * @throws \Exception
-   */
-  public function createEmptyMandate($currentContactId) {
-    $transaction = new CRM_Core_Transaction();
-    try {
-      $sqlInsertInDirectDebitMandate = "INSERT INTO " . self::DIRECT_DEBIT_TABLE_NAME . " (`entity_id`) VALUES (%1)";
-      CRM_Core_DAO::executeQuery($sqlInsertInDirectDebitMandate, [
-        1 => [
-          $currentContactId,
-          'String',
-        ],
-      ]);
-
-      $mandateId = $this->getLastInsertedMandateId($currentContactId);
-    } catch (Exception $exception) {
-      $transaction->rollback();
-      throw $exception;
-    }
-    $transaction->commit();
-
-    $this->setMandateForCreatingDependency($mandateId);
   }
 
   /**
@@ -316,7 +297,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
 
     return $amountOfInstallments == $amountOfContributions ? TRUE : FALSE;
   }
-  
+
   /**
    * Changes mandate id for contribution
    *

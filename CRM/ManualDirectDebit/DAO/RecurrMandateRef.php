@@ -127,48 +127,6 @@ class CRM_ManualDirectDebit_DAO_RecurrMandateRef extends CRM_Core_DAO {
   }
 
   /**
-   * Given an associative array of name/value pairs, extract all the values
-   * that belong to this object and initialize the object with said values
-   *
-   * @param array $params
-   *   (reference ) associative array of name/value pairs.
-   *
-   * @return bool
-   *   Did we copy all null values into the object
-   */
-  public function copyValues(&$params) {
-    $fields = &$this->fields();
-    $allNull = TRUE;
-    foreach ($fields as $name => $value) {
-      $dbName = $value['name'];
-      if (array_key_exists($dbName, $params)) {
-        $pValue = $params[$dbName];
-        $exists = TRUE;
-      }
-      elseif (array_key_exists($name, $params)) {
-        $pValue = $params[$name];
-        $exists = TRUE;
-      }
-      else {
-        $exists = FALSE;
-      }
-
-      // if there is no value then make the variable NULL
-      if ($exists) {
-        if ($pValue === '') {
-          $this->$dbName = 'null';
-        }
-        else {
-          $this->$dbName = $pValue;
-          $allNull = FALSE;
-        }
-      }
-    }
-
-    return $allNull;
-  }
-
-  /**
    * Returns the list of fields that can be exported
    *
    * @param bool $prefix
