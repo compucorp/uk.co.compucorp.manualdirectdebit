@@ -61,6 +61,16 @@ class CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInje
     }
 
     if ($mandateId) {
+      $contactId = CRM_Utils_Request::retrieve('cid', 'Integer', $this->page);
+      $contactType = civicrm_api3('Contact', 'getvalue', [
+        'return' => 'contact_type',
+        'id' => $contactId,
+      ]);
+
+      CRM_Core_Resources::singleton()->addVars('uk.co.compucorp.manualdirectdebit', [
+        'contactType' => $contactType,
+      ]);
+
       CRM_Core_Region::instance('page-body')->add([
         'template' => "{$this->templatePath}/CRM/ManualDirectDebit/Form/InjectDirectDebitInformation.tpl",
       ]);
@@ -70,7 +80,7 @@ class CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInje
         ->addSetting([
           'urlData' => [
             'gid' => CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getGroupIDByName("direct_debit_mandate"),
-            'cid' => CRM_Utils_Request::retrieve('cid', 'Integer', $this->page, FALSE),
+            'cid' => $contactId,
             'recId' => $mandateId,
             'mandateId' => $mandateId,
             'cgcount' => $this->getCgCount(),
