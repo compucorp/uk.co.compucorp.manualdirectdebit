@@ -105,20 +105,16 @@ CRM.$(function($) {
   CRM.$('#_qf_BatchTransaction_submit-top, #_qf_BatchTransaction_submit-bottom').click(function() {
     CRM.$('.crm-batch_transaction_search-accordion:not(.collapsed)').crmAccordionToggle();
   });
+
+  setDefaultFilterValues();
+
   var batchStatus = {/literal}{$statusID}{literal};
   {/literal}{if $validStatus}{literal}
-    // build transaction listing only for open/reopened batches
-    var paymentInstrumentID = {/literal}{if $paymentInstrumentID neq null}{$paymentInstrumentID}{else}'null'{/if}{literal};
-    if (paymentInstrumentID != 'null') {
-      buildTransactionSelectorAssign( true );
-    }
-    else {
-      buildTransactionSelectorAssign( false );
-    }
+    buildTransactionSelectorAssign();
     buildTransactionSelectorRemove();
 
     CRM.$('#_qf_BatchTransaction_submit-bottom, #_qf_BatchTransaction_submit-top').click( function() {
-      buildTransactionSelectorAssign( true );
+      buildTransactionSelectorAssign();
       return false;
     });
 
@@ -166,8 +162,6 @@ CRM.$(function($) {
   {/literal}{/if}{literal}
 
   hideSearchFields();
-  setDefaultFilterValues();
-
 });
 
 function hideSearchFields() {
@@ -203,13 +197,10 @@ function toggleFinancialSelections(toggleID, toggleClass) {
   }
 }
 
-function buildTransactionSelectorAssign(filterSearch) {
-  var sourceUrl = {/literal}'{crmURL p="civicrm/ajax/rest" h=0 q="className=CRM_ManualDirectDebit_Page_AJAX&fnName=getInstructionTransactionsList&snippet=4&context=instructionBatch&entityID=$entityID&entityTable=$entityTable&notPresent=1&statusID=$statusID"}'{literal};
+function buildTransactionSelectorAssign() {
+  var sourceUrl = {/literal}'{crmURL p="civicrm/ajax/rest" h=0 q="className=CRM_ManualDirectDebit_Page_AJAX&fnName=getInstructionTransactionsList&snippet=4&context=instructionBatch&entityID=$entityID&entityTable=$entityTable&notPresent=1&statusID=$statusID&search=1"}'{literal};
 
-  if ( filterSearch ) {
-    sourceUrl = sourceUrl+"&search=1";
-    var ZeroRecordText = '<div class="status messages">{/literal}{ts escape="js"}None found.{/ts}{literal}</li></ul></div>';
-  }
+  var ZeroRecordText = '<div class="status messages">{/literal}{ts escape="js"}None found.{/ts}{literal}</li></ul></div>';
 
   var columns = [
     {sClass:'crm-transaction-checkbox', bSortable:false, mData: "check"},
@@ -259,7 +250,7 @@ function buildTransactionSelectorAssign(filterSearch) {
       var searchData = {/literal}{$searchData}{literal};
       aoData = aoData.concat(searchData);
 
-      if ( filterSearch ) {
+
       CRM.$('#searchForm :input').each(function() {
         if (CRM.$(this).val()) {
           aoData.push(
@@ -272,7 +263,6 @@ function buildTransactionSelectorAssign(filterSearch) {
           });
         }
       });
-    }
 
       CRM.$.ajax({
       "dataType": 'json',
@@ -379,7 +369,7 @@ function bulkAssignRemove( action ) {
   CRM.$.post(postUrl, { ID: fids, actions:action }, function(data) {
     //this is custom status set when record update success.
     if (data.status == 'record-updated-success') {
-      buildTransactionSelectorAssign( true );
+      buildTransactionSelectorAssign();
       buildTransactionSelectorRemove();
       batchSummary({/literal}{$entityID}{literal});
     }
@@ -423,10 +413,12 @@ function setDefaultFilterValues() {
   cj('#contribution_status_id').select2().enable(false);
 
   // Date received
-  // set default end date to today's date if user chooses "Choose date range" option.
-  cj('#contribution_date_relative').on('change.select2', function(e){
-    if(e.val == 0) {
-      cj('#contribution_date_high').next().datepicker('setDate', new Date());
+  cj('#receive_date_relative').select2('val', 0).trigger('change');
+  cj('#receive_date_high').next().datepicker('setDate', new Date()).trigger('change');
+
+  cj('#receive_date_relative').on('change.select2', function(e){
+    if(e.val == "0") {
+      cj('#receive_date_high').next().datepicker('setDate', new Date()).trigger('change');
     }
   });
 
