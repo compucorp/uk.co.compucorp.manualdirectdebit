@@ -309,6 +309,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
     $result = civicrm_api3('Contribution', 'create', [
       'id' => $contributionId,
       'contribution_status_id' => 'Completed',
+      'payment_instrument_id' => 'direct_debit',
     ]);
     $contribution = array_shift($result['values']);
 
