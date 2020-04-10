@@ -13,12 +13,20 @@ class CRM_ManualDirectDebit_Hook_BuildForm_UpdateSubscription {
   private $form;
 
   /**
+   * Path to where extension templates are physically stored.
+   *
+   * @var string
+   */
+  private $templatePath;
+
+  /**
    * CRM_ManualDirectDebit_Hook_BuildForm_UpdateSubscription constructor.
    *
    * @param \CRM_Contribute_Form_UpdateSubscription $form
    */
   public function __construct(CRM_Contribute_Form_UpdateSubscription $form) {
     $this->form = $form;
+    $this->templatePath = CRM_ManualDirectDebit_ExtensionUtil::path() . '/templates';
   }
 
   /**
@@ -27,6 +35,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_UpdateSubscription {
   public function buildForm() {
     $this->addContactIDToCoreFormJSVariable();
     $this->addMandateIDToCoreFormJSVariable();
+    $this->preventChangingDirectDebitPaymentMethod();
   }
 
   /**
@@ -57,6 +66,12 @@ class CRM_ManualDirectDebit_Hook_BuildForm_UpdateSubscription {
     if ($selectedMandateID) {
       CRM_Core_Resources::singleton()->addVars('coreForm', array('selected_mandate_id' => (int) $selectedMandateID));
     }
+  }
+
+  private function preventChangingDirectDebitPaymentMethod() {
+    CRM_Core_Region::instance('page-body')->add([
+      'template' => "{$this->templatePath}/CRM/Member/Form/UpdateSubscriptionModifications.tpl"
+    ]);
   }
 
 }
