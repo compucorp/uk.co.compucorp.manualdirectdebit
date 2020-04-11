@@ -408,8 +408,8 @@ function setDefaultFilterValues() {
   });
 
   // Contribution Status
-  // Allow 'Pending' and 'Cancelled' options only.
-  cj('#contribution_status_id').select2('val', [2, 3]);
+  // Allow 'Pending' contributions only.
+  cj('#contribution_status_id').select2('val', [2]);
   cj('#contribution_status_id').select2().enable(false);
 
   // Date received

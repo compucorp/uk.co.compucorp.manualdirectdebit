@@ -160,7 +160,6 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
         'name' => 'contribution_status',
         'value' => [
           array_search('Pending', $contributionStatus),
-          array_search('Cancelled', $contributionStatus),
         ],
       ],
       [
