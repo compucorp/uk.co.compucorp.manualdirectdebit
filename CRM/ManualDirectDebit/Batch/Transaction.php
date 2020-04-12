@@ -635,16 +635,16 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     if (!empty($this->params['receive_date_relative'])) {
       $relativeDate = explode('.', $this->params['receive_date_relative']);
       $date = CRM_Utils_Date::relativeToAbsolute($relativeDate[0], $relativeDate[1]);
-      $query->where('civicrm_contribution.receive_date >= @receive_date_start', ['receive_date_start' => $date['from']]);
-      $query->where('civicrm_contribution.receive_date <= @receive_date_end', ['receive_date_end' => $date['to']]);
+      $query->where('DATE_FORMAT(civicrm_contribution.receive_date, "%Y%m%d") >= @receive_date_start', ['receive_date_start' => date('Ymd', strtotime($date['from']))]);
+      $query->where('DATE_FORMAT(civicrm_contribution.receive_date, "%Y%m%d") <= @receive_date_end', ['receive_date_end' => date('Ymd', strtotime($date['to']))]);
     }
     if (!empty($this->params['receive_date_low'])) {
-      $query->where('civicrm_contribution.receive_date >= @receive_date_start',
+      $query->where('DATE_FORMAT(civicrm_contribution.receive_date, "%Y%m%d") >= @receive_date_start',
                      ['receive_date_start' => date('Ymd', strtotime($this->params['receive_date_low']))]
                    );
     }
     if(!empty($this->params['receive_date_high'])) {
-      $query->where('civicrm_contribution.receive_date <= @receive_date_end',
+      $query->where('DATE_FORMAT(civicrm_contribution.receive_date, "%Y%m%d") <= @receive_date_end',
                      ['receive_date_end' => date('Ymd', strtotime($this->params['receive_date_high']))]
                    );
     }
