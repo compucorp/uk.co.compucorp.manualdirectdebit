@@ -106,6 +106,7 @@ CRM.$(function($) {
     CRM.$('.crm-batch_transaction_search-accordion:not(.collapsed)').crmAccordionToggle();
   });
 
+  hideTimeFieldFromDatePicker();
   setDefaultFilterValues();
 
   var batchStatus = {/literal}{$statusID}{literal};
@@ -163,6 +164,10 @@ CRM.$(function($) {
 
   hideSearchFields();
 });
+
+function hideTimeFieldFromDatePicker() {
+  CRM.$('input.crm-form-time').hide();
+}
 
 function hideSearchFields() {
   var fieldsToHide  = [
