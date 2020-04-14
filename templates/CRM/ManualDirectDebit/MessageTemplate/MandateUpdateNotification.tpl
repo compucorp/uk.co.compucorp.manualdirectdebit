@@ -83,7 +83,11 @@
         {foreach from=$paymentPlanMemberships item=membership}
             <div>
                 <p style="color: black;">
-                    {ts 1=$membership.price 2=$membership.durationUnit 3=$currency }{$membership.label} at %3%1 per %2.{/ts}
+                    {if !empty($membership.tax)}
+                        {ts 1=$membership.price 2=$membership.durationUnit 3=$currency 4=$membership.tax}{$membership.label} at %3%1 (+%3%4 tax) per %2{/ts}.
+                    {else}
+                        {ts 1=$membership.price 2=$membership.durationUnit 3=$currency }{$membership.label} at %3%1 per %2{/ts}.
+                    {/if}
                 </p>
             </div>
         {/foreach}
@@ -113,7 +117,7 @@
     {/if}
 
     {if isset($mandateData) and $mandateData}
-        <div style="padding-top: 60px">
+        <div style="padding-top: 30px">
             <table style="border-collapse: collapse;border: 1px solid black;max-width: 600px;width: 100%;">
                 <tr >
                     <th style="text-align: left; padding-left: 40px;">

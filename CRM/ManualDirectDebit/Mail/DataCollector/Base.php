@@ -198,20 +198,26 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $installmentsCount = empty($recurringContributionBao->installments) ? 1 : $recurringContributionBao->installments;
     $recurringContributionRows = $this->collectRecurringContributionRows($installmentsCount);
     $total = 0;
+    $totalTax = 0;
     $recurringContributionPlan = array();
     foreach ($recurringContributionRows as $index => $recurringContributionRow) {
       $total += $recurringContributionRow['amount'];
+      $totalTax += $recurringContributionRow['tax'];
       $dueDate = DateTime::createFromFormat('Y-m-d H:i:s', $recurringContributionRow['receive_date']);
       $recurringContributionPlan[$index]['index'] = $index+1;
       $recurringContributionPlan[$index]['amount'] = $this->formatAmount($recurringContributionRow['amount']);
+      $recurringContributionPlan[$index]['tax'] = $this->formatAmount($recurringContributionRow['tax']);
+      $recurringContributionPlan[$index]['sub_total'] = $this->formatAmount($recurringContributionRow['amount'] - $recurringContributionRow['tax']);
       $recurringContributionPlan[$index]['due_date'] = $dueDate->format('Y-m-d');
     }
-    $recurringContributionRows['recurringInstallmentsTable'] = $this->buildRecuringContributionTable($recurringContributionPlan);
+    $recurringContributionRows['recurringInstallmentsTable'] = $this->buildRecuringContributionTable($recurringContributionPlan, $totalTax);
     $total = $this->formatAmount($total);
+    $totalTax = $this->formatAmount($totalTax);
 
     $this->tplParams['recurringContributionData'] = [
       'recurringContributionRows' => $recurringContributionRows,
       'total' => $total,
+      'tax_total' => $totalTax,
       'installments' => $installmentsCount,
       'installments_paid' => $this->formatAmount($recurringContributionBao->amount),
     ];
@@ -224,10 +230,13 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
    * to which the mail templates are loaded into
    *
    * @param $recurringContributionPlan
+   * @param $totalTax
+   *
    * @return string
    */
-  private function buildRecuringContributionTable($recurringContributionPlan) {
+  private function buildRecuringContributionTable($recurringContributionPlan, $totalTax) {
     $smarty = CRM_Core_Smarty::singleton();
+    $smarty->assign('totalTax', $totalTax);
     $smarty->assign('installments', $recurringContributionPlan);
     return $smarty->fetch('CRM/ManualDirectDebit/MessageTemplate/Snippets/InstallmentList.tpl');
   }
@@ -266,6 +275,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $query = "
       SELECT 
         contribution.total_amount AS amount,
+        contribution.tax_amount AS tax_amount,
         contribution.receive_date AS receive_date,
         financial_type.name AS financial_type_name,
         contribution_recur.amount AS recur_amount,
@@ -295,6 +305,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
       $rows[] = [
         'type' => $dao->financial_type_name,
         'amount' => $dao->amount,
+        'tax' => $dao->tax_amount,
         'receive_date' => $dao->receive_date,
         'recur_amount' => $dao->recur_amount,
         'recur_currency' => $dao->recur_currency,
@@ -324,11 +335,13 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $total = 0;
     foreach ($lineItems['values'] as $lineItem) {
       $price = $this->formatAmount($lineItem['line_total'] * $installmentsCount);
+      $tax = $this->formatAmount($lineItem['tax_amount'] * $installmentsCount);
       $orderLineItems[] = [
         'label' => $lineItem['label'],
         'price' => $price,
         'entityTable' => $lineItem['entity_table'],
         'entityId' => $lineItem['entity_id'],
+        'tax' => $tax,
       ];
       $total += (float) $price;
     }
@@ -349,6 +362,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
         $membershipIds[] = $lineItem['entityId'];
         $paymentPlanMemberships[$lineItem['entityId']]['label'] = $lineItem['label'];
         $paymentPlanMemberships[$lineItem['entityId']]['price'] = $lineItem['price'];
+        $paymentPlanMemberships[$lineItem['entityId']]['tax'] = $lineItem['tax'];
       }
     }
 
@@ -439,7 +453,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
    * Gets direct debit image src
    */
   private function collectImageSrc() {
-    $this->tplParams['directDebitImageSrc'] = CRM_ManualDirectDebit_ExtensionUtil::url('Images/debit.png');
+    $this->tplParams['directDebitImageSrc'] = CIVICRM_UF_BASEURL . CRM_ManualDirectDebit_ExtensionUtil::url('Images/debit.png');
   }
 
   /**

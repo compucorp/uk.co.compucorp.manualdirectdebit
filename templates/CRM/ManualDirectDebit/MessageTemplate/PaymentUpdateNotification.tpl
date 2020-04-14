@@ -114,7 +114,7 @@
     {/if}
 
     {if isset($mandateData) and $mandateData}
-        <div style="padding-top: 60px">
+        <div style="padding-top: 30px">
             <table style="border-collapse: collapse;border: 1px solid black;max-width: 600px;width: 100%;">
                 <tr >
                     <th style="text-align: left; padding-left: 40px;">
