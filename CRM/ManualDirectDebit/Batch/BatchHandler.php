@@ -287,7 +287,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
         $this->updateDDMandate('recurring_contribution', $row['mandate_id']);
       }
       if (!empty($row['contribute_id'])) {
-        $this->updateContribute('Completed', $row['contribute_id']);
+        $this->recordContributionPayment($row['contribute_id']);
       }
     }
 
@@ -295,27 +295,21 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
   }
 
   /**
-   * Updates Contributes status and calls transition components to update
+   * Updates Contribution status and calls transition components to update
    * related entities (like memberships).
    *
-   * @param string $status
-   * @param string $mandateId
+   * @param int $contributionId
    */
-  private function updateContribute($status, $mandateId) {
+  private function recordContributionPayment($contributionId) {
     $originalStatusID = civicrm_api3('Contribution', 'getvalue', [
       'return' => 'contribution_status_id',
-      'id' => $mandateId,
+      'id' => $contributionId,
     ])['result'];
 
-    $contributeStatuses = CRM_Core_PseudoConstant::get(
-      'CRM_Contribute_DAO_Contribution',
-      'contribution_status_id',
-      ['labelColumn' => 'name']
-    );
-
     $result = civicrm_api3('Contribution', 'create', [
-      'id' => $mandateId,
-      'contribution_status_id' => array_search($status, $contributeStatuses),
+      'id' => $contributionId,
+      'contribution_status_id' => 'Completed',
+      'payment_instrument_id' => 'direct_debit',
     ]);
     $contribution = array_shift($result['values']);
 
