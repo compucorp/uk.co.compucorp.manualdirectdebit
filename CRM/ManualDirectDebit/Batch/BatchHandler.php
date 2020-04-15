@@ -198,7 +198,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
           1 => '01',
           2 => '17',
         ]) . '</p>';
-      $submittedMessage .= '<p>' . ts('-All contributions in the batch with status \'Pending\' or \'Cancelled\' will be marked as \'Completed\'') . '</p>';
+      $submittedMessage .= '<p>' . ts('-All contributions in the batch with status \'Pending\' will be marked as \'Completed\'') . '</p>';
       $submittedMessage .= '<p>' . ts('-The batch will be updated with \'Submitted\' status') . '</p>';
       $submittedMessage .= '<p>' . ts('This process is not revertable.') . '</p>';
     }
