@@ -25,7 +25,7 @@
                 £{$recurringPlanRow.amount}
             </td>
             <td style="padding-left: 10px;">
-                {$recurringPlanRow.due_date|crmDate:'%d/%m/%Y'}
+                {$recurringPlanRow.due_date|crmDate:$shortDateFormat}
             </td>
         </tr>
     {/foreach}
