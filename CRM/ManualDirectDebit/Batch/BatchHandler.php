@@ -184,27 +184,28 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
     $batchTypes = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, NULL, 'name');
 
     if ($batchTypes[$typeId] == 'instructions_batch') {
-      $submittedMessage = '<p>' . ts('You are submitting the batch results:') . '</p>';
-      $submittedMessage .= '<p>' . ts('-All mandates in the batch with code %1 will be transite to code %2', [
+      $submittedMessage = '<p>' . ts('You are submitting all items within this batch:') . '</p>';
+      $submittedMessage .= '<p>' . ts('- All mandates in the batch that currently have instruction code %1 will be transitioned to instruction code %2', [
           1 => '0N',
           2 => '01',
         ]) . '</p>';
-      $submittedMessage .= '<p>' . ts('-The batch will be updated with \'Submitted\' status') . '</p>';
-      $submittedMessage .= '<p>' . ts('This process is not revertable.') . '</p>';
+      $submittedMessage .= '<p>' . ts('- The status of this batch will be updated to \'Submitted\'') . '</p>';
+      $submittedMessage .= '<p>' . ts('Please note that this process is not reversible.') . '</p>';
     }
     elseif ($batchTypes[$typeId] == 'dd_payments') {
-      $submittedMessage = '<p>' . ts('You are submitting the batch results:') . '</p>';
-      $submittedMessage .= '<p>' . ts('-All mandates in the batch with code %1 will be transite to code %2', [
+      $submittedMessage = '<p>' . ts('You are submitting all items within this batch:') . '</p>';
+      $submittedMessage .= '<p>' . ts('- All mandates in the batch that currently have the code %1 will be transitioned to the code %2', [
           1 => '01',
           2 => '17',
         ]) . '</p>';
-      $submittedMessage .= '<p>' . ts('-All contributions in the batch with status \'Pending\' will be marked as \'Completed\'') . '</p>';
-      $submittedMessage .= '<p>' . ts('-The batch will be updated with \'Submitted\' status') . '</p>';
-      $submittedMessage .= '<p>' . ts('This process is not revertable.') . '</p>';
+
+      $submittedMessage .= '<p>' . ts('- All contributions in the batch with status \'Pending\' will be marked as \'Completed\'') . '</p>';
+      $submittedMessage .= '<p>' . ts('- The status of this batch will be updated to \'Submitted\'') . '</p>';
+      $submittedMessage .= '<p>' . ts('Please note that this process is not reversible.') . '</p>';
     }
     else {
       $submittedMessage = '<p>' . ts('Are you sure you want to submit this batch?') . '</p>';
-      $submittedMessage .= '<p>' . ts('This process is not revertable.') . '</p>';
+      $submittedMessage .= '<p>' . ts('Please note that this process is not reversible.') . '</p>';
     }
 
     return $submittedMessage;
