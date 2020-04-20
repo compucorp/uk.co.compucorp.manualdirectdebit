@@ -18,7 +18,7 @@
     <tr style="border: 1px solid black;">
         <td style="padding-left: 10px;">
           <p style="color: black">
-            {ts 1=$recurringContributionData.installments 2=$recurringContributionData.installments_paid 3=$currency }To be paid on %1 installments of %3%2 each{/ts}
+            {ts 1=$recurringContributionData.installments 2=$recurringContributionData.installments_paid 3=$currency }To be paid in %1 installments of %3%2 each{/ts}
             {if !empty($recurringContributionData.tax_total)}
               (includes {$currency}{$recurringContributionData.tax_total/$recurringContributionData.installments} tax)
             {/if}
