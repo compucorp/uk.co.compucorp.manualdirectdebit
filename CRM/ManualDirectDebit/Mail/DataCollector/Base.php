@@ -344,16 +344,16 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $orderLineItems = [];
     $total = 0;
     foreach ($lineItems['values'] as $lineItem) {
-      $price = $this->formatAmount($lineItem['line_total'] * $installmentsCount);
-      $tax = $this->formatAmount($lineItem['tax_amount'] * $installmentsCount);
+      $price = $lineItem['line_total'] * $installmentsCount;
+      $tax = $lineItem['tax_amount'] * $installmentsCount;
       $orderLineItems[] = [
         'label' => $lineItem['label'],
-        'price' => $price,
+        'price' => $this->formatAmount($price),
         'entityTable' => $lineItem['entity_table'],
         'entityId' => $lineItem['entity_id'],
-        'tax' => $tax,
+        'tax' => $this->formatAmount($tax),
       ];
-      $total += (float) $price;
+      $total += $price;
     }
 
     $this->tplParams['orderLineItems'] = $orderLineItems;
