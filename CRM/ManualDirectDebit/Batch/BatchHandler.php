@@ -338,7 +338,10 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
     ];
 
     if($this->getBatchType() == 'dd_payments') {
+      $returnValues['contribute_id'] = 'civicrm_contribution.id as contribute_id';
       $returnValues['receive_date'] = 'DATE_FORMAT(civicrm_contribution.receive_date, "%d-%m-%Y") as receive_date';
+    } else {
+      $returnValues['mandate_id'] = 'civicrm_value_dd_mandate.id as mandate_id';
     }
 
     return $this->getMandateCurrentState($returnValues);
@@ -374,11 +377,15 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
     foreach ($mandateItems as $mandateItem) {
       switch ($this->getBatchType()) {
         case 'instructions_batch':
-          $dataForExport[$mandateItem['mandate_id']] = $mandateItem;
+          $entityId = $mandateItem['mandate_id'];
+          unset($mandateItem['mandate_id']);
+          $dataForExport[$entityId] = $mandateItem;
           break;
 
         case 'dd_payments':
-          $dataForExport[$mandateItem['contribute_id']] = $mandateItem;
+          $entityId = $mandateItem['contribute_id'];
+          unset($mandateItem['contribute_id']);
+          $dataForExport[$entityId] = $mandateItem;
           break;
       }
     }
