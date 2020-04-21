@@ -108,7 +108,7 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
     return [
       [
         'name' => 'originator_number',
-        'value' => $batchData['originator_number'],
+        'value' => $batchData['values']['originator_number'],
       ],
       [
         'name' => 'dd_code',
@@ -143,7 +143,7 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
     return [
       [
         'name' => 'originator_number',
-        'value' => $batchData['originator_number'],
+        'value' => $batchData['values']['originator_number'],
       ],
       [
         'name' => 'dd_code',

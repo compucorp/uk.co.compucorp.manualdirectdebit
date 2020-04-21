@@ -119,7 +119,9 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     $params = $this->controller->exportValues($this->_name);
 
     $params['data'] = json_encode(
-      ['originator_number' => $params['originator_number']]
+      ['values' => [
+        'originator_number' => $params['originator_number'],
+      ]]
     );
 
     $params['modified_date'] = date('YmdHis');
