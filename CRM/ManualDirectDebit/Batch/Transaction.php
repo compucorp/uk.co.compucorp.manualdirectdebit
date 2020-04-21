@@ -296,16 +296,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    */
   public function getRows() {
     $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID));
-    $mandateData = $batch->getBatchValues();
-
-    if (isset($mandateData['values']['mandates']) && !empty($mandateData['values']['mandates']) && $this->notPresent != 1) {
-      $rows = $this->getSavedRows($mandateData, $batch);
-    }
-    else {
-      $rows = $this->getBatchRows($batch);
-    }
-
-    return $rows;
+    return $this->getBatchRows($batch);
   }
 
 

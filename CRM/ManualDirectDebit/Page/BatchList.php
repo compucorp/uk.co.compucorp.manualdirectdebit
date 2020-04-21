@@ -54,6 +54,12 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
           'title' => ts('Submit Transaction'),
           'extra' => 'onclick = "assignRemove( %%id%%,\'' . 'submit' . '\' );"',
         ],
+        CRM_Core_Action::UPDATE => [
+          'name' => ts('Update'),
+          'url' => 'civicrm/direct_debit/batch-transaction',
+          'qs' => 'reset=1&bid=%%id%%&action=update',
+          'title' => ts('Update Transaction'),
+        ],
         CRM_Core_Action::DISABLE => [
           'name' => ts('Discard'),
           'title' => ts('Discard Transaction'),
@@ -101,6 +107,7 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
         'Reopened',
       ])) {
         $action -= CRM_Core_Action::ENABLE;
+        $action -= CRM_Core_Action::UPDATE;
         $action -= CRM_Core_Action::DISABLE;
       }
 

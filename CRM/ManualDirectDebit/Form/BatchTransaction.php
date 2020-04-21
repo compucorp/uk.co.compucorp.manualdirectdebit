@@ -108,7 +108,7 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
     return [
       [
         'name' => 'originator_number',
-        'value' => $batchData['values']['originator_number'],
+        'value' => $batchData['originator_number'],
       ],
       [
         'name' => 'dd_code',
@@ -143,7 +143,7 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
     return [
       [
         'name' => 'originator_number',
-        'value' => $batchData['values']['originator_number'],
+        'value' => $batchData['originator_number'],
       ],
       [
         'name' => 'dd_code',
@@ -173,7 +173,6 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
    * Builds the form object.
    */
   public function buildQuickForm() {
-
     parent::buildQuickForm();
     if (CRM_Batch_BAO_Batch::checkBatchPermission('close', $this->_values['created_id'])) {
       if (CRM_Batch_BAO_Batch::checkBatchPermission('export', $this->_values['created_id'])) {
@@ -241,30 +240,6 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
   public function postProcess() {
     $params = $this->controller->exportValues($this->_name);
 
-    $batchHandles = new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID);
-    $batchSerializedValues = $batchHandles->getBatchValues();
-
-    if (!isset($batchSerializedValues['values']['mandates']) || empty($batchSerializedValues['values']['mandates'])) {
-      $returnValues = [
-        'mandate_id' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.id as mandate_id',
-        'contact_id' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.entity_id as contact_id',
-        'name' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.account_holder_name as name',
-        'sort_code' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.sort_code as sort_code',
-        'account_number' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.ac_number as account_number',
-        'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0.00) as amount',
-        'reference_number' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.dd_ref as reference_number',
-        'transaction_type' => 'civicrm_option_value.label as transaction_type',
-      ];
-
-      if ($batchHandles->getBatchType() == 'dd_payments'){
-        $returnValues['receive_date'] = 'DATE_FORMAT(civicrm_contribution.receive_date, "%d-%m-%Y") as receive_date';
-        $returnValues['contribute_id'] = 'civicrm_contribution.id as contribute_id';
-      };
-      $mandateCurrentState['values']['mandates'] = $batchHandles->getMandateCurrentState($returnValues);
-
-      $this->updateBatchValues($batchSerializedValues, $mandateCurrentState);
-    }
-
     if (isset($params['export_batch']) || isset($params['save_and_export_batch'])) {
       $batch = new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID);
       $batch->createExportFile();
@@ -304,20 +279,6 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
     }
 
     return $this->links;
-  }
-
-  /**
-   * Updates current batch valuesvalues
-   */
-  private function updateBatchValues($batchSerializedValues, $mandateCurrentState) {
-    $updatedBatch['values'] = array_merge($batchSerializedValues['values'], $mandateCurrentState['values']);
-
-    $serializedBatchValues = json_encode($updatedBatch);
-
-    civicrm_api3('Batch', 'create', [
-      'id' => $this->batchID,
-      'data' => $serializedBatchValues,
-    ]);
   }
 
 }
