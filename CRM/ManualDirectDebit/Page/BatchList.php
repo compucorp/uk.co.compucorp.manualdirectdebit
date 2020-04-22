@@ -52,7 +52,7 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
         CRM_Core_Action::ENABLE => [
           'name' => ts('Submit'),
           'title' => ts('Submit Transaction'),
-          'extra' => 'onclick = "assignRemove( %%id%%,\'' . 'submit' . '\' );"',
+          'extra' => 'onclick = "submitBatch(%%id%%);"',
         ],
         CRM_Core_Action::UPDATE => [
           'name' => ts('Update'),
