@@ -379,11 +379,18 @@ class CRM_ManualDirectDebit_Batch_Transaction {
           break;
 
         case "dd_payments":
-          if (!empty($mandateItem['contact_id'])) {
-            $row['action'] = $this->getLinkToContribution($mandateItem['id'], $mandateItem['contact_id']);
+          if (isset($mandateItem['contribute_id'])) {
+            $contributionId = $mandateItem['contribute_id'];
+          }
+          else {
+            $contributionId = $mandateItem['id'];
           }
 
-          $rows[$mandateItem['id']] = $row;
+          if (!empty($mandateItem['contact_id'])) {
+            $row['action'] = $this->getLinkToContribution($contributionId, $mandateItem['contact_id']);
+          }
+
+          $rows[$contributionId] = $row;
           break;
       }
 
