@@ -197,7 +197,6 @@ class CRM_ManualDirectDebit_Page_AJAX {
       'assign' => 'create',
       'remove' => 'del',
       'discard' => 'create',
-      'submit' => 'create',
     ];
 
     $response = ['status' => 'record-updated-fail'];
@@ -225,18 +224,6 @@ class CRM_ManualDirectDebit_Page_AJAX {
             $params['modified_date'] = date('YmdHis');
             $params['modified_id'] = $session->get('userID');
             $params['id'] = $recordID;
-            break;
-          case 'submit':
-            $dd = new CRM_ManualDirectDebit_Batch_BatchHandler($recordID);
-
-            if ($dd->submitBatch()) {
-              $batchStatus = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id', ['labelColumn' => 'name']);
-              $params['status_id'] = CRM_Utils_Array::key('Submitted', $batchStatus);
-              $session = CRM_Core_Session::singleton();
-              $params['modified_date'] = date('YmdHis');
-              $params['modified_id'] = $session->get('userID');
-              $params['id'] = $recordID;
-            }
             break;
         }
 
