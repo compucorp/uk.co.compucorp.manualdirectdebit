@@ -296,16 +296,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    */
   public function getRows() {
     $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID));
-    $mandateData = $batch->getBatchValues();
-
-    if (isset($mandateData['values']['mandates']) && !empty($mandateData['values']['mandates']) && $this->notPresent != 1) {
-      $rows = $this->getSavedRows($mandateData, $batch);
-    }
-    else {
-      $rows = $this->getBatchRows($batch);
-    }
-
-    return $rows;
+    return $this->getBatchRows($batch);
   }
 
 
@@ -388,11 +379,18 @@ class CRM_ManualDirectDebit_Batch_Transaction {
           break;
 
         case "dd_payments":
-          if (!empty($mandateItem['contact_id'])) {
-            $row['action'] = $this->getLinkToContribution($mandateItem['id'], $mandateItem['contact_id']);
+          if (isset($mandateItem['contribute_id'])) {
+            $contributionId = $mandateItem['contribute_id'];
+          }
+          else {
+            $contributionId = $mandateItem['id'];
           }
 
-          $rows[$mandateItem['id']] = $row;
+          if (!empty($mandateItem['contact_id'])) {
+            $row['action'] = $this->getLinkToContribution($contributionId, $mandateItem['contact_id']);
+          }
+
+          $rows[$contributionId] = $row;
           break;
       }
 
