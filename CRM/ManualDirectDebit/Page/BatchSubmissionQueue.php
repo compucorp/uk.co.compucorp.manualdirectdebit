@@ -91,10 +91,13 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
   }
 
   private function addInstructionsQueueTaskItem() {
+    $mandateIds = implode(', ', array_column($this->taskItemRecords, 'mandate_id'));
+    $taskTitle = 'Processing the mandates with these Ids : ' . $mandateIds;
+
     $task = new CRM_Queue_Task(
       ['CRM_ManualDirectDebit_Queue_Task_BatchSubmission_InstructionItem', 'run'],
       [$this->taskItemRecords],
-      ''
+      $taskTitle
     );
     $this->queue->createItem($task);
   }
@@ -127,10 +130,13 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
 
 
   private function addPaymentQueueTaskItem() {
+    $contributionIds = implode(', ', array_column($this->taskItemRecords, 'contribution_id'));
+    $taskTitle = 'Processing the contributions with these Ids : ' . $contributionIds;
+
     $task = new CRM_Queue_Task(
       ['CRM_ManualDirectDebit_Queue_Task_BatchSubmission_PaymentItem', 'run'],
       [$this->taskItemRecords],
-      ''
+      $taskTitle
     );
     $this->queue->createItem($task);
   }

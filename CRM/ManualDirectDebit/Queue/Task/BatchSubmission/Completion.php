@@ -13,6 +13,8 @@ class CRM_ManualDirectDebit_Queue_Task_BatchSubmission_Completion {
       'modified_id' => $loggedInUserId
     ]);
 
+    $ctx->log->info('Changing batch with Id : ' . $batchId . ' to Submitted');
+
     return TRUE;
   }
 

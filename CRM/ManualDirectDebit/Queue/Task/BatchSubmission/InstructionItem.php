@@ -3,11 +3,21 @@
 class CRM_ManualDirectDebit_Queue_Task_BatchSubmission_InstructionItem {
 
   public static function run(CRM_Queue_TaskContext $ctx, $batchTaskItems) {
+    $processingStartTime = microtime(TRUE);
+
     foreach ($batchTaskItems as $batchTaskItem) {
-      if (!empty($row['mandate_id'])) {
-        self::updateDDMandate('first_time_payment', $batchTaskItem['mandate_id']);
+      try {
+        self::updateDDMandate('first_time_payment', $batchTaskItem['mandate_id']);;
+      }
+      catch (Exception $e) {
+        $errorMessage = 'Failed to process mandate with Id: ' . $batchTaskItem['mandate_id'] . ' - Error message : ' . $e->getMessage();
+        $ctx->log->err($errorMessage);
       }
     }
+
+    $totalExecutionTime = (microtime(true) - $processingStartTime);
+    $endProcessingMessage = 'Finished processing the task In : ' . $totalExecutionTime . 'Seconds';
+    $ctx->log->info($endProcessingMessage);
 
     return TRUE;
   }

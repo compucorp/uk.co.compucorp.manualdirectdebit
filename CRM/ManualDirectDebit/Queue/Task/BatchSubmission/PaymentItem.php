@@ -3,14 +3,25 @@
 class CRM_ManualDirectDebit_Queue_Task_BatchSubmission_PaymentItem {
 
   public static function run(CRM_Queue_TaskContext $ctx, $batchTaskItems) {
+    $processingStartTime = microtime(TRUE);
+
     foreach ($batchTaskItems as $batchTaskItem) {
-      if (!empty($batchTaskItem['mandate_id'])) {
-        self::updateDDMandate('recurring_contribution', $batchTaskItem['mandate_id']);
-      }
-      if (!empty($batchTaskItem['contribution_id'])) {
+      try {
+        if (!empty($batchTaskItem['mandate_id'])) {
+          self::updateDDMandate('recurring_contribution', $batchTaskItem['mandate_id']);
+        }
+
         self::recordContributionPayment($batchTaskItem['contribution_id']);
       }
+      catch (Exception $e) {
+        $errorMessage = 'Failed to process contribution with Id: ' . $batchTaskItem['contribution_id'] . ' - Error message : ' . $e->getMessage();
+        $ctx->log->err($errorMessage);
+      }
     }
+
+    $totalExecutionTime = (microtime(true) - $processingStartTime);
+    $endProcessingMessage = 'Finished processing the task In : ' . $totalExecutionTime . 'Seconds';
+    $ctx->log->info($endProcessingMessage);
 
     return TRUE;
   }
