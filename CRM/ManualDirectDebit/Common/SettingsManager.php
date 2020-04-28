@@ -67,6 +67,12 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
     }
   }
 
+  public static function getBatchSubmissionRecordsPerTaskLimit() {
+    return civicrm_api3('Setting', 'getvalue', [
+      'name' => "manualdirectdebit_batch_submission_queue_limit",
+    ]);
+  }
+
   /**
    * Gets setting values
    *

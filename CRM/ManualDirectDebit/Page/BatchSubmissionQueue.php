@@ -2,7 +2,7 @@
 
 class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
 
-  const BATCH_LIMIT = 50;
+  private $batchRecordsLimit;
 
   private $queue;
 
@@ -15,6 +15,7 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
 
     $this->queue = CRM_ManualDirectDebit_Queue_BatchSubmission::getQueue();
     $this->batchId =  CRM_Utils_Request::retrieveValue('batchId', 'Int');
+    $this->batchRecordsLimit = CRM_ManualDirectDebit_Common_SettingsManager::getBatchSubmissionRecordsPerTaskLimit();
   }
 
   public function run() {
@@ -75,7 +76,7 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
     $rows = $rows['values'];
 
     foreach ($rows as $row) {
-      if (count($this->taskItemRecords) >= self::BATCH_LIMIT) {
+      if (count($this->taskItemRecords) >= $this->batchRecordsLimit) {
         $this->addInstructionsQueueTaskItem();
         $this->taskItemRecords = [];
       }
@@ -108,7 +109,7 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
     ]);
 
     while ($result->fetch()) {
-      if (count($this->taskItemRecords) >= self::BATCH_LIMIT) {
+      if (count($this->taskItemRecords) >= $this->batchRecordsLimit) {
         $this->addPaymentQueueTaskItem();
         $this->taskItemRecords = [];
       }

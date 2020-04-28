@@ -101,6 +101,21 @@ return [
     'html_attributes' => '',
     'extra_data' => '',
     'section' => 'reminder_config',
+  ],
+  'manualdirectdebit_batch_submission_queue_limit' => [
+    'group_name' => 'Manual Direct Debit',
+    'group' => 'manualdirectdebit',
+    'name' => 'manualdirectdebit_batch_submission_queue_limit',
+    'title' => 'Number of records to be processed per batch submission queue task',
+    'type' => 'Integer',
+    'html_type' => 'number',
+    'quick_form_type' => 'Element',
+    'default' => 50,
+    'is_required' => TRUE,
+    'is_help' => FALSE,
+    'html_attributes' => '',
+    'extra_data' => '',
+    'section' => 'batch_config',
   ]
 ];
 
