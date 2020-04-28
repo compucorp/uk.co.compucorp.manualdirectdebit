@@ -2,12 +2,14 @@
 
 class CRM_ManualDirectDebit_Queue_Task_BatchSubmission_PaymentItem {
 
-  public static function run(CRM_Queue_TaskContext $ctx, $row) {
-    if (!empty($row['mandate_id'])) {
-      self::updateDDMandate('recurring_contribution', $row['mandate_id']);
-    }
-    if (!empty($row['contribute_id'])) {
-      self::recordContributionPayment($row['contribute_id']);
+  public static function run(CRM_Queue_TaskContext $ctx, $batchTaskItems) {
+    foreach ($batchTaskItems as $batchTaskItem) {
+      if (!empty($batchTaskItem['mandate_id'])) {
+        self::updateDDMandate('recurring_contribution', $batchTaskItem['mandate_id']);
+      }
+      if (!empty($batchTaskItem['contribution_id'])) {
+        self::recordContributionPayment($batchTaskItem['contribution_id']);
+      }
     }
 
     return TRUE;

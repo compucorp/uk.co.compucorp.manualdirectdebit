@@ -2,9 +2,13 @@
 
 class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
 
+  const BATCH_LIMIT = 50;
+
   private $queue;
 
   private $batchId;
+
+  private $taskItemRecords = [];
 
   public function __construct($title = NULL, $mode = NULL) {
     parent::__construct($title, $mode);
@@ -15,7 +19,9 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
 
   public function run() {
     if (!$this->validBatchStatus()) {
-      return FALSE;
+      CRM_Core_Session::setStatus('The batch is not in a valid status for submission', '', 'error');
+
+      return;
     }
 
     $this->addTasksToQueue();
@@ -35,12 +41,6 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
     return $batchStatuses[$statusID];
   }
 
-  private function getBatchType() {
-    $batch = CRM_Batch_DAO_Batch::findById($this->batchId);
-    $batchTypes = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'type_id', ['labelColumn' => 'name']);
-    return $batchTypes[$batch->type_id];
-  }
-
   private function addTasksToQueue() {
     $batchType = $this->getBatchType();
     switch ($batchType) {
@@ -52,69 +52,89 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
         break;
     }
 
-    $this->enqueueBatchSubmissionCompletionTask();
+    $this->addBatchSubmissionCompletionTask();
+  }
+
+  private function getBatchType() {
+    $batch = CRM_Batch_DAO_Batch::findById($this->batchId);
+    $batchTypes = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'type_id', ['labelColumn' => 'name']);
+    return $batchTypes[$batch->type_id];
   }
 
   private function addInstructionsQueueTasks() {
-    $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction(
-      $this->batchId,
-      ['entityTable' => 'civicrm_value_dd_mandate'],
-      ['mandate_id' => 1],
-      ['mandate_id' => 'civicrm_value_dd_mandate.id as mandate_id']
-    );
-    $rows = $batchTransaction->getRows();
+    $rows = civicrm_api3('EntityBatch', 'get', [
+      'return' => ['entity_id'],
+      'options' => ['limit' => 0],
+      'sequential' => 1,
+      'batch_id' => $this->batchId,
+    ]);
+
+    if (empty($rows['values'])) {
+      return;
+    }
+    $rows = $rows['values'];
+
     foreach ($rows as $row) {
-      $this->enqueueInstructionsQueueTask($row);
+      if (count($this->taskItemRecords) >= self::BATCH_LIMIT) {
+        $this->addInstructionsQueueTaskItem();
+        $this->taskItemRecords = [];
+      }
+
+      $mandateId = CRM_Utils_Array::value('entity_id', $row);
+      $this->taskItemRecords[] = ['mandate_id' => $mandateId];
+    }
+
+    if (!empty($this->taskItemRecords)) {
+      $this->addInstructionsQueueTaskItem();
     }
   }
 
-  private function enqueueInstructionsQueueTask($row) {
-    $processingMessage = '';
-    if (!empty($row['mandate_id'])) {
-      $processingMessage = 'Processing mandate with Id : ' . $row['mandate_id'];
-    }
-
+  private function addInstructionsQueueTaskItem() {
     $task = new CRM_Queue_Task(
       ['CRM_ManualDirectDebit_Queue_Task_BatchSubmission_InstructionItem', 'run'],
-      [$row],
-      $processingMessage
+      [$this->taskItemRecords],
+      ''
     );
     $this->queue->createItem($task);
   }
 
   private function addPaymentsQueueTasks() {
-    $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction(
-      $this->batchId,
-      ['entityTable' => 'civicrm_contribution'],
-      ['mandate_id' => 1, 'contribute_id' => 1],
-      [
-        'mandate_id' => 'civicrm_value_dd_mandate.id as mandate_id',
-        'contribute_id' => 'civicrm_contribution.id as contribute_id',
-      ]
-    );
-    $rows = $batchTransaction->getRows();
+    $sqlQuery = 'SELECT mandate.entity_id as contribution_id, mandate.mandate_id as mandate_id 
+               FROM s1mev2civi_mstkv.civicrm_entity_batch entity_batch 
+               LEFT JOIN civicrm_value_dd_information mandate ON entity_batch.entity_id = mandate.entity_id  
+               WHERE entity_batch.batch_id = %1;';
+    $result = CRM_Core_DAO::executeQuery($sqlQuery, [
+      1 => [$this->batchId, 'Integer'],
+    ]);
 
-    foreach ($rows as $row) {
-      $this->enqueuePaymentsQueueTask($row);
+    while ($result->fetch()) {
+      if (count($this->taskItemRecords) >= self::BATCH_LIMIT) {
+        $this->addPaymentQueueTaskItem();
+        $this->taskItemRecords = [];
+      }
+
+      $row = $result->toArray();
+      $mandateId = CRM_Utils_Array::value('mandate_id', $row);
+      $contributionId = CRM_Utils_Array::value('contribution_id', $row);
+      $this->taskItemRecords[] = ['mandate_id' => $mandateId, 'contribution_id' => $contributionId];
+    }
+
+    if (!empty($this->taskItemRecords)) {
+      $this->addPaymentQueueTaskItem();
     }
   }
 
 
-  private function enqueuePaymentsQueueTask($row) {
-    $processingMessage = '';
-    if (!empty($row['contribute_id'])) {
-      $processingMessage = 'Processing contribution with Id : ' . $row['contribute_id'];
-    }
-
+  private function addPaymentQueueTaskItem() {
     $task = new CRM_Queue_Task(
       ['CRM_ManualDirectDebit_Queue_Task_BatchSubmission_PaymentItem', 'run'],
-      [$row],
-      $processingMessage
+      [$this->taskItemRecords],
+      ''
     );
     $this->queue->createItem($task);
   }
 
-  private function enqueueBatchSubmissionCompletionTask() {
+  private function addBatchSubmissionCompletionTask() {
     $task = new CRM_Queue_Task(
       ['CRM_ManualDirectDebit_Queue_Task_BatchSubmission_Completion', 'run'],
       [$this->batchId],

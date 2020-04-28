@@ -2,9 +2,11 @@
 
 class CRM_ManualDirectDebit_Queue_Task_BatchSubmission_InstructionItem {
 
-  public static function run(CRM_Queue_TaskContext $ctx, $row) {
-    if (!empty($row['mandate_id'])) {
-      self::updateDDMandate('first_time_payment', $row['mandate_id']);
+  public static function run(CRM_Queue_TaskContext $ctx, $batchTaskItems) {
+    foreach ($batchTaskItems as $batchTaskItem) {
+      if (!empty($row['mandate_id'])) {
+        self::updateDDMandate('first_time_payment', $batchTaskItem['mandate_id']);
+      }
     }
 
     return TRUE;
