@@ -75,6 +75,12 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Payment {
     $requiredFields[] = 'mandate_id';
     $this->form->assign('requiredPaymentFields', $requiredFields);
 
+    $extraAttributes = [];
+    $isEditRecurContributionForm = $this->form->_formName == 'UpdateSubscription';
+    if ($isEditRecurContributionForm) {
+      $extraAttributes['disabled'] = true;
+    }
+
     $contactID = CRM_Utils_Request::retrieve('cid', 'Int');
     $this->form->setDefaults(['mandate_id' => $this->getNewlyCreatedMandateID($contactID)]);
     $this->form->add(
@@ -83,7 +89,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Payment {
       'Mandate',
       $this->getMandateOptionsForContact($contactID),
       TRUE,
-      []
+      $extraAttributes
     );
   }
 
@@ -181,5 +187,5 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Payment {
 
     return FALSE;
   }
-  
+
 }
