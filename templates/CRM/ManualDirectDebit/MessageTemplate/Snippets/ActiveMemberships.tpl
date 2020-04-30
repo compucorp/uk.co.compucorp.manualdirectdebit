@@ -8,8 +8,8 @@
     {foreach from=$activeMemberships item=membership}
         <tr style="border: 1px solid black;">
             <td style="border: 1px solid black;padding-left: 10px;"><p style="color: black;"><strong>{$membership.name}</strong></p></td>
-            <td style="border: 1px solid black;padding-left: 10px;"><p style="color: black;"><strong>{$membership.startDate}</strong></p></td>
-            <td style="border: 1px solid black;padding-left: 10px;"><p style="color: black;"><strong>{$membership.endDate}</strong></p></td>
+            <td style="border: 1px solid black;padding-left: 10px;"><p style="color: black;"><strong>{$membership.startDate|crmDate:$shortDateFormat}</strong></p></td>
+            <td style="border: 1px solid black;padding-left: 10px;"><p style="color: black;"><strong>{$membership.endDate|crmDate:$shortDateFormat}</strong></p></td>
         </tr>
     {/foreach}
 </table>

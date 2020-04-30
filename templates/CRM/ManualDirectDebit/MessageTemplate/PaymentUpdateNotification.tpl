@@ -65,11 +65,11 @@
             </tr>
             <tr>
                 <td style="padding-left: 10px;"><span style="color: black;">{ts}Start Date{/ts}</span></td>
-                <td style="padding-left: 10px;"><span style="color: black;">{$mandateData.start_date}</span></td>
+                <td style="padding-left: 10px;"><span style="color: black;">{$mandateData.start_date|crmDate:$shortDateFormat}</span></td>
             </tr>
             <tr>
                 <td style="padding-left: 10px;"><span style="color: black;">{ts}Authorisation Date:{/ts}</span></td>
-                <td style="padding-left: 10px;"><span style="color: black;">{$mandateData.authorisation_date}</span></td>
+                <td style="padding-left: 10px;"><span style="color: black;">{$mandateData.authorisation_date|crmDate:$shortDateFormat}</span></td>
             </tr>
         </table>
     {/if}
@@ -84,7 +84,11 @@
         {foreach from=$paymentPlanMemberships item=membership}
             <div>
                 <p style="color: black;">
-                    {ts 1=$membership.price 2=$membership.durationUnit 3=$currency }{$membership.label} at %3%1 per %2.{/ts}
+                    {if !empty($membership.tax)}
+                        {ts 1=$membership.price 2=$membership.durationUnit 3=$currency 4=$membership.tax}{$membership.label} at %3%1 (+%3%4 tax) per %2{/ts}.
+                    {else}
+                        {ts 1=$membership.price 2=$membership.durationUnit 3=$currency }{$membership.label} at %3%1 per %2{/ts}.
+                    {/if}
                 </p>
             </div>
         {/foreach}
@@ -100,7 +104,10 @@
             </div>
 
             <div>
-                <p style="color: black;">{ts 1=$nextMembershipPayment.amount 2=$nextMembershipPayment.date 3=$currency }Your next payment of %3%1 will be collected on %2{/ts}</p>
+                <p style="color: black;">
+                  {ts 1=$nextMembershipPayment.amount 2=$currency}Your next payment of %2%1 will be collected on{/ts}
+                  {$nextMembershipPayment.date|crmDate:$shortDateFormat}
+                </p>
             </div>
         {/if}
     {/if}
@@ -114,7 +121,7 @@
     {/if}
 
     {if isset($mandateData) and $mandateData}
-        <div style="padding-top: 60px">
+        <div style="padding-top: 30px">
             <table style="border-collapse: collapse;border: 1px solid black;max-width: 600px;width: 100%;">
                 <tr >
                     <th style="text-align: left; padding-left: 40px;">
