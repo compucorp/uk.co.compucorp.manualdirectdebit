@@ -220,7 +220,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     }
     $recurringContributionRows['recurringInstallmentsTable'] = $this->buildRecuringContributionTable($recurringContributionPlan, $totalTax);
     $total = $this->formatAmount($total);
-    $totalTax = $totalTax ? $this->formatAmount($totalTax) : null;
+    $totalTax = $totalTax ? $this->formatAmount($totalTax) : NULL;
 
     $this->tplParams['recurringContributionData'] = [
       'recurringContributionRows' => $recurringContributionRows,
@@ -351,7 +351,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
         'price' => $this->formatAmount($price),
         'entityTable' => $lineItem['entity_table'],
         'entityId' => $lineItem['entity_id'],
-        'tax' => $tax ? $this->formatAmount($tax) : null,
+        'tax' => $tax ? $this->formatAmount($tax) : NULL,
       ];
       $total += $price;
     }
