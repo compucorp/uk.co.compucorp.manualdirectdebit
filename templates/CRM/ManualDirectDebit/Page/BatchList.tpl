@@ -56,27 +56,29 @@
     order: []
   });
 
-  function assignRemove(recordID, op) {
-    if (op == 'submit') {
-      CRM.$("#enableDisableStatusMsg").dialog({
-        title: {/literal}'{ts escape="js"}Submit Batch{/ts}'{literal},
-        modal: true,
-        open: function () {
-          var msg = {/literal}{if $submittedMessage}"{$submittedMessage}"{else}"{ts escape="js"}Are you sure you want to submit this batch? This process is not revertable.{/ts}"{/if}{literal};
+  function submitBatch(batchId) {
+    CRM.$("#enableDisableStatusMsg").dialog({
+      title: {/literal}'{ts escape="js"}Submit Batch{/ts}'{literal},
+      modal: true,
+      open: function () {
+        var msg = {/literal}{if $submittedMessage}"{$submittedMessage}"{else}"{ts escape="js"}Are you sure you want to submit this batch? This process is not revertable.{/ts}"{/if}{literal};
 
-          CRM.$('#enableDisableStatusMsg').show().html(msg);
+        CRM.$('#enableDisableStatusMsg').show().html(msg);
+      },
+      buttons: {
+        {/literal}"{ts escape='js'}Cancel{/ts}"{literal}: function () {
+          CRM.$(this).dialog("close");
         },
-        buttons: {
-          {/literal}"{ts escape='js'}Cancel{/ts}"{literal}: function () {
-              CRM.$(this).dialog("close");
-          },
-          {/literal}"{ts escape='js'}Submit{/ts}"{literal}: function () {
-              CRM.$(this).dialog("close");
-              saveRecord(recordID, op);
-          }
+        {/literal}"{ts escape='js'}Submit{/ts}"{literal}: function () {
+          CRM.$(this).dialog("close");
+          window.location.href = CRM.url('civicrm/direct_debit/batch/submit', {batchId: batchId});
         }
-      });
-    } else if (op == 'discard') {
+    }
+    });
+  }
+
+  function assignRemove(recordID, op) {
+    if (op == 'discard') {
       CRM.$("#enableDisableStatusMsg").dialog({
         title: {/literal}'{ts escape="js"}Discard Batch{/ts}'{literal},
         modal: true,

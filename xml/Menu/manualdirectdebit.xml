@@ -30,6 +30,11 @@
     <weight>610</weight>
   </item>
   <item>
+    <path>civicrm/direct_debit/batch/submit</path>
+    <page_callback>CRM_ManualDirectDebit_Page_BatchSubmissionQueue</page_callback>
+    <title>Batch Submission Queue</title>
+  </item>
+  <item>
     <path>civicrm/direct_debit/mandate/create</path>
     <page_callback>CRM_ManualDirectDebit_Form_Mandate_Create</page_callback>
     <title>Mandate_Create</title>

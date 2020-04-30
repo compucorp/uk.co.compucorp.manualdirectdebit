@@ -144,6 +144,17 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->createDirectDebitPaymentProcessor();
   }
 
+  public function upgrade_0012() {
+    $this->setBatchSubmissionRecordsPerTaskConfigDefaultValue();
+    return TRUE;
+  }
+
+  private function setBatchSubmissionRecordsPerTaskConfigDefaultValue() {
+    civicrm_api3('Setting', 'create', [
+      'manualdirectdebit_batch_submission_queue_limit' => 50,
+    ]);
+  }
+
   /**
    * Current Compuclient database does not have
    * the message templates custom fields set for
