@@ -4,7 +4,7 @@ class CRM_ManualDirectDebit_Queue_Build_PaymentsQueueBuilder extends CRM_ManualD
 
   public function buildQueue() {
     $sqlQuery = 'SELECT mandate.entity_id as contribution_id, mandate.mandate_id as mandate_id 
-               FROM s1mev2civi_mstkv.civicrm_entity_batch entity_batch 
+               FROM civicrm_entity_batch entity_batch 
                LEFT JOIN civicrm_value_dd_information mandate ON entity_batch.entity_id = mandate.entity_id  
                WHERE entity_batch.batch_id = %1;';
     $result = CRM_Core_DAO::executeQuery($sqlQuery, [
