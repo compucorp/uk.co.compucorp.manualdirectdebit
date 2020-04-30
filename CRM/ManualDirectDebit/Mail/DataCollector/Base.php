@@ -147,7 +147,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
         mandate.dd_ref AS dd_ref,
         mandate.start_date AS start_date,
         mandate.authorisation_date AS authorisation_date
-      FROM civicrm_value_dd_information AS dd_information 
+      FROM civicrm_value_dd_information AS dd_information
       LEFT JOIN civicrm_value_dd_mandate AS mandate
         ON dd_information.mandate_id = mandate.id
       WHERE dd_information.entity_id = %1
@@ -220,7 +220,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     }
     $recurringContributionRows['recurringInstallmentsTable'] = $this->buildRecuringContributionTable($recurringContributionPlan, $totalTax);
     $total = $this->formatAmount($total);
-    $totalTax = $this->formatAmount($totalTax);
+    $totalTax = $totalTax ? $this->formatAmount($totalTax) : null;
 
     $this->tplParams['recurringContributionData'] = [
       'recurringContributionRows' => $recurringContributionRows,
@@ -283,7 +283,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
    */
   private function collectRecurringContributionRows($installmentsCount) {
     $query = "
-      SELECT 
+      SELECT
         contribution.total_amount AS amount,
         contribution.tax_amount AS tax_amount,
         contribution.receive_date AS receive_date,
@@ -298,7 +298,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
       LEFT JOIN civicrm_financial_type AS financial_type
         ON contribution.financial_type_id = financial_type.id
       LEFT JOIN civicrm_contribution_recur AS contribution_recur
-        ON contribution.contribution_recur_id = contribution_recur.id  
+        ON contribution.contribution_recur_id = contribution_recur.id
       WHERE contribution.contribution_recur_id = %1
     ";
 
@@ -351,7 +351,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
         'price' => $this->formatAmount($price),
         'entityTable' => $lineItem['entity_table'],
         'entityId' => $lineItem['entity_id'],
-        'tax' => $this->formatAmount($tax),
+        'tax' => $tax ? $this->formatAmount($tax) : null,
       ];
       $total += $price;
     }
@@ -429,8 +429,8 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $completedStatus = CRM_ManualDirectDebit_Common_OptionValue::getValueForOptionValue('contribution_status', 'Completed');
 
     $query = "
-      SELECT 
-        contribution.receive_date AS next_payment_date, 
+      SELECT
+        contribution.receive_date AS next_payment_date,
         contribution.total_amount AS next_payment_amount
       FROM civicrm_membership_payment AS membership_payment
       LEFT JOIN civicrm_contribution AS contribution

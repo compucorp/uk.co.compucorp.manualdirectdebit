@@ -103,7 +103,10 @@
             </div>
 
             <div>
-                <p style="color: black;">{ts 1=$nextMembershipPayment.amount 2=$nextMembershipPayment.date 3=$currency }Your next payment of %3%1 will be collected on %2{/ts}</p>
+                <p style="color: black;">
+                  {ts 1=$nextMembershipPayment.amount 2=$currency}Your next payment of %2%1 will be collected on{/ts}
+                  {$nextMembershipPayment.date|crmDate:$shortDateFormat}
+                </p>
             </div>
         {/if}
     {/if}
