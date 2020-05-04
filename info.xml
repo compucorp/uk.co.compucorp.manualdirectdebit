@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <extension key="uk.co.compucorp.manualdirectdebit" type="module">
-  <downloadUrl>https://github.com/compucorp/uk.co.compucorp.manualdirectdebit/master</downloadUrl>
+  <downloadUrl>https://github.com/compucorp/uk.co.compucorp.manualdirectdebit/releases</downloadUrl>
   <file>manualdirectdebit</file>
   <name>Manual Direct Debit</name>
   <description>This extension provides a back-office Direct Debit management process that is compatible to AUDDIS based Direct Debit processing platforms such as PT-X. Please note this extension requires https://github.com/compucorp/uk.co.compucorp.membershipextras as a dependency.</description>
@@ -18,15 +18,15 @@
   <urls>
     <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
-  <releaseDate>2020-01-28</releaseDate>
-  <version>2.0.0</version>
+  <releaseDate>2020-05-04</releaseDate>
+  <version>2.1.0</version>
   <develStage>stable</develStage>
   <compatibility>
-    <ver>5.19</ver>
+    <ver>5.24</ver>
   </compatibility>
   <comments>
     Supported CiviCRM versions  :
-    - 5.19.4
+    - 5.24.6
   </comments>
   <civix>
     <namespace>CRM/ManualDirectDebit</namespace>
