@@ -144,6 +144,50 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->createDirectDebitPaymentProcessor();
   }
 
+  public function upgrade_0013() {
+    $this->hideAndReserveDDActivityTypes();
+    return TRUE;
+  }
+
+  /**
+   * Make Direct Debit activity types
+   * reserved and hidden (hidden by setting filter filed value to 1)
+   * to prevent users from removing them.
+   * It also recreate the activities in case
+   * there where remove for any reason.
+   */
+  private function hideAndReserveDDActivityTypes() {
+    $activityTypesToCreate = [
+      ['name' => 'new_direct_debit_recurring_payment', 'label' => 'New Direct Debit Recurring Payment'],
+      ['name' => 'update_direct_debit_recurring_payment', 'label' => 'Update Direct Debit Recurring Payment'],
+      ['name' => 'direct_debit_payment_reminder', 'label' => 'Direct Debit Payment Reminder'],
+      ['name' => 'offline_direct_debit_auto_renewal', 'label' => 'Offline Direct Debit Auto-renewal'],
+      ['name' => 'direct_debit_mandate_update', 'label' => 'Direct Debit Mandate Update'],
+    ];
+
+    foreach ($activityTypesToCreate as $activityTypeParams) {
+      $result = civicrm_api3('OptionValue', 'get', [
+        'sequential' => 1,
+        'option_group_id' => 'activity_type',
+        'name' => $activityTypeParams['name'],
+      ]);
+
+      if ($result['count'] > 0) {
+        $updateParams = [
+          'id' => $result['id'],
+          'filter' => 1,
+          'is_reserved' => 1,
+        ];
+        civicrm_api3('OptionValue', 'create', $updateParams);
+      } else {
+        $activityTypeParams['option_group_id'] = 'activity_type';
+        $activityTypeParams['filter'] = 1;
+        $activityTypeParams['is_reserved'] = 1;
+        civicrm_api3('OptionValue', 'create', $activityTypeParams);
+      }
+    }
+  }
+
   public function upgrade_0012() {
     $this->setBatchSubmissionRecordsPerTaskConfigDefaultValue();
     return TRUE;
