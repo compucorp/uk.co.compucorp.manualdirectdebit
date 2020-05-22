@@ -45,6 +45,11 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Payment {
       return;
     }
 
+    // Selecting mandate is not needed when recording payments
+    if ($this->form->_formName == 'AdditionalPayment') {
+      return;
+    }
+
     $contactID = CRM_Utils_Request::retrieve('cid', 'Int');
     if (empty($contactID)) {
       CRM_Core_Session::setStatus(
