@@ -423,6 +423,8 @@
       <weight>100</weight>
       <description>New Direct Debit Recurring Payment</description>
       <option_group_name>activity_type</option_group_name>
+      <filter>1</filter>
+      <is_reserved>1</is_reserved>
       <is_active>1</is_active>
     </OptionValue>
     <OptionValue>
@@ -432,6 +434,8 @@
       <weight>101</weight>
       <description>Update Direct Debit Recurring Payment</description>
       <option_group_name>activity_type</option_group_name>
+      <filter>1</filter>
+      <is_reserved>1</is_reserved>
       <is_active>1</is_active>
     </OptionValue>
     <OptionValue>
@@ -441,6 +445,8 @@
       <weight>102</weight>
       <description>Direct Debit Payment Reminder</description>
       <option_group_name>activity_type</option_group_name>
+      <filter>1</filter>
+      <is_reserved>1</is_reserved>
       <is_active>1</is_active>
     </OptionValue>
     <OptionValue>
@@ -450,6 +456,8 @@
       <weight>103</weight>
       <description>Offline Direct Debit Auto-renewal</description>
       <option_group_name>activity_type</option_group_name>
+      <filter>1</filter>
+      <is_reserved>1</is_reserved>
       <is_active>1</is_active>
     </OptionValue>
     <OptionValue>
@@ -459,6 +467,8 @@
       <weight>104</weight>
       <description>Direct Debit Mandate Update</description>
       <option_group_name>activity_type</option_group_name>
+      <filter>1</filter>
+      <is_reserved>1</is_reserved>
       <is_active>1</is_active>
     </OptionValue>
   </OptionValues>
