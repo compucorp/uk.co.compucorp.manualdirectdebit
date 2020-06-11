@@ -12,7 +12,7 @@ class CRM_ManualDirectDebit_Form_SignUp extends CRM_Core_Form {
 
   public function preProcess() {
     parent::preProcess();
-    $this->contributionId = CRM_Utils_Request::retrieveValue('contribution_id', 'String', NULL);
+    $this->contributionId = CRM_Utils_Request::retrieveValue('contribution_id', 'Positive', NULL);
     if ($this->contributionId == NULL) {
       CRM_Utils_System::redirect('/');
     }
