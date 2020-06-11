@@ -40,4 +40,11 @@
     <title>Mandate_Create</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
+  <item>
+    <path>civicrm/direct_debit/signup</path>
+    <page_callback>CRM_ManualDirectDebit_Form_SignUp</page_callback>
+    <title>SignUp</title>
+    <access_arguments>profile create</access_arguments>
+    <is_public>true</is_public>
+  </item>
 </menu>
