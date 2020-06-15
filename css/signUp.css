@@ -1,0 +1,17 @@
+.crm-manual-direct-debit-form-block .label{
+  color: black;
+}
+
+.crm-manual-direct-debit-form-block .crm-submit-buttons{
+  float: right;
+  width: 53%;
+  height: 50px;
+}
+
+.crm-direct-debit-sign-up-guarantee .dd-logo{
+  width: 90px;
+  height: auto;
+  float: right;
+}
+
+
