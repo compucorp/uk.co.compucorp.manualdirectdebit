@@ -1,5 +1,5 @@
-{crmStyle ext=uk.co.compucorp.manualdirectdebit file=css/signUp.css}
-<div class="crm-block crm-direct-debit-sign-up-form-block">
+{crmStyle ext=uk.co.compucorp.manualdirectdebit file=css/setUp.css}
+<div class="crm-block crm-direct-debit-set-up-form-block">
   {if $errorMessage}
     <div class="messages status no-popup">
       <div class="icon inform-icon"></div>
@@ -35,8 +35,8 @@
             </div>
             {if $payment_date_value}
               <div class="crm-section form-item crm-manual-direct-debit-form-payment-date-text">
-                <div class="label"></div>
-                <div class="content">{ts}Your payment will be taken on or around {$payment_date_value} of the month.{/ts}</div>
+                <div class="label"><label> {ts}Payment Date:{/ts}</label></div>
+                <div class="content">{ts}To be taken on or around {$payment_date_value} of the month.{/ts}</div>
                 <div class="clear"></div>
               </div>
             {else}
@@ -75,7 +75,7 @@
         </div>
         <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>
         <div class="clear"></div>
-        <div class="crm-block crm-direct-debit-sign-up-guarantee">
+        <div class="crm-block crm-direct-debit-set-up-guarantee">
           <div class="dd-guarantee">
             <h5>{ts}Direct Debit Guarantee{/ts}</h5>
             <img class="dd-logo" src="{crmResURL ext=uk.co.compucorp.manualdirectdebit file=Images/debit.png}"
