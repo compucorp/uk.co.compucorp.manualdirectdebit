@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<ruleset name="PHP Custom Ruleset">
+  <description>CiviCRM Coder Ruleset</description>
+  <rule ref="bin/civicrm/coder/coder_sniffer/Drupal"></rule>
+</ruleset>
