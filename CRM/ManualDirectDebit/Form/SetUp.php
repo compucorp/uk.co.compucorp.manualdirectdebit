@@ -3,10 +3,10 @@
 use CRM_ManualDirectDebit_ExtensionUtil as E;
 
 /**
- * Form Manual Direct Debit Sign up Form
+ * Form Manual Direct Debit Setup up Form
  *
  */
-class CRM_ManualDirectDebit_Form_SignUp extends CRM_Core_Form {
+class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
 
   /**
    * @var $contributionId
@@ -19,10 +19,11 @@ class CRM_ManualDirectDebit_Form_SignUp extends CRM_Core_Form {
     if ($this->contributionId == NULL) {
       CRM_Utils_System::redirect('/');
     }
-    CRM_Utils_System::setTitle(E::ts('Direct Debit Sign up'));
+    CRM_Utils_System::setTitle(E::ts('Set up a Direct Debit'));
   }
 
   public function buildQuickForm() {
+    parent::buildQuickForm();
     $errorMessage = NULL;
     $contribution = $this->getContribution();
     if (empty($contribution)) {
@@ -49,7 +50,7 @@ class CRM_ManualDirectDebit_Form_SignUp extends CRM_Core_Form {
       $this->assign('payment_date_value', reset($paymentDates));
       $this->add('hidden', 'payment_dates', key($paymentDates));
     }else {
-      $this->add('select', 'payment_dates', E::ts('Payment Date'), $paymentDates,TRUE);
+      $this->add('select', 'payment_dates', E::ts('Payment Date'), $paymentDates);
     }
 
     $this->add('text', 'bank_name', E::ts('Bank name:'), ['size' => 40], TRUE);
@@ -65,7 +66,6 @@ class CRM_ManualDirectDebit_Form_SignUp extends CRM_Core_Form {
       ],
     ]);
 
-    parent::buildQuickForm();
   }
 
   public function postProcess() {

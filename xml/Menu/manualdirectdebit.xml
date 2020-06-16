@@ -41,9 +41,9 @@
     <access_arguments>access CiviCRM</access_arguments>
   </item>
   <item>
-    <path>civicrm/direct_debit/signup</path>
-    <page_callback>CRM_ManualDirectDebit_Form_SignUp</page_callback>
-    <title>SignUp</title>
+    <path>civicrm/direct_debit/setup</path>
+    <page_callback>CRM_ManualDirectDebit_Form_SetUp</page_callback>
+    <title>Set Up a Direct Debit</title>
     <access_arguments>profile create</access_arguments>
     <is_public>true</is_public>
   </item>
