@@ -43,7 +43,14 @@
   <item>
     <path>civicrm/direct_debit/setup</path>
     <page_callback>CRM_ManualDirectDebit_Form_SetUp</page_callback>
-    <title>Set Up a Direct Debit</title>
+    <title>Set up your Direct Debit</title>
+    <access_arguments>profile create</access_arguments>
+    <is_public>true</is_public>
+  </item>
+  <item>
+    <path>civicrm/direct_debit/setup/confirmation</path>
+    <page_callback>CRM_ManualDirectDebit_Page_Setup_Confirmation</page_callback>
+    <title>Direct Debit Setup Confirmation</title>
     <access_arguments>profile create</access_arguments>
     <is_public>true</is_public>
   </item>
