@@ -36,7 +36,10 @@
             {if $payment_date_value}
               <div class="crm-section form-item crm-manual-direct-debit-form-payment-date-text">
                 <div class="label"><label> {ts}Payment Date:{/ts}</label></div>
-                <div class="content">{ts}To be taken on or around {$payment_date_value} of the month.{/ts}</div>
+                <div class="content">
+                  {ts}To be taken on or around {$payment_date_value} of the month.{/ts}
+                  {$form.payment_dates.html}
+                </div>
                 <div class="clear"></div>
               </div>
             {else}
@@ -72,6 +75,10 @@
               <div class="clear"></div>
             </div>
           </fieldset>
+        </div>
+        <div class="crm-manual-direct-debit-form-hidden-elements">
+          {$form.contribution_id.html}
+          {$form.contact_id.html}
         </div>
         <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>
         <div class="clear"></div>
