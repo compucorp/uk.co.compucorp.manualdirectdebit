@@ -13,6 +13,9 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
    */
   private $contributionId;
 
+  /**
+   * @throws CRM_Core_Exception
+   */
   public function preProcess() {
     parent::preProcess();
     $this->contributionId = CRM_Utils_Request::retrieveValue('contribution_id', 'Positive', NULL);
@@ -22,6 +25,9 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
     CRM_Utils_System::setTitle(E::ts('Set up your Direct Debit'));
   }
 
+  /**
+   * @throws CiviCRM_API3_Exception
+   */
   public function buildQuickForm() {
     parent::buildQuickForm();
     $errorMessage = NULL;
@@ -70,24 +76,61 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
 
   }
 
+
   public function postProcess() {
     parent::postProcess();
 
     $values = $this->exportValues();
+    $recurringContribution = $this->getRecurringContribution($values['contribution_id']);
+    $this->updateRecurringContribution($recurringContribution, $values);
+    $mandate = $this->createDirectDebitMandate($values);
+    $this->attachDirectDebitMandateToContributions(
+      $mandate->id,
+      $values['contribution_id'],
+      $recurringContribution['id']
+    );
 
-    $contributionRecur = civicrm_api3('Contribution', 'getsingle', [
-      'id' => $values['contribution_id'],
+    $url = CRM_Utils_System::url('civicrm/direct_debit/setup/confirmation');
+    CRM_Utils_System::redirect( $url);
+  }
+
+  /**
+   * @param $contributionId
+   * @return mixed
+   * @throws CiviCRM_API3_Exception
+   */
+  private function getRecurringContribution($contributionId){
+    return civicrm_api3('Contribution', 'getsingle', [
+      'id' => $contributionId,
       'api.ContributionRecur.get' => [],
     ])['api.ContributionRecur.get']['values'][0];
+  }
 
-    $cycleDay = $this->getCycleDay($values['payment_dates'], $contributionRecur['frequency_unit']);
+  /**
+   * @param $recurringContribution
+   * @param $values
+   * @throws CiviCRM_API3_Exception
+   */
+  private function updateRecurringContribution($recurringContribution, $values){
+    $cycleDay = $this->getCycleDay(
+      $values['payment_dates'],
+      $recurringContribution['frequency_unit']
+    );
 
-    $test = civicrm_api3('ContributionRecur', 'create', [
-      'id' => $contributionRecur['id'],
+    civicrm_api3('ContributionRecur', 'create', [
+      'id' => $recurringContribution['id'],
       'payment_instrument_id' => 'direct_debit',
       'cycle_day' => $cycleDay,
     ]);
 
+  }
+
+  /**
+   * @param $values
+   * @return CRM_Core_DAO|object
+   * @throws CiviCRM_API3_Exception
+   */
+  private function createDirectDebitMandate($values){
     $defaultDDCode = civicrm_api3('OptionValue', 'get', [
       'sequential' => 1,
       'option_group_id' => 'direct_debit_codes',
@@ -106,12 +149,19 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
     ];
 
     $storageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
-    $mandate = $storageManager->saveDirectDebitMandate($values['contact_id'], $mandateValues);
-    $storageManager->assignRecurringContributionMandate($contributionRecur['id'], $mandate->id);
-    $storageManager->assignContributionMandate($values['contribution_id'], $mandate->id);
+    return $storageManager->saveDirectDebitMandate($values['contact_id'], $mandateValues);
 
-    $url = CRM_Utils_System::url('civicrm/direct_debit/setup/confirmation');
-    CRM_Utils_System::redirect( $url);
+  }
+
+  /**
+   * @param $mandateId
+   * @param $contributionId
+   * @param $recurringContributionId
+   */
+  private function attachDirectDebitMandateToContributions($mandateId, $contributionId, $recurringContributionId){
+    $storageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
+    $storageManager->assignRecurringContributionMandate($recurringContributionId, $mandateId);
+    $storageManager->assignContributionMandate($contributionId, $mandateId);
   }
 
   /**
