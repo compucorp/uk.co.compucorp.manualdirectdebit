@@ -89,9 +89,24 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
       $values['contribution_id'],
       $recurringContribution['id']
     );
+    $this->createActivity($recurringContribution['id'], $values['contact_id']);
 
     $url = CRM_Utils_System::url('civicrm/direct_debit/setup/confirmation');
     CRM_Utils_System::redirect( $url);
+  }
+
+  /**
+   * @param $recurringContributionId
+   * @param $contactId
+   */
+  private function createActivity($recurringContributionId, $contactId) {
+    CRM_ManualDirectDebit_Common_Activity::create(
+      ts("New Direct Debit Recurring Payment"),
+      "new_direct_debit_recurring_payment",
+      $recurringContributionId,
+      $contactId,
+      $contactId
+    );
   }
 
   /**
