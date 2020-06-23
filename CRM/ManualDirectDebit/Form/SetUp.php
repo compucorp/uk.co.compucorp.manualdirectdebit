@@ -9,7 +9,7 @@ use CRM_ManualDirectDebit_ExtensionUtil as E;
 class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
 
   /**
-   * @var $contributionId
+   * @var contributionId
    */
   private $contributionId;
 
@@ -34,7 +34,8 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
     $contribution = $this->getContribution();
     if (empty($contribution)) {
       $errorMessage = E::ts('This invoice is already paid. Please contact the administrator for the correct link to setup direct debit.');
-    } else if (empty($contribution['contribution_recur_id'])) {
+    }
+    elseif (empty($contribution['contribution_recur_id'])) {
       $errorMessage = E::ts('This invoice is not part of a payment plan. Please contact the administrator for the correct link to set up a direct debit.');
     }
 
@@ -55,7 +56,8 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
     if (count($paymentDates) == 1) {
       $this->assign('payment_date_value', reset($paymentDates));
       $this->add('hidden', 'payment_dates', key($paymentDates));
-    } else {
+    }
+    else {
       $this->add('select', 'payment_dates', E::ts('Payment Date'), $paymentDates);
     }
 
@@ -76,7 +78,6 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
 
   }
 
-
   public function postProcess() {
     parent::postProcess();
 
@@ -89,24 +90,9 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
       $values['contribution_id'],
       $recurringContribution['id']
     );
-    $this->createActivity($recurringContribution['id'], $values['contact_id']);
 
     $url = CRM_Utils_System::url('civicrm/direct_debit/setup/confirmation');
-    CRM_Utils_System::redirect( $url);
-  }
-
-  /**
-   * @param $recurringContributionId
-   * @param $contactId
-   */
-  private function createActivity($recurringContributionId, $contactId) {
-    CRM_ManualDirectDebit_Common_Activity::create(
-      ts("New Direct Debit Recurring Payment"),
-      "new_direct_debit_recurring_payment",
-      $recurringContributionId,
-      $contactId,
-      $contactId
-    );
+    CRM_Utils_System::redirect($url);
   }
 
   /**
@@ -114,7 +100,7 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
    * @return mixed
    * @throws CiviCRM_API3_Exception
    */
-  private function getRecurringContribution($contributionId){
+  private function getRecurringContribution($contributionId) {
     return civicrm_api3('Contribution', 'getsingle', [
       'id' => $contributionId,
       'api.ContributionRecur.get' => [],
@@ -126,7 +112,7 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
    * @param $values
    * @throws CiviCRM_API3_Exception
    */
-  private function updateRecurringContribution($recurringContribution, $values){
+  private function updateRecurringContribution($recurringContribution, $values) {
     $cycleDay = $this->getCycleDay(
       $values['payment_dates'],
       $recurringContribution['frequency_unit']
@@ -145,7 +131,7 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
    * @return CRM_Core_DAO|object
    * @throws CiviCRM_API3_Exception
    */
-  private function createDirectDebitMandate($values){
+  private function createDirectDebitMandate($values) {
     $defaultDDCode = civicrm_api3('OptionValue', 'get', [
       'sequential' => 1,
       'option_group_id' => 'direct_debit_codes',
@@ -173,7 +159,7 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
    * @param $contributionId
    * @param $recurringContributionId
    */
-  private function attachDirectDebitMandateToContributions($mandateId, $contributionId, $recurringContributionId){
+  private function attachDirectDebitMandateToContributions($mandateId, $contributionId, $recurringContributionId) {
     $storageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
     $storageManager->assignRecurringContributionMandate($recurringContributionId, $mandateId);
     $storageManager->assignContributionMandate($contributionId, $mandateId);
@@ -191,7 +177,7 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
     }
 
     $now = new DateTime();
-    $cycleDate = DateTime::createFromFormat('Y-m-d', $now->format('Y-m'. '-' . $paymentDay));
+    $cycleDate = DateTime::createFromFormat('Y-m-d', $now->format('Y-m' . '-' . $paymentDay));
 
     //If cycle date is in the past, set cycle date should be next month.
     if ($cycleDate < $now) {
@@ -245,7 +231,7 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
         'contribution_recur_id',
         'invoice_number',
         'tax_amount',
-        'total_amount'
+        'total_amount',
       ],
     ]);
 
