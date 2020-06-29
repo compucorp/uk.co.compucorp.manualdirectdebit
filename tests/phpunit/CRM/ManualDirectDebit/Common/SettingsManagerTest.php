@@ -11,10 +11,16 @@ require_once __DIR__ . '/../../../BaseHeadlessTest.php';
  */
 class CRM_ManualDirectDebit_Common_SettingsManagerTest extends BaseHeadlessTest {
 
+  /**
+   * setUp test
+   */
   public function setUp() {
     SettingFabricator::fabricate();
   }
 
+  /**
+   * Tests getManualDirectDebitSetting
+   */
   public function testGetManualDirectDebitSettings() {
     $settingsManager = new CRM_ManualDirectDebit_Common_SettingsManager();
     $settings = $settingsManager->getManualDirectDebitSettings();
