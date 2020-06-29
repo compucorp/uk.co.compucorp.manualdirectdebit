@@ -49,4 +49,5 @@ class CRM_ManualDirectDebit_Test_Fabricator_Contribution extends BaseFabricator 
       'receive_date' => $now->format('Y-m-d H:i:s'),
     ];
   }
+
 }

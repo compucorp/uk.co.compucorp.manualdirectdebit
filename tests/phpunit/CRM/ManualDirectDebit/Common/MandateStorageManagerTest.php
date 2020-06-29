@@ -14,27 +14,24 @@ require_once __DIR__ . '/../../../BaseHeadlessTest.php';
  */
 class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadlessTest {
 
-  private $mandateValues = [];
-
-  public function setUp() {
-    SettingFabricator::fabricate();
-  }
-
-  public function tearDown() {
-    \Civi::reset();
-  }
+  /**
+   * @var array
+   */
+  protected $mandateValues = [];
+  /**
+   * @var array
+   */
+  protected $contact;
 
   /**
-   * Test assignRecurringContributionMandate function
+   * setUp test
    * @throws CiviCRM_API3_Exception
-   * @throws Exception
    */
-  public function testSaveDirectDebitMandate() {
-    $contact = ContactFabricator::fabricate();
-
+  public function setUp() {
+    $this->contact = ContactFabricator::fabricate();
     $now = new DateTime();
     $this->mandateValues = [
-      'entity_id' => $contact['id'],
+      'entity_id' => $this->contact['id'],
       'bank_name' => 'Lloyds Bank',
       'account_holder_name' => 'John Doe',
       'ac_number' => '12345678',
@@ -46,18 +43,28 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
       'originator_number' => 1,
     ];
 
+    //Fabricate default settings
+    SettingFabricator::fabricate();
+
+  }
+
+  /**
+   * Test assignRecurringContributionMandate function
+   * @throws CiviCRM_API3_Exception
+   * @throws Exception
+   */
+  public function testSaveDirectDebitMandate() {
+
     $storageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
-    $mandate = $storageManager->saveDirectDebitMandate($contact['id'], $this->mandateValues);
+    $mandate = $storageManager->saveDirectDebitMandate($this->contact['id'], $this->mandateValues);
     $this->assertNotNull($mandate->id);
     $this->assertEquals($mandate->bank_name, 'Lloyds Bank');
     $this->assertEquals($mandate->account_holder_name, 'John Doe');
     $this->assertEquals($mandate->ac_number, '12345678');
     $this->assertEquals($mandate->sort_code, '12-34-56');
     $this->assertNotNull($mandate->dd_code);
-    //DD Ref should be generated without something else if not the value is 'DD Ref'
     $this->assertNotEquals($mandate->dd_ref, 'DD Ref');
     $this->assertNotNull($mandate->originator_number);
-
 
   }
 
@@ -69,52 +76,43 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
    */
   public function testAssignRecurringContributionMandate() {
 
-    $fabricatedContact = ContactFabricator::fabricate();
-    $recurringContribution = RecurringContributionFabricator::fabricate([
-      'contact_id' => $fabricatedContact['id'],
-      'amount' => 100,
-      'frequency_interval' => 1,
-    ]);
-
-    $this->mandateValues['entity_id'] = $fabricatedContact['id'];
+    $recurringContribution = RecurringContributionFabricator::fabricate(['contact_id' => $this->contact['id']]);
+    $this->mandateValues['entity_id'] = $this->contact['id'];
     $storageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
-    $mandate = $storageManager->saveDirectDebitMandate($fabricatedContact['id'], $this->mandateValues);
+    $mandate = $storageManager->saveDirectDebitMandate($this->contact['id'], $this->mandateValues);
     $storageManager->assignRecurringContributionMandate($recurringContribution['id'], $mandate->id);
 
-    $values['recurring_contribution_id'] = $recurringContribution['id'];
+    $recurrMandateId =
+      CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($recurringContribution['id']);
+    $this->assertEquals($recurrMandateId, $mandate->id);
 
   }
 
   /**
-   * @depends testAssignContributionMandate
+   * @depends testSaveDirectDebitMandate
+   * Tests assignContributionMandate function
    * @return void
    * @throws CiviCRM_API3_Exception
    * @throws Exception
-   *
+   */
   public function testAssignContributionMandate() {
-    $fabricatedContact = ContactFabricator::fabricate();
-    $now = new DateTime();
-    $fabricatedContribution = ContributionFabricator::fabricate([
-      'financial_type_id' => "Member Dues",
-      'total_amount' => 100,
-      'receive_date' => $now->format('Y-m-d H:i:s'),
-      'contact_id' => $fabricatedContact['id'],
-    ]);
-    $this->mandateValues['entity_id'] = $fabricatedContact['id'];
+    $fabricatedContribution = ContributionFabricator::fabricate(['contact_id' => $this->contact['id']]);
+    $this->mandateValues['entity_id'] = $this->contact['id'];
     $storageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
-    $mandate = $storageManager->saveDirectDebitMandate($fabricatedContact['id'], $this->mandateValues);
+    $mandate = $storageManager->saveDirectDebitMandate($this->contact['id'], $this->mandateValues);
     $storageManager->assignContributionMandate($fabricatedContribution['id'], $mandate->id);
 
-    $contribution =  civicrm_api3('Contribution', 'get', [
+    $contribution = civicrm_api3('Contribution', 'get', [
       'sequential' => 1,
       'id' => $fabricatedContribution['id'],
     ]);
 
     $this->assertNotEmpty($contribution['values']);
-    $this->assertEquals($contribution['values'][0]['mandate_id'],  $mandate->id);
 
-  }*/
+    $mandateIdCustomFieldId =
+      CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName("mandate_id");
+    $this->assertEquals($contribution['values'][0]['custom_' . $mandateIdCustomFieldId], $mandate->id);
+
+  }
 
 }
-
-

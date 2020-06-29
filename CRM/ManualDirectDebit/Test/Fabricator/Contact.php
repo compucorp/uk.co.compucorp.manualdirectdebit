@@ -22,7 +22,7 @@ class CRM_ManualDirectDebit_Test_Fabricator_Contact extends BaseFabricator {
     'contact_type' => 'Individual',
     'first_name'   => 'John',
     'last_name'    => 'Doe',
-    'sequential'   => 1
+    'sequential'   => 1,
   ];
 
   /**
@@ -43,11 +43,11 @@ class CRM_ManualDirectDebit_Test_Fabricator_Contact extends BaseFabricator {
   /**
    * Fabricates a contact with an e-mail address.
    *
-   * @param $params
-   *
+   * @param array $params
+   * @param string $email
    * @return array
    *
-   * @throws \CiviCRM_API3_Exception
+   * @throws CiviCRM_API3_Exception
    */
   public static function fabricateWithEmail($params = [], $email = 'johndoe@test.com') {
     $contact = self::fabricate($params);
@@ -55,7 +55,7 @@ class CRM_ManualDirectDebit_Test_Fabricator_Contact extends BaseFabricator {
     civicrm_api3('Email', 'create', [
       'email' => $email,
       'contact_id' => $contact['id'],
-      'is_primary' => 1
+      'is_primary' => 1,
     ]);
 
     return $contact;

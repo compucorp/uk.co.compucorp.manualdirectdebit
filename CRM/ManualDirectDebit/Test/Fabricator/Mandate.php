@@ -37,4 +37,5 @@ class CRM_ManualDirectDebit_Test_Fabricator_Mandate {
       'originator_number' => 1,
     ];
   }
+
 }

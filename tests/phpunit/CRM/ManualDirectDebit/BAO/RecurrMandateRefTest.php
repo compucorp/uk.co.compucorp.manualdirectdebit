@@ -42,10 +42,10 @@ class CRM_ManualDirectDebit_BAO_RecurrMandateRefTest extends BaseHeadlessTest {
   /**
    * Tests create recurrMandateRef entity
    */
-  public function testCreate(){
+  public function testCreate() {
     $recurrMandateRef = CRM_ManualDirectDebit_BAO_RecurrMandateRef::create([
       'recurr_id' => $this->recurringContribution['id'],
-      'mandate_id' => $this->mandate['id']
+      'mandate_id' => $this->mandate['id'],
     ]);
 
     $this->assertEquals($this->recurringContribution['id'], $recurrMandateRef->recurr_id);
@@ -59,7 +59,7 @@ class CRM_ManualDirectDebit_BAO_RecurrMandateRefTest extends BaseHeadlessTest {
   public function testGetMandateIdForRecurringContribution() {
     CRM_ManualDirectDebit_BAO_RecurrMandateRef::create([
       'recurr_id' => $this->recurringContribution['id'],
-      'mandate_id' => $this->mandate['id']
+      'mandate_id' => $this->mandate['id'],
     ]);
     $mandateId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($this->recurringContribution['id']);
     $this->assertEquals($mandateId, $this->mandate['id']);
@@ -71,12 +71,11 @@ class CRM_ManualDirectDebit_BAO_RecurrMandateRefTest extends BaseHeadlessTest {
   public function testGetMandateReferenceId() {
     $recurrMandateRef = CRM_ManualDirectDebit_BAO_RecurrMandateRef::create([
       'recurr_id' => $this->recurringContribution['id'],
-      'mandate_id' => $this->mandate['id']
+      'mandate_id' => $this->mandate['id'],
     ]);
-   $mandateRefId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateReferenceId($this->mandate['id'],  $this->recurringContribution['id']);
+    $mandateRefId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateReferenceId($this->mandate['id'], $this->recurringContribution['id']);
     $this->assertEquals($recurrMandateRef->id, $mandateRefId);
 
   }
+
 }
-
-

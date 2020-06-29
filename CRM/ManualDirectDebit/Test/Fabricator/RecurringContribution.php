@@ -14,7 +14,6 @@ class CRM_ManualDirectDebit_Test_Fabricator_RecurringContribution extends BaseFa
    */
   protected static $entityName = 'ContributionRecur';
 
-
   /**
    * Fabricates a recurring contribution with given parameters.
    *
@@ -41,4 +40,5 @@ class CRM_ManualDirectDebit_Test_Fabricator_RecurringContribution extends BaseFa
       'frequency_interval' => 1,
     ];
   }
+
 }

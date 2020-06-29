@@ -27,4 +27,5 @@ class CRM_ManualDirectDebit_Test_Fabricator_Setting {
       'manualdirectdebit_minimum_days_to_first_payment' => 2,
     ];
   }
+
 }

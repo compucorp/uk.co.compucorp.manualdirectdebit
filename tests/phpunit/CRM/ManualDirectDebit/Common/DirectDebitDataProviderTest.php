@@ -3,10 +3,10 @@
 require_once __DIR__ . '/../../../BaseHeadlessTest.php';
 
 /**
-* Runs tests on DirectDebitDataProvider.
-*
-* @group headless
-*/
+ * Runs tests on DirectDebitDataProvider.
+ *
+ * @group headless
+ */
 class CRM_ManualDirectDebit_Common_DirectDebitDataProviderTest extends BaseHeadlessTest {
 
   /**
