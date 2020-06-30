@@ -138,12 +138,6 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
       'label' => "0N",
     ])['values'][0]['value'];
 
-    $originateNumber = civicrm_api3('OptionValue', 'get', [
-      'sequential' => 1,
-      'option_group_id' => 'direct_debit_originator_number',
-      'label' => "01",
-    ])['values'][0]['value'];
-
     $now = new DateTime();
     $mandateValues = [
       'entity_id' => $values['contact_id'],
@@ -152,10 +146,7 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
       'ac_number' => $values['bank_account_number'],
       'sort_code' => $values['bank_sort_code'],
       'dd_code' => $defaultDDCode,
-      'dd_ref' => 'DD Ref',
       'start_date' => $now->format('Y-m-d H:i:s'),
-      'authorisation_date' => $now->format('Y-m-d H:i:s'),
-      'originator_number' => $originateNumber,
     ];
 
     $storageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();

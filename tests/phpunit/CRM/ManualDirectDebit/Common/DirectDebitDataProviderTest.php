@@ -1,5 +1,7 @@
 <?php
 
+use CRM_ManualDirectDebit_Common_DirectDebitDataProvider as DirectDebitDataProvider;
+
 require_once __DIR__ . '/../../../BaseHeadlessTest.php';
 
 /**
@@ -13,8 +15,7 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProviderTest extends BaseHeadl
    * Tests getCustomFieldIdbyName function
    */
   public function testGetCustomFieldIdByName() {
-    $customFieldId =
-      CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName('mandate_id');
+    $customFieldId = DirectDebitDataProvider::getCustomFieldIdByName('mandate_id');
     $this->assertNotNull($customFieldId);
   }
 
@@ -22,8 +23,7 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProviderTest extends BaseHeadl
    * Tests getGroupIDByName function
    */
   public function testGetGroupIDByName() {
-    $groupId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::
-      getGroupIDByName('direct_debit_message_template');
+    $groupId = DirectDebitDataProvider::getGroupIDByName('direct_debit_message_template');
 
     $this->assertNotNull($groupId);
   }
@@ -32,8 +32,7 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProviderTest extends BaseHeadl
    * Tests getDirectDebitPaymentInstrumentId
    */
   public function testGetDirectDebitPaymentInstrumentId() {
-    $paymentInstrumentId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::
-    getDirectDebitPaymentInstrumentId('direct_debit_message_template');
+    $paymentInstrumentId = DirectDebitDataProvider::getDirectDebitPaymentInstrumentId('direct_debit_message_template');
 
     $this->assertNotNull($paymentInstrumentId);
   }
