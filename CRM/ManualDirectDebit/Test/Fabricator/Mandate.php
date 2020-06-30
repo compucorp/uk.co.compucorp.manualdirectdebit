@@ -1,5 +1,7 @@
 <?php
 
+use CRM_ManualDirectDebit_Test_Fabricator_OriginatorNumber as OriginatorNumberFabricator;
+
 /**
  * Class CRM_ManualDirectDebit_Test_Fabricator_Mandate
  */
@@ -16,6 +18,12 @@ class CRM_ManualDirectDebit_Test_Fabricator_Mandate {
       $contact = CRM_ManualDirectDebit_Test_Fabricator_Contact::fabricate();
       $params['entity_id'] = $contact['id'];
     }
+
+    if (!isset($params['originator_number'])) {
+      $originatorNumber = OriginatorNumberFabricator::fabricate();
+      $params['originator_number'] = $originatorNumber['values'][0]['value'];
+    }
+
     $storageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
     return (array) $storageManager->saveDirectDebitMandate($params['entity_id'], $params);
   }
@@ -34,7 +42,6 @@ class CRM_ManualDirectDebit_Test_Fabricator_Mandate {
       'dd_ref' => 'DD Ref',
       'start_date' => $now->format('Y-m-d H:i:s'),
       'authorisation_date' => $now->format('Y-m-d H:i:s'),
-      'originator_number' => 1,
     ];
   }
 

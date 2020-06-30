@@ -4,6 +4,7 @@ use CRM_ManualDirectDebit_Test_Fabricator_Setting as SettingFabricator;
 use CRM_ManualDirectDebit_Test_Fabricator_Contact as ContactFabricator;
 use CRM_ManualDirectDebit_Test_Fabricator_Contribution as ContributionFabricator;
 use CRM_ManualDirectDebit_Test_Fabricator_RecurringContribution as RecurringContributionFabricator;
+use CRM_ManualDirectDebit_Test_Fabricator_OriginatorNumber as OriginatorNumberFabricator;
 
 require_once __DIR__ . '/../../../BaseHeadlessTest.php';
 
@@ -29,6 +30,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
    */
   public function setUp() {
     $this->contact = ContactFabricator::fabricate();
+    $originatorNumber = OriginatorNumberFabricator::fabricate()['values'][0]['value'];
     $now = new DateTime();
     $this->mandateValues = [
       'entity_id' => $this->contact['id'],
@@ -40,7 +42,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
       'dd_ref' => 'DD Ref',
       'start_date' => $now->format('Y-m-d H:i:s'),
       'authorisation_date' => $now->format('Y-m-d H:i:s'),
-      'originator_number' => 1,
+      'originator_number' => $originatorNumber,
     ];
 
     //Fabricate default settings
