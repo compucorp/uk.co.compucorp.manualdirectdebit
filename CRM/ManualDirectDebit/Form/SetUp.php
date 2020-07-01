@@ -142,6 +142,7 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
     $originatorNumber = civicrm_api3('OptionValue', 'get', [
       'sequential' => 1,
       'option_group_id' => "direct_debit_originator_number",
+      'weight' => 1,
     ])['values'][0]['value'];
 
     $now = new DateTime();
