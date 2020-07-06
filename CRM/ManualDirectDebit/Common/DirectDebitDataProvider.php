@@ -183,6 +183,7 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
     $directDebitPaymentInstrumentId = civicrm_api3('OptionValue', 'getvalue', [
       'return' => "value",
       'name' => "direct_debit",
+      'option_group_id' => "payment_instrument",
     ]);
 
     return $directDebitPaymentInstrumentId;
