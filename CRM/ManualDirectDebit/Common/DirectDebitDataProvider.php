@@ -43,7 +43,7 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
    *
    * @return array
    */
-  public function getMandateCustomFieldDataForBuildingForm(){
+  public function getMandateCustomFieldDataForBuildingForm() {
     $mandateCustomGroupFieldData = [];
     foreach ($this->directDebitMandateCustomGroupFields['values'] as $value) {
       $params = [];
@@ -87,7 +87,7 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
    *
    * @return array
    */
-  private function getOptionList($optionGroupId){
+  private function getOptionList($optionGroupId) {
     $optionValue = civicrm_api3('OptionValue', 'get', [
       'sequential' => 1,
       'option_group_id' => "$optionGroupId",
@@ -106,7 +106,7 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
    *
    * @return array
    */
-  public function getMandateCustomFieldNames(){
+  public function getMandateCustomFieldNames() {
     $mandateCustomGroupFieldNames = [];
     foreach ($this->directDebitMandateCustomGroupFields['values'] as $value) {
       $mandateCustomGroupFieldNames[] = self::PREFIX . $value['name'];
@@ -126,7 +126,7 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
     $directDebitPaymentMethod = civicrm_api3('OptionValue', 'getvalue', [
       'return' => "value",
       'name' => "direct_debit",
-      'option_group_id' => "payment_instrument"
+      'option_group_id' => "payment_instrument",
     ]);
 
     return $currentMethodId == $directDebitPaymentMethod;
@@ -147,7 +147,7 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
       'is_test' => 0,
     ]);
 
-    if($directDebitPaymentProcessorId != $currentPaymentProcessor){
+    if ($directDebitPaymentProcessorId != $currentPaymentProcessor) {
       $directDebitPaymentProcessorId = civicrm_api3('PaymentProcessor', 'getvalue', [
         'return' => "id",
         'name' => "Direct Debit",
@@ -183,6 +183,7 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
     $directDebitPaymentInstrumentId = civicrm_api3('OptionValue', 'getvalue', [
       'return' => "value",
       'name' => "direct_debit",
+      'option_group_id' => "payment_instrument",
     ]);
 
     return $directDebitPaymentInstrumentId;
