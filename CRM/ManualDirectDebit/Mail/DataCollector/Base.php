@@ -55,6 +55,9 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
    * Retrieves tpl params for template
    *
    * @return array
+   *
+   * @throws \CRM_Core_Exception
+   * @throws \CiviCRM_API3_Exception
    */
   public function retrieve() {
     $this->setShortDateFormat();
@@ -360,6 +363,12 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $this->tplParams['recurringContributionData']['total'] = $this->formatAmount($total);
   }
 
+  /**
+   * Obtains data for the membership payment plan.
+   *
+   * @throws \CRM_Core_Exception
+   * @throws \CiviCRM_API3_Exception
+   */
   private function collectPaymentPlanMembershipsData() {
     if (empty($this->tplParams['orderLineItems'])) {
       return;
@@ -386,6 +395,11 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
       'options' => ['limit' => 0],
       'api.MembershipType.get' => ['id' => '$value.membership_type_id'],
     ]);
+
+    if ($membershipsResponse['count'] < 1) {
+      $membershipIds = implode(', ', $membershipIds);
+      throw new CRM_Core_Exception("Memberships with IDs $membershipIds don't exist!");
+    }
 
     foreach ($membershipsResponse['values'] as $membership) {
       $paymentPlanMemberships[$membership['id']]['id'] = $membership['id'];
