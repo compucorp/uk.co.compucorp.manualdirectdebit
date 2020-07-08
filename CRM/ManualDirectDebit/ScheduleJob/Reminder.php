@@ -31,29 +31,48 @@ class CRM_ManualDirectDebit_ScheduleJob_Reminder {
     $targetContributionDataList = CRM_ManualDirectDebit_ScheduleJob_TargetContribution::retrieve();
 
     if (empty($targetContributionDataList)) {
-      $this->setLog(ts("Haven't appropriate contributions."));
+      $this->setLog(ts("Haven't found appropriate contributions."));
+
       return $this->log;
     }
 
     foreach ($targetContributionDataList as $targetContributionData) {
-      $this->setLog(ts("Contribution with id = %1", [1 => $targetContributionData['contributionId']]));
+      $this->processTargetContribution($targetContributionData);
+    }
 
-      if (!empty($targetContributionData['email'])) {
-        $this->sendEmail($targetContributionData['contributionId']);
-      }
-      else {
-        $this->setLog(ts("Email not sent. Related contact doesn't have an e-mail or has the 'do not send e-mail' flag set."));
-      }
+    return $this->log;
+  }
 
+  /**
+   * Processes the given contribution to send the collection reminder.
+   *
+   * @param array $targetContributionData
+   */
+  private function processTargetContribution($targetContributionData) {
+    $this->setLog(ts("Contribution with id = %1", [1 => $targetContributionData['contributionId']]));
+
+    if (empty($targetContributionData['email'])) {
+      $this->setLog(ts("Email not sent. Related contact doesn't have an e-mail or has the 'do not send e-mail' flag set."));
+      $this->setLog(ts(""));
+
+      return;
+    }
+
+    try {
+      $this->sendEmail($targetContributionData['contributionId']);
       $this->createActivity(
         $targetContributionData['contributionId'],
         $targetContributionData['contactId']
       );
-
-      $this->setLog(ts(""));
+    }
+    catch (Exception $e) {
+      $this->setLog(ts("Exception found processing contribution with id %1: %2", [
+        1 => $targetContributionData['contributionId'],
+        2 => $e->getMessage()
+      ]));
     }
 
-    return $this->log;
+    $this->setLog(ts(""));
   }
 
   /**
