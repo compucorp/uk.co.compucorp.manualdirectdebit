@@ -190,23 +190,22 @@ class CRM_ManualDirectDebit_Mail_Notification {
   }
 
   /**
-   * Sends mail
+   * Sends mail.
    *
    * @param CRM_ManualDirectDebit_Mail_DataCollector_Base $collector
-   * @param $templateId
+   * @param int $templateId
    *
    * @return bool
-   *
    */
   private function sendEmail($collector, $templateId) {
-    $tplParams = $collector->retrieve();
-    $contactEmailData = $collector->retrieveContactEmailData();
-
-    if (empty($contactEmailData['email']) || $contactEmailData['do_not_email'] == 1 ) {
-      return FALSE;
-    }
-
     try {
+      $tplParams = $collector->retrieve();
+      $contactEmailData = $collector->retrieveContactEmailData();
+
+      if (empty($contactEmailData['email']) || $contactEmailData['do_not_email'] == 1 ) {
+        return FALSE;
+      }
+
       civicrm_api3('MessageTemplate', 'send', [
         'id' => $templateId,
         'template_params' => $tplParams,
@@ -216,7 +215,7 @@ class CRM_ManualDirectDebit_Mail_Notification {
 
       return TRUE;
     }
-    catch (CiviCRM_API3_Exception $e) {
+    catch (Exception $e) {
       return FALSE;
     }
   }

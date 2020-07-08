@@ -109,33 +109,44 @@ class CRM_ManualDirectDebit_Mail_Task_ContributionEmailCommon extends CRM_Contac
       $contributionIds = $form->getVar('_contributionIds');
     }
 
+    $errors = [];
     foreach ($formattedContactDetails as $formattedContactDetail) {
       $contactId = $formattedContactDetail['contact_id'];
       $selectedContributionIdsForCurrentContact = self::getSelectedContributionIdsForCurrentContact($contactId, $contributionIds);
       foreach ($selectedContributionIdsForCurrentContact as $contributionId) {
-        $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Contribution($contributionId);
-        $tplParams = $dataCollector->retrieve();
-        $contactDetail = [$formattedContactDetail];
-        CRM_ManualDirectDebit_Mail_Task_Mail::sendEmail(
-          $contactDetail,
-          $subject,
-          $formValues['text_message'],
-          $formValues['html_message'],
-          NULL,
-          NULL,
-          $from,
-          $attachments,
-          $cc,
-          $bcc,
-          array_keys($form->_toContactDetails),
-          $additionalDetails,
-          $contributionIds,
-          CRM_Utils_Array::value('campaign_id', $formValues),
-          $tplParams
-        );
+        try {
+          $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Contribution($contributionId);
+          $tplParams = $dataCollector->retrieve();
+          $contactDetail = [$formattedContactDetail];
+          CRM_ManualDirectDebit_Mail_Task_Mail::sendEmail(
+            $contactDetail,
+            $subject,
+            $formValues['text_message'],
+            $formValues['html_message'],
+            NULL,
+            NULL,
+            $from,
+            $attachments,
+            $cc,
+            $bcc,
+            array_keys($form->_toContactDetails),
+            $additionalDetails,
+            $contributionIds,
+            CRM_Utils_Array::value('campaign_id', $formValues),
+            $tplParams
+          );
+        } catch (Exception $e) {
+          $errors[] = ts('Exception found processing e-mail for contact with ID %1: %2', [
+            1 => $contactId,
+            $e->getMessage()
+          ]);
+        }
       }
     }
 
+    if ($errors) {
+      CRM_Core_Error::statusBounce(ts('Errors found: %1', [1 => implode('; ', $errors)]));
+    }
   }
 
   /**
@@ -150,7 +161,7 @@ class CRM_ManualDirectDebit_Mail_Task_ContributionEmailCommon extends CRM_Contac
     $validatedContributionIds = self::validateIds($contributionIds);
     $validatedContributionIdsImploded = implode(', ', $validatedContributionIds);
     $query = "
-      SELECT contribution.id AS contribution_id 
+      SELECT contribution.id AS contribution_id
       FROM civicrm_contribution AS contribution
       WHERE contribution.contact_id = %1
         AND contribution.id IN(". $validatedContributionIdsImploded .")
