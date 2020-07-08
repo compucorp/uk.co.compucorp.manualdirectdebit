@@ -3,8 +3,8 @@
 use CRM_ManualDirectDebit_Common_MessageTemplate as MessageTemplate;
 
 /**
-* Sends mails
-*/
+ * Sends mails.
+ */
 class CRM_ManualDirectDebit_Mail_Notification {
 
   /**
@@ -202,7 +202,7 @@ class CRM_ManualDirectDebit_Mail_Notification {
       $tplParams = $collector->retrieve();
       $contactEmailData = $collector->retrieveContactEmailData();
 
-      if (empty($contactEmailData['email']) || $contactEmailData['do_not_email'] == 1 ) {
+      if (empty($contactEmailData['email']) || $contactEmailData['do_not_email'] == 1) {
         return FALSE;
       }
 
