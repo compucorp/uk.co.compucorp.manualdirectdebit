@@ -68,7 +68,7 @@ class CRM_ManualDirectDebit_ScheduleJob_Reminder {
     catch (Exception $e) {
       $this->setLog(ts("Exception found processing contribution with id %1: %2", [
         1 => $targetContributionData['contributionId'],
-        2 => $e->getMessage()
+        2 => $e->getMessage(),
       ]));
     }
 

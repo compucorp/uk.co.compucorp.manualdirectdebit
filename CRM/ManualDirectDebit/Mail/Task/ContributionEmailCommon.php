@@ -135,10 +135,11 @@ class CRM_ManualDirectDebit_Mail_Task_ContributionEmailCommon extends CRM_Contac
             CRM_Utils_Array::value('campaign_id', $formValues),
             $tplParams
           );
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
           $errors[] = ts('Exception found processing e-mail for contact with ID %1: %2', [
             1 => $contactId,
-            $e->getMessage()
+            2 => $e->getMessage(),
           ]);
         }
       }
@@ -164,11 +165,11 @@ class CRM_ManualDirectDebit_Mail_Task_ContributionEmailCommon extends CRM_Contac
       SELECT contribution.id AS contribution_id
       FROM civicrm_contribution AS contribution
       WHERE contribution.contact_id = %1
-        AND contribution.id IN(". $validatedContributionIdsImploded .")
+        AND contribution.id IN(" . $validatedContributionIdsImploded . ")
     ";
 
     $dao = CRM_Core_DAO::executeQuery($query, [
-      1 => [(int) $contactId, 'Integer']
+      1 => [(int) $contactId, 'Integer'],
     ]);
 
     $contactContributionIds = [];
