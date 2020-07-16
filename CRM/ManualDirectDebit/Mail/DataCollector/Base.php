@@ -402,7 +402,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
 
     if ($membershipsResponse['count'] < 1) {
       $membershipIds = implode(', ', $membershipIds);
-      throw new CRM_Core_Exception("Memberships with IDs $membershipIds don't exist!");
+      throw new CRM_Core_Exception("Memberships with the following IDs: $membershipIds, do no longer exist!");
     }
 
     foreach ($membershipsResponse['values'] as $membership) {
