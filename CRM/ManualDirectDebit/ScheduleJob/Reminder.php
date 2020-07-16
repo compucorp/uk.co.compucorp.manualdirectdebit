@@ -49,10 +49,13 @@ class CRM_ManualDirectDebit_ScheduleJob_Reminder {
    * @param array $targetContributionData
    */
   private function processTargetContribution($targetContributionData) {
-    $this->setLog(ts("Contribution with id = %1", [1 => $targetContributionData['contributionId']]));
+    $this->setLog(ts("Processing contribution with id = %1", [1 => $targetContributionData['contributionId']]));
 
     if (empty($targetContributionData['email'])) {
-      $this->setLog(ts("Email not sent. Related contact doesn't have an e-mail or has the 'do not send e-mail' flag set."));
+      $this->setLog(ts(
+        "Could not send email for contribution with id = %1. Related contact doesn't have an e-mail or has the 'do not send e-mail' flag set.",
+        [1 => $targetContributionData['contributionId']]
+      ));
       $this->setLog(ts(""));
 
       return;
