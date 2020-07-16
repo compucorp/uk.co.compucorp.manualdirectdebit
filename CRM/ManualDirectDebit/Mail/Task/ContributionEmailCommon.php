@@ -1,4 +1,5 @@
 <?php
+use CRM_ManualDirectDebit_Mail_Task_MailDetailsModel as MailDetailsModel;
 
 class CRM_ManualDirectDebit_Mail_Task_ContributionEmailCommon extends CRM_Contact_Form_Task_EmailCommon {
 
@@ -83,7 +84,7 @@ class CRM_ManualDirectDebit_Mail_Task_ContributionEmailCommon extends CRM_Contac
     }
 
     $errors = [];
-    $mailDetails = new CRM_ManualDirectDebit_Mail_Task_MailDetailsModel();
+    $mailDetails = new MailDetailsModel();
     $mailDetails->setSubject($subject);
     $mailDetails->setFrom($from);
     $mailDetails->setCc($cc);
@@ -135,7 +136,7 @@ class CRM_ManualDirectDebit_Mail_Task_ContributionEmailCommon extends CRM_Contac
    * @param array $formattedContactDetail
    * @param array $errors
    */
-  private static function sendEmailsForContact($form, $formValues, CRM_ManualDirectDebit_Mail_Task_MailDetailsModel $mailDetails, $formattedContactDetail, &$errors) {
+  private static function sendEmailsForContact($form, $formValues, MailDetailsModel $mailDetails, $formattedContactDetail, &$errors) {
     $contributionIds = array();
     if ($form->getVar('_contributionIds')) {
       $contributionIds = $form->getVar('_contributionIds');
@@ -155,7 +156,7 @@ class CRM_ManualDirectDebit_Mail_Task_ContributionEmailCommon extends CRM_Contac
    *
    * @param object $form
    * @param array $formValues
-   * @param \CRM_ManualDirectDebit_Mail_Task_MailDetailsModel $mailDetails
+   * @param MailDetailsModel $mailDetails
    * @param array $formattedContactDetail
    * @param array $errors
    */
