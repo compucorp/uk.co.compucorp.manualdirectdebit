@@ -156,11 +156,11 @@ class CRM_ManualDirectDebit_Mail_Task_ContributionEmailCommon extends CRM_Contac
    *
    * @param object $form
    * @param array $formValues
-   * @param MailDetailsModel $mailDetails
+   * @param \CRM_ManualDirectDebit_Mail_Task_MailDetailsModel $mailDetails
    * @param array $formattedContactDetail
    * @param array $errors
    */
-  private static function sendEmailForContribution($form, $formValues, CRM_ManualDirectDebit_Mail_Task_MailDetailsModel $mailDetails, $formattedContactDetail, &$errors) {
+  private static function sendEmailForContribution($form, $formValues, MailDetailsModel $mailDetails, $formattedContactDetail, &$errors) {
     try {
       $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Contribution($mailDetails->getContributionID());
       $tplParams = $dataCollector->retrieve();
