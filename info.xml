@@ -18,8 +18,8 @@
   <urls>
     <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
-  <releaseDate>2020-06-24</releaseDate>
-  <version>2.2.0</version>
+  <releaseDate>2020-07-17</releaseDate>
+  <version>2.3.0</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>5.24</ver>
