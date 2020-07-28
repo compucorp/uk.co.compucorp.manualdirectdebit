@@ -104,11 +104,10 @@
                 you are entitled to a full and immediate refund of the amount paid from your bank or building society
                 You can cancel a Direct Debit at any time by simply contacting your bank or building society -
                 If you receive a refund you are not entitled to, you must pay it back when the organisation asks you to{/ts}
-          </ul>
-          <li>
-            {ts}You can cancel a Direct Debit at any time by simply contacting your bank or building society.
-              Written confirmation may be required. Please also notify the organisation{/ts}
-          </li>
+            <li>
+              {ts}You can cancel a Direct Debit at any time by simply contacting your bank or building society.
+                Written confirmation may be required. Please also notify the organisation{/ts}
+            </li>
           </ul>
         </div>
       </div>
