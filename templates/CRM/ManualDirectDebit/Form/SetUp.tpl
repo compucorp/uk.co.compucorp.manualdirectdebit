@@ -37,7 +37,7 @@
               <div class="crm-section form-item crm-manual-direct-debit-form-payment-date-text">
                 <div class="label"><label> {ts}Payment Date:{/ts}</label></div>
                 <div class="content">
-                  {ts}To be taken on or around {$payment_date_value} of the month.{/ts}
+                  {ts}To be taken on or around the {$payment_date_value} of the month.{/ts}
                   {$form.payment_dates.html}
                 </div>
                 <div class="clear"></div>
@@ -84,7 +84,7 @@
         <div class="clear"></div>
         <div class="crm-block crm-direct-debit-set-up-guarantee">
           <div class="dd-guarantee">
-            <h5>{ts}Direct Debit Guarantee{/ts}</h5>
+            <h5><b>{ts}Direct Debit Guarantee{/ts}</b></h5>
             <img class="dd-logo" src="{crmResURL ext=uk.co.compucorp.manualdirectdebit file=Images/debit.png}"
                  alt="Direct Debit"/>
           </div>
@@ -94,18 +94,16 @@
               {ts}The Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits{/ts}
             </li>
             <li>
-              {ts} there are any changes to the amount, date or frequency of your Direct Debit the organisation will notify you
+              {ts}If there are any changes to the amount, date or frequency of your Direct Debit the organisation will notify you
                 (normally 10 working days) in advance of your account being debited or as otherwise agreed.
                 If you request the organisation to collect a payment,
                 confirmation of the amount and date will be given to you at the time of the request{/ts}
             </li>
             <li>
               {ts}If an error is made in the payment of your Direct Debit, by the organisation or your bank or building society,
-                you are entitled to a full and immediate refund of the amount paid from your bank or building society{/ts}
-              <ul>
-                <li>
-                  {ts}If you receive a refund you are not entitled to, you must pay it back when the organisation asks you to{/ts}
-                </li>
+                you are entitled to a full and immediate refund of the amount paid from your bank or building society
+                You can cancel a Direct Debit at any time by simply contacting your bank or building society -
+                If you receive a refund you are not entitled to, you must pay it back when the organisation asks you to{/ts}
               </ul>
             <li>
               {ts}You can cancel a Direct Debit at any time by simply contacting your bank or building society.
