@@ -47,7 +47,7 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
     $this->assign('invoiceNumber', $contribution['invoice_number']);
     $this->assign('amount', $this->calculateAmount($contribution['total_amount'], $contribution['tax_amount']));
 
-    if (!empty($contribution['tax_amount'])) {
+    if (!empty($contribution['tax_amount']) && $contribution['tax_amount'] != '0.00') {
       $this->assign('taxAmount', $contribution['tax_amount']);
     }
     $this->assign('totalAmount', $contribution['total_amount']);
