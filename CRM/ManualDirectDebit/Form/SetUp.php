@@ -82,12 +82,14 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
     parent::postProcess();
 
     $values = $this->exportValues();
-    $recurringContribution = $this->getRecurringContribution($values['contribution_id']);
+    $contributionId = $values['contribution_id'];
+    $this->updateContribution($contributionId);
+    $recurringContribution = $this->getRecurringContribution($contributionId);
     $this->updateRecurringContribution($recurringContribution, $values);
     $mandate = $this->createDirectDebitMandate($values);
     $this->attachDirectDebitMandateToContributions(
       $mandate->id,
-      $values['contribution_id'],
+      $contributionId,
       $recurringContribution['id']
     );
 
@@ -124,6 +126,16 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
       'cycle_day' => $cycleDay,
     ]);
 
+  }
+
+  /**
+   * @param $contributionId
+   */
+  private function updateContribution($contributionId) {
+    civicrm_api3('Contribution', 'create', [
+      'id' => $contributionId,
+      'payment_instrument_id' => 'direct_debit',
+    ]);
   }
 
   /**
