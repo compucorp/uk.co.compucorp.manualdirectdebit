@@ -55,6 +55,9 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
    * Retrieves tpl params for template
    *
    * @return array
+   *
+   * @throws \CRM_Core_Exception
+   * @throws \CiviCRM_API3_Exception
    */
   public function retrieve() {
     $this->setShortDateFormat();
@@ -118,7 +121,9 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
         'id' => $this->contributionData['contact_id'],
       ]);
     }
-    catch (CiviCRM_API3_Exception $e) {}
+    catch (CiviCRM_API3_Exception $e) {
+      return;
+    }
   }
 
   /**
@@ -129,6 +134,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
       $this->recurringContributionId = $this->contributionData['contribution_recur_id'];
     }
   }
+
   /**
    * Collects mandate data
    */
@@ -155,7 +161,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     ";
 
     $dao = CRM_Core_DAO::executeQuery($query, [
-      1 => [$this->contributionId, 'Integer']
+      1 => [$this->contributionId, 'Integer'],
     ]);
 
     while ($dao->fetch()) {
@@ -187,7 +193,8 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
   private function obfuscateAccountNumber($accountNumber) {
     if (strlen($accountNumber) > 4) {
       $accountNumber = str_repeat('*', strlen($accountNumber) - 4) . substr($accountNumber, -4);
-    } else {
+    }
+    else {
       $accountNumber = '****';
     }
 
@@ -212,7 +219,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
       $total += $recurringContributionRow['amount'];
       $totalTax += $recurringContributionRow['tax'];
       $dueDate = DateTime::createFromFormat('Y-m-d H:i:s', $recurringContributionRow['receive_date']);
-      $recurringContributionPlan[$index]['index'] = $index+1;
+      $recurringContributionPlan[$index]['index'] = $index + 1;
       $recurringContributionPlan[$index]['amount'] = $this->formatAmount($recurringContributionRow['amount']);
       $recurringContributionPlan[$index]['tax'] = $this->formatAmount($recurringContributionRow['tax']);
       $recurringContributionPlan[$index]['sub_total'] = $this->formatAmount($recurringContributionRow['amount'] - $recurringContributionRow['tax']);
@@ -266,7 +273,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     ";
 
     $dao = CRM_Core_DAO::executeQuery($query, [
-      1 => [$currencyString, 'String']
+      1 => [$currencyString, 'String'],
     ]);
 
     while ($dao->fetch()) {
@@ -307,7 +314,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     }
 
     $dao = CRM_Core_DAO::executeQuery($query, [
-      1 => [$this->recurringContributionId, 'Integer']
+      1 => [$this->recurringContributionId, 'Integer'],
     ]);
 
     $rows = [];
@@ -322,7 +329,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
         'recur_frequency_unit' => $dao->recur_frequency_unit,
         'recur_interval' => $dao->recur_interval,
         'recur_installments' => $dao->recur_installments,
-        'recur_start_date' =>$dao->recur_start_date,
+        'recur_start_date' => $dao->recur_start_date,
       ];
     }
 
@@ -360,6 +367,12 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $this->tplParams['recurringContributionData']['total'] = $this->formatAmount($total);
   }
 
+  /**
+   * Obtains data for the membership payment plan.
+   *
+   * @throws \CRM_Core_Exception
+   * @throws \CiviCRM_API3_Exception
+   */
   private function collectPaymentPlanMembershipsData() {
     if (empty($this->tplParams['orderLineItems'])) {
       return;
@@ -386,6 +399,11 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
       'options' => ['limit' => 0],
       'api.MembershipType.get' => ['id' => '$value.membership_type_id'],
     ]);
+
+    if ($membershipsResponse['count'] < 1) {
+      $membershipIds = implode(', ', $membershipIds);
+      throw new CRM_Core_Exception("Memberships with the following IDs: $membershipIds, do no longer exist!");
+    }
 
     foreach ($membershipsResponse['values'] as $membership) {
       $paymentPlanMemberships[$membership['id']]['id'] = $membership['id'];
@@ -454,7 +472,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     while ($dao->fetch()) {
       $this->tplParams['nextMembershipPayment'] = [
         'date' => $dao->next_payment_date,
-        'amount' => round($dao->next_payment_amount, 2)
+        'amount' => round($dao->next_payment_amount, 2),
       ];
     }
   }
@@ -473,7 +491,8 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     if ($this->recurringContributionId !== FALSE) {
       $recurringContributionBao = CRM_Contribute_BAO_ContributionRecur::findById($this->recurringContributionId);
       $this->tplParams['currency'] = $this->getCurrencySymbol($recurringContributionBao->currency);
-    } else {
+    }
+    else {
       $contributionBao = CRM_Contribute_BAO_Contribution::findById($this->contributionId);
       $this->tplParams['currency'] = $this->getCurrencySymbol($contributionBao->currency);
     }
@@ -486,7 +505,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
       $smarty->assign($param, $this->tplParams[$param]);
     }
 
-    $this->tplParams['orderSummaryTable']  =  $smarty->fetch('CRM/ManualDirectDebit/MessageTemplate/Snippets/OrderSummary.tpl');
+    $this->tplParams['orderSummaryTable'] = $smarty->fetch('CRM/ManualDirectDebit/MessageTemplate/Snippets/OrderSummary.tpl');
   }
 
   private function generateActiveMembershipsTable() {
@@ -494,7 +513,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $smarty->assign('activeMemberships', $this->tplParams['activeMemberships']);
     $smarty->assign('shortDateFormat', $this->tplParams['shortDateFormat']);
 
-    $this->tplParams['activeMembershipsTable']  =  $smarty->fetch('CRM/ManualDirectDebit/MessageTemplate/Snippets/ActiveMemberships.tpl');
+    $this->tplParams['activeMembershipsTable'] = $smarty->fetch('CRM/ManualDirectDebit/MessageTemplate/Snippets/ActiveMemberships.tpl');
   }
 
   /**
