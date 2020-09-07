@@ -33,22 +33,6 @@
               <div class="content">{$totalAmount|crmMoney:$currency}</div>
               <div class="clear"></div>
             </div>
-            {if $payment_date_value}
-              <div class="crm-section form-item crm-manual-direct-debit-form-payment-date-text">
-                <div class="label"><label> {ts}Payment Date:{/ts}</label></div>
-                <div class="content">
-                  {ts}To be taken on or around the {$payment_date_value} of the month.{/ts}
-                  {$form.payment_dates.html}
-                </div>
-                <div class="clear"></div>
-              </div>
-            {else}
-              <div class="crm-section form-item crm-manual-direct-debit-form-payment-date-select">
-                <div class="label">{$form.payment_dates.label}</div>
-                <div class="content">{$form.payment_dates.html}</div>
-                <div class="clear"></div>
-              </div>
-            {/if}
           </fieldset>
         </div>
         <div class="crm-public-form-item crm-section crm-manual-direct-debit-form-bank-details">

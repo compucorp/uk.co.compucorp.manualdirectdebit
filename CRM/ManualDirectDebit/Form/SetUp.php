@@ -52,15 +52,6 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
     }
     $this->assign('totalAmount', $contribution['total_amount']);
 
-    $paymentDates = $this->getPaymentDates();
-    if (count($paymentDates) == 1) {
-      $this->assign('payment_date_value', reset($paymentDates));
-      $this->add('hidden', 'payment_dates', key($paymentDates));
-    }
-    else {
-      $this->add('select', 'payment_dates', E::ts('Payment Date'), $paymentDates);
-    }
-
     $this->add('text', 'bank_name', E::ts('Bank name:'), ['size' => 40], TRUE);
     $this->add('text', 'bank_account_holder', E::ts('Name of Account holder:'), ['size' => 40], TRUE);
     $this->add('text', 'bank_account_number', E::ts('Account number:'), ['size' => 40], TRUE);
@@ -114,11 +105,9 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
    * @param $values
    * @throws CiviCRM_API3_Exception
    */
-  private function updateRecurringContribution($recurringContribution, $values) {
-    $cycleDay = $this->getCycleDay(
-      $values['payment_dates'],
-      $recurringContribution['frequency_unit']
-    );
+  private function updateRecurringContribution($recurringContribution) {
+    $paymentDates = $this->getPaymentDates();
+    $cycleDay = $this->getCycleDay($paymentDates, $recurringContribution['frequency_unit']);
 
     civicrm_api3('ContributionRecur', 'create', [
       'id' => $recurringContribution['id'],
@@ -188,21 +177,38 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
   }
 
   /**
-   * @param $paymentDay
+   * @param $paymentDates
    * @param $frequencyUnit
    * @return integer
    */
-  private function getCycleDay($paymentDay, $frequencyUnit) {
-
+  private function getCycleDay($paymentDates, $frequencyUnit) {
+    //Get the first payment collection run date set in the configuration
+    $firstPaymentRunDate = $paymentDates['payment_collection_run_dates'][0];
     if ($frequencyUnit != 'year') {
-      return $paymentDay;
+      return $firstPaymentRunDate;
     }
-
+    $minimumDaysToFirstPayment = $paymentDates['minimum_days_to_first_payment'];
     $now = new DateTime();
-    $cycleDate = DateTime::createFromFormat('Y-m-d', $now->format('Y-m' . '-' . $paymentDay));
-
-    //If cycle date is in the past, set cycle date should be next month.
-    if ($cycleDate < $now) {
+    $isPaymentRunDateInThePast = TRUE;
+    $cycleDate = NULL;
+    foreach ($paymentDates['payment_collection_run_dates'] as $paymentDay) {
+      $cycleDate = DateTime::createFromFormat('Y-m-d', $now->format('Y-m' . '-' . $paymentDay));
+      $dateDiff = date_diff($cycleDate, $now);
+      if ($cycleDate < $now) {
+        continue;
+      }
+      elseif ($dateDiff->format('%a') < $minimumDaysToFirstPayment) {
+        continue;
+      }
+      else {
+        //Returns false as we found the date that are not in the past.
+        $isPaymentRunDateInThePast = FALSE;
+        break;
+      }
+    }
+    //If cycle date is in the past, set cycle date should be next month from the first date of payment run dates
+    if ($isPaymentRunDateInThePast) {
+      $cycleDate = DateTime::createFromFormat('Y-m-d', $now->format('Y-m' . '-' . $firstPaymentRunDate));
       $cycleDate = $cycleDate->modify('next month');
     }
 
@@ -225,19 +231,10 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
   private function getPaymentDates() {
     $settingsManager = new CRM_ManualDirectDebit_Common_SettingsManager();
     $settings = $settingsManager->getManualDirectDebitSettings();
-
-    $locale = civicrm_api3('Setting', 'get', [
-      'sequential' => 1,
-      'return' => ["lcMessages"],
-    ])['values'][0]['lcMessages'];
-    $ordinalSuffixFormatter = new NumberFormatter($locale, NumberFormatter::ORDINAL);
-
-    $paymentDates = [];
-    foreach ($settings['payment_collection_run_dates'] as $day) {
-      $paymentDates[$day] = $ordinalSuffixFormatter->format($day);
-    }
-
-    return $paymentDates;
+    return [
+      'payment_collection_run_dates' => $settings['payment_collection_run_dates'],
+      'minimum_days_to_first_payment' => $settings['minimum_days_to_first_payment'],
+    ];
   }
 
   /**
