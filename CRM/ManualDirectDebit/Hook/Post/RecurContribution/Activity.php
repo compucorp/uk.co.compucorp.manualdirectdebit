@@ -21,12 +21,18 @@ class CRM_ManualDirectDebit_Hook_Post_RecurContribution_Activity extends CRM_Man
    * Creates activity
    */
   protected function createActivity() {
+    $loggedContactId = CRM_ManualDirectDebit_Common_User::getLoggedContactId();
+
+    if (empty($loggedContactId)) {
+      $loggedContactId = $this->contributionRecurDao->contact_id;
+    }
+
     if ($this->operation == "create") {
       CRM_ManualDirectDebit_Common_Activity::create(
         "New Direct Debit Recurring Payment",
         "new_direct_debit_recurring_payment",
         $this->contributionRecurDao->id,
-        CRM_ManualDirectDebit_Common_User::getLoggedContactId(),
+        $loggedContactId,
         $this->contributionRecurDao->contact_id
       );
     }
@@ -36,7 +42,7 @@ class CRM_ManualDirectDebit_Hook_Post_RecurContribution_Activity extends CRM_Man
         "Update Direct Debit Recurring Payment",
         "update_direct_debit_recurring_payment",
         $this->contributionRecurDao->id,
-        CRM_ManualDirectDebit_Common_User::getAdminContactId(),
+        $loggedContactId,
         $this->contributionRecurDao->contact_id
       );
     }
