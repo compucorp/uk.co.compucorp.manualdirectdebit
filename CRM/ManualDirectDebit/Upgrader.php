@@ -144,6 +144,21 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->createDirectDebitPaymentProcessor();
   }
 
+  public function upgrade_0014() {
+    $this->addNav([
+      'label' => ts('Create Cancelled Instructions Batch'),
+      'name' => 'create_cancelled_batches',
+      'url' => 'civicrm/direct_debit/cancelled-batch-list',
+      'permission' => 'can manage direct debit batches',
+      'operator' => NULL,
+      'separator' => NULL,
+      'parent_name' => 'direct_debit',
+    ]);
+    CRM_Core_BAO_Navigation::resetNavigation();
+
+    return TRUE;
+  }
+
   public function upgrade_0013() {
     $this->hideAndReserveDDActivityTypes();
     return TRUE;
@@ -218,7 +233,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
 
   private function createCollectionReminderFlagRecords() {
     CRM_Core_DAO::executeQuery("
-      INSERT INTO civicrm_value_direct_debit_collectionreminder_sendflag 
+      INSERT INTO civicrm_value_direct_debit_collectionreminder_sendflag
       (entity_id, is_notification_sent) SELECT id,0 FROM civicrm_contribution
       ");
   }
@@ -472,6 +487,15 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
         'label' => ts('View Payment Collection Batches'),
         'name' => 'view_payment_batches',
         'url' => 'civicrm/direct_debit/batch-list?reset=1&type_id=' . array_search('dd_payments', $batchTypes),
+        'permission' => 'can manage direct debit batches',
+        'operator' => NULL,
+        'separator' => NULL,
+        'parent_name' => 'direct_debit',
+      ],
+      [
+        'label' => ts('Create Cancelled Instructions Batch'),
+        'name' => 'create_cancelled_batches',
+        'url' => 'civicrm/direct_debit/cancelled-batch-list',
         'permission' => 'can manage direct debit batches',
         'operator' => NULL,
         'separator' => NULL,
