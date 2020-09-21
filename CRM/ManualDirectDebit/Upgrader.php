@@ -316,9 +316,8 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   private function setDefaultMinimumMandateReferenceLength() {
     $configFields = CRM_ManualDirectDebit_Common_SettingsManager::getConfigFields();
     civicrm_api3('setting', 'create', [
-        'manualdirectdebit_minimum_reference_prefix_length' =>
-          $configFields['manualdirectdebit_minimum_reference_prefix_length']['default'],
-      ]);
+      'manualdirectdebit_minimum_reference_prefix_length' => $configFields['manualdirectdebit_minimum_reference_prefix_length']['default'],
+    ]);
   }
 
   public function upgrade_0004() {
