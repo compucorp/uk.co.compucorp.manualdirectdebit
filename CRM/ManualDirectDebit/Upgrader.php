@@ -93,7 +93,6 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     ],
   ];
 
-
   /**
    * List of processor types
    *
@@ -805,6 +804,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       'export_direct_debit_payments',
       'view_new_instruction_batches',
       'view_payment_batches',
+      'create_cancelled_batches',
     ];
 
     foreach ($menuItems as $item) {
