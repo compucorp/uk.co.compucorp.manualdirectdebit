@@ -25,6 +25,11 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     ],
     [
       "entityType" => "OptionValue",
+      "searchValue" => "cancellations_batch",
+      "optionGroup" => "batch_type",
+    ],
+    [
+      "entityType" => "OptionValue",
       "searchValue" => "dd_payments",
       "optionGroup" => "batch_type",
     ],
@@ -144,18 +149,50 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   }
 
   public function upgrade_0014() {
-    $this->addNav([
+    $this->addOptionValue([
+      'option_group_id' => 'batch_type',
+      'name' => 'cancellations_batch',
+      'label' => 'Direct Debit Cancellations',
+      'is_active' => 1,
+      'weight' => 6,
+      'description' => 'Direct debit mandates that need to be cancelled.',
+    ]);
+    $this->addNav($this->buildCreateCancelledInstructionsBatchMenuItem());
+    CRM_Core_BAO_Navigation::resetNavigation();
+
+    return TRUE;
+  }
+
+  /**
+   * Adds the option value, if it exist.
+   *
+   * @param array $optionValueParams
+   *
+   * @throws \CiviCRM_API3_Exception
+   */
+  private function addOptionValue($optionValueParams) {
+    $optionValue = civicrm_api3('OptionValue', 'get', [
+      'option_group_id' => $optionValueParams['option_group_id'],
+      'name' => $optionValueParams['name'],
+    ]);
+
+    if (!$optionValue['count']) {
+      civicrm_api3('OptionValue', 'create', $optionValueParams);
+    }
+  }
+
+  private function buildCreateCancelledInstructionsBatchMenuItem() {
+    $batchTypes = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, NULL, 'name');
+
+    return [
       'label' => ts('Create Cancelled Instructions Batch'),
-      'name' => 'create_cancelled_batches',
-      'url' => 'civicrm/direct_debit/cancelled-batch-list',
+      'name' => 'create_cancellation_batch',
+      'url' => 'civicrm/direct_debit/batch?reset=1&action=add&type_id=' . array_search('cancellations_batch', $batchTypes),
       'permission' => 'can manage direct debit batches',
       'operator' => NULL,
       'separator' => NULL,
       'parent_name' => 'direct_debit',
-    ]);
-    CRM_Core_BAO_Navigation::resetNavigation();
-
-    return TRUE;
+    ];
   }
 
   public function upgrade_0013() {
@@ -255,21 +292,12 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   }
 
   private function addMessageTemplateToCustomGroupEntities() {
-    $optionValueParams = [
+    $this->addOptionValue([
       'option_group_id' => 'cg_extend_objects',
       'name' => 'civicrm_msg_template',
       'label' => 'MessageTemplate',
       'value' => 'MessageTemplate',
-    ];
-
-    $cgextendOptionValue = civicrm_api3('OptionValue', 'get', [
-      'option_group_id' => $optionValueParams['option_group_id'],
-      'name' => $optionValueParams['name'],
     ]);
-
-    if (!$cgextendOptionValue['count']) {
-      civicrm_api3('OptionValue', 'create', $optionValueParams);
-    }
   }
 
   private function addDDTemplateCustomGroup() {
@@ -494,15 +522,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
         'separator' => NULL,
         'parent_name' => 'direct_debit',
       ],
-      [
-        'label' => ts('Create Cancelled Instructions Batch'),
-        'name' => 'create_cancelled_batches',
-        'url' => 'civicrm/direct_debit/cancelled-batch-list',
-        'permission' => 'can manage direct debit batches',
-        'operator' => NULL,
-        'separator' => NULL,
-        'parent_name' => 'direct_debit',
-      ],
+      $this->buildCreateCancelledInstructionsBatchMenuItem(),
     ];
 
     foreach ($menuItems as $item) {
@@ -804,7 +824,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       'export_direct_debit_payments',
       'view_new_instruction_batches',
       'view_payment_batches',
-      'create_cancelled_batches',
+      'create_cancellation_batch',
     ];
 
     foreach ($menuItems as $item) {

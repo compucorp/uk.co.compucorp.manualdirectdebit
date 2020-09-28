@@ -401,6 +401,14 @@
       <is_active>1</is_active>
     </OptionValue>
     <OptionValue>
+      <label>Direct Debit Cancellations</label>
+      <name>cancellations_batch</name>
+      <is_active>1</is_active>
+      <weight>6</weight>
+      <description>Direct debit mandates that need to be cancelled.</description>
+      <option_group_name>batch_type</option_group_name>
+    </OptionValue>
+    <OptionValue>
       <label>Submitted</label>
       <name>Submitted</name>
       <is_active>1</is_active>
