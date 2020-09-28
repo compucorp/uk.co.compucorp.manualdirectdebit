@@ -108,6 +108,10 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
       $defaults['end_date_filter'] = (new DateTime())->format('Y-m-d');
     }
 
+    if ($this->batchType['name'] == 'cancellations_batch') {
+      $defaults['title'] = ts('Cancelled Instruction Batch - %1', [1 => $batchNo]);
+    }
+
     return $defaults;
   }
 
