@@ -155,7 +155,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       'label' => 'Direct Debit Cancellations',
       'is_active' => 1,
       'weight' => 6,
-      'description' => 'Direct debit mandates that need to be cancelled.'
+      'description' => 'Direct debit mandates that need to be cancelled.',
     ]);
     $this->addNav($this->buildCreateCancelledInstructionsBatchMenuItem());
     CRM_Core_BAO_Navigation::resetNavigation();
