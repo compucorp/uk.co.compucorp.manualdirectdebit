@@ -246,7 +246,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'transaction_type' => ts('Transaction Type'),
       ];
 
-      if ($batch->getBatchType() == 'dd_payments') {
+      if ($batch->getBatchType() == BatchHandler::BATCH_TYPE_PAYMENTS) {
         $columnHeader['receive_date'] = ts('Received Date');
       }
     }
@@ -278,7 +278,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'transaction_type' => 'civicrm_option_value.label as transaction_type',
       ];
 
-      if ($batch->getBatchType() == 'dd_payments') {
+      if ($batch->getBatchType() == BatchHandler::BATCH_TYPE_PAYMENTS) {
         $returnValues['receive_date'] = 'DATE_FORMAT(civicrm_contribution.receive_date, "%d-%m-%Y") as receive_date';
       }
     }
@@ -319,11 +319,11 @@ class CRM_ManualDirectDebit_Batch_Transaction {
 
       if (!empty($mandateValue['contact_id'])) {
         switch ($batch->getBatchType()) {
-          case "instructions_batch":
+          case BatchHandler::BATCH_TYPE_INSTRUCTIONS:
             $row['action'] = $this->getLinkToMandate($mandateId, $mandateValue['contact_id']);
             break;
 
-          case "dd_payments":
+          case BatchHandler::BATCH_TYPE_PAYMENTS:
             $row['action'] = $this->getLinkToContribution($mandateValue['contribute_id'], $mandateValue['contact_id']);
             break;
         }
