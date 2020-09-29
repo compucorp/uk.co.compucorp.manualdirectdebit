@@ -131,7 +131,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       ts('Transaction Type'),
     ];
 
-    if($this->getBatchType() == 'dd_payments') {
+    if($this->getBatchType() == self::BATCH_TYPE_PAYMENTS) {
       $headers[] = ts('Received Date');
     }
 
@@ -185,7 +185,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
   public static function getSubmitAlertMessage($typeId) {
     $batchTypes = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, NULL, 'name');
 
-    if ($batchTypes[$typeId] == 'instructions_batch') {
+    if ($batchTypes[$typeId] == self::BATCH_TYPE_INSTRUCTIONS) {
       $submittedMessage = '<p>' . ts('You are submitting all items within this batch:') . '</p>';
       $submittedMessage .= '<p>' . ts('- All mandates in the batch that currently have instruction code %1 will be transitioned to instruction code %2', [
           1 => '0N',
@@ -194,7 +194,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       $submittedMessage .= '<p>' . ts('- The status of this batch will be updated to \'Submitted\'') . '</p>';
       $submittedMessage .= '<p>' . ts('Please note that this process is not reversible.') . '</p>';
     }
-    elseif ($batchTypes[$typeId] == 'dd_payments') {
+    elseif ($batchTypes[$typeId] == self::BATCH_TYPE_PAYMENTS) {
       $submittedMessage = '<p>' . ts('You are submitting all items within this batch:') . '</p>';
       $submittedMessage .= '<p>' . ts('- All mandates in the batch that currently have the code %1 will be transitioned to the code %2', [
           1 => '01',
@@ -224,10 +224,10 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       return FALSE;
     }
 
-    if ($this->getBatchType() == 'instructions_batch') {
+    if ($this->getBatchType() == self::BATCH_TYPE_INSTRUCTIONS) {
       $submitted = $this->submitInstructionsBatch();
     }
-    if ($this->getBatchType() == 'dd_payments') {
+    if ($this->getBatchType() == self::BATCH_TYPE_PAYMENTS) {
       $submitted = $this->submitDDPayments();
     }
 
@@ -339,7 +339,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       'transaction_type' => 'CONCAT("\t",civicrm_option_value.label) as transaction_type',
     ];
 
-    if($this->getBatchType() == 'dd_payments') {
+    if($this->getBatchType() == self::BATCH_TYPE_PAYMENTS) {
       $returnValues['contribute_id'] = 'civicrm_contribution.id as contribute_id';
       $returnValues['receive_date'] = 'DATE_FORMAT(civicrm_contribution.receive_date, "%d-%m-%Y") as receive_date';
     } else {
@@ -359,11 +359,11 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
   public function getMandateCurrentState($returnValues) {
     $dataForExport = [];
     switch ($this->getBatchType()) {
-      case 'instructions_batch':
+      case self::BATCH_TYPE_INSTRUCTIONS:
         $entityTable = 'civicrm_value_dd_mandate';
         break;
 
-      case 'dd_payments':
+      case self::BATCH_TYPE_PAYMENTS:
         $entityTable = 'civicrm_contribution';
         break;
     }
@@ -378,13 +378,13 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
     $mandateItems = $batchTransaction->getDDMandateInstructions();
     foreach ($mandateItems as $mandateItem) {
       switch ($this->getBatchType()) {
-        case 'instructions_batch':
+        case self::BATCH_TYPE_INSTRUCTIONS:
           $entityId = $mandateItem['mandate_id'];
           unset($mandateItem['mandate_id']);
           $dataForExport[$entityId] = $mandateItem;
           break;
 
-        case 'dd_payments':
+        case self::BATCH_TYPE_PAYMENTS:
           $entityId = $mandateItem['contribute_id'];
           unset($mandateItem['contribute_id']);
           $dataForExport[$entityId] = $mandateItem;

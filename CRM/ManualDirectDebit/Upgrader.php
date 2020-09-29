@@ -21,17 +21,17 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     ],
     [
       "entityType" => "OptionValue",
-      "searchValue" => "instructions_batch",
+      "searchValue" => BatchHandler::BATCH_TYPE_INSTRUCTIONS,
       "optionGroup" => "batch_type",
     ],
     [
       "entityType" => "OptionValue",
-      "searchValue" => "cancellations_batch",
+      "searchValue" => BatchHandler::BATCH_TYPE_PAYMENTS,
       "optionGroup" => "batch_type",
     ],
     [
       "entityType" => "OptionValue",
-      "searchValue" => "dd_payments",
+      "searchValue" => BatchHandler::BATCH_TYPE_CANCELLATIONS,
       "optionGroup" => "batch_type",
     ],
     [
@@ -182,13 +182,18 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     }
   }
 
+  /**
+   * Builds menu item to create mandate cancellation batches.
+   *
+   * @return array
+   */
   private function buildCreateCancelledInstructionsBatchMenuItem() {
     $batchTypes = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, NULL, 'name');
 
     return [
       'label' => ts('Create Cancelled Instructions Batch'),
       'name' => 'create_cancellation_batch',
-      'url' => 'civicrm/direct_debit/batch?reset=1&action=add&type_id=' . array_search('cancellations_batch', $batchTypes),
+      'url' => 'civicrm/direct_debit/batch?reset=1&action=add&type_id=' . array_search(BatchHandler::BATCH_TYPE_CANCELLATIONS, $batchTypes),
       'permission' => 'can manage direct debit batches',
       'operator' => NULL,
       'separator' => NULL,
@@ -491,7 +496,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       [
         'label' => ts('Create New Instructions Batch'),
         'name' => 'create_new_instructions_batch',
-        'url' => 'civicrm/direct_debit/batch?reset=1&action=add&type_id=' . array_search('instructions_batch', $batchTypes),
+        'url' => 'civicrm/direct_debit/batch?reset=1&action=add&type_id=' . array_search(BatchHandler::BATCH_TYPE_INSTRUCTIONS, $batchTypes),
         'permission' => 'can manage direct debit batches',
         'separator' => 1,
         'parent_name' => 'direct_debit',
@@ -499,7 +504,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       [
         'label' => ts('Create Payment Collection Batch'),
         'name' => 'export_direct_debit_payments',
-        'url' => 'civicrm/direct_debit/batch?reset=1&action=add&type_id=' . array_search('dd_payments', $batchTypes),
+        'url' => 'civicrm/direct_debit/batch?reset=1&action=add&type_id=' . array_search(BatchHandler::BATCH_TYPE_PAYMENTS, $batchTypes),
         'permission' => 'can manage direct debit batches',
         'operator' => NULL,
         'separator' => NULL,
@@ -508,7 +513,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       [
         'label' => ts('View New Instruction Batches'),
         'name' => 'view_new_instruction_batches',
-        'url' => 'civicrm/direct_debit/batch-list?reset=1&type_id=' . array_search('instructions_batch', $batchTypes),
+        'url' => 'civicrm/direct_debit/batch-list?reset=1&type_id=' . array_search(BatchHandler::BATCH_TYPE_INSTRUCTIONS, $batchTypes),
         'permission' => 'can manage direct debit batches',
         'operator' => NULL,
         'separator' => 1,
@@ -517,7 +522,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       [
         'label' => ts('View Payment Collection Batches'),
         'name' => 'view_payment_batches',
-        'url' => 'civicrm/direct_debit/batch-list?reset=1&type_id=' . array_search('dd_payments', $batchTypes),
+        'url' => 'civicrm/direct_debit/batch-list?reset=1&type_id=' . array_search(BatchHandler::BATCH_TYPE_PAYMENTS, $batchTypes),
         'permission' => 'can manage direct debit batches',
         'operator' => NULL,
         'separator' => NULL,
