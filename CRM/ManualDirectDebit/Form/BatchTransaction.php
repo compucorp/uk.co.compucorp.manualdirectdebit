@@ -1,5 +1,5 @@
 <?php
-
+use CRM_ManualDirectDebit_Batch_BatchHandler as BatchHandler;
 
 /**
  * This class generates form components for Batch Transaction
@@ -28,13 +28,20 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
   protected $batch;
 
   /**
+   * List of values associated to the batch.
+   *
+   * @var array
+   */
+  private $_values;
+
+  /**
    * PreProcess function.
    */
   public function preProcess() {
     $this->batchID = CRM_Utils_Request::retrieve('bid', 'Positive') ? CRM_Utils_Request::retrieve('bid', 'Positive') : CRM_Utils_Array::value('batch_id', $_POST);
     $this->assign('entityID', $this->batchID);
     if (isset($this->batchID)) {
-      $batch = new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID);
+      $batch = new BatchHandler($this->batchID);
       $this->batch = $batch->getBatch();
       $this->assign('statusID', $batch->getBatchStatusId());
       $this->assign('batchStatus', $batch->getBatchStatus());
@@ -74,16 +81,20 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
    */
   private function assignSearchProperties($batchType) {
     $searchData = [];
-    if ($batchType['name'] == 'instructions_batch') {
+    if ($batchType['name'] == BatchHandler::BATCH_TYPE_INSTRUCTIONS) {
       $searchData = $this->assignInstructionsSearchProperties();
     }
 
-    if ($batchType['name'] == 'dd_payments') {
+    if ($batchType['name'] == BatchHandler::BATCH_TYPE_PAYMENTS) {
       $searchData = $this->assignDDPaymentsSearchProperties();
       // Show filters only for create DD payments batch page.
       $this->assign('showFilters', TRUE);
       // Show "receive date" column only for DD payments batches.
       $this->assign('showReceiveDateColumn', TRUE);
+    }
+
+    if ($batchType['name'] == BatchHandler::BATCH_TYPE_CANCELLATIONS) {
+      $searchData = $this->assignCancellationsSearchProperties();
     }
 
     $this->assign('searchData', json_encode($searchData));
@@ -117,6 +128,31 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
       [
         'name' => 'start_date',
         'value' => date('Y-m-d H:i:s'),
+      ],
+    ];
+  }
+
+  /**
+   * Assigns search properties to the form.
+   *
+   * @return array[]
+   */
+  private function assignCancellationsSearchProperties() {
+    $this->addElement('hidden', 'entityTable', 'civicrm_value_dd_mandate');
+    $this->assign('tableTitle', ts('Available instructions'));
+    $this->assign('entityTable', 'civicrm_value_dd_mandate');
+
+    $ddCodes = CRM_Core_OptionGroup::values('direct_debit_codes');
+    $batchData = json_decode($this->_values['data'], TRUE);
+
+    return [
+      [
+        'name' => 'originator_number',
+        'value' => $batchData['values']['originator_number'],
+      ],
+      [
+        'name' => 'dd_code',
+        'value' => [array_search('0C', $ddCodes)],
       ],
     ];
   }
@@ -241,7 +277,7 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
     $params = $this->controller->exportValues($this->_name);
 
     if (isset($params['export_batch']) || isset($params['save_and_export_batch'])) {
-      $batch = new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID);
+      $batch = new BatchHandler($this->batchID);
       $batch->createExportFile();
     }
 
