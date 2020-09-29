@@ -1,4 +1,5 @@
 <?php
+use CRM_ManualDirectDebit_Batch_BatchHandler as BatchHandler;
 
 /**
  * This class contains all the function that are called using AJAX
@@ -31,8 +32,8 @@ class CRM_ManualDirectDebit_Page_AJAX {
     $entityTable = CRM_Utils_Request::retrieveValue('entityTable', 'String', NULL);
     $notPresent = CRM_Utils_Request::retrieveValue('notPresent', 'String', NULL);
 
-    $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($entityID));
-    if($batch->getBatchType() == 'dd_payments') {
+    $batch = (new BatchHandler($entityID));
+    if($batch->getBatchType() == BatchHandler::BATCH_TYPE_PAYMENTS) {
       $sortMapper[] = 'receive_date';
     }
 
@@ -73,7 +74,7 @@ class CRM_ManualDirectDebit_Page_AJAX {
       'transaction_type',
     ];
 
-    if($batch->getBatchType() == 'dd_payments') {
+    if($batch->getBatchType() == BatchHandler::BATCH_TYPE_PAYMENTS) {
       $selectorElements[] = 'receive_date';
     }
     $selectorElements[] = 'action';
@@ -250,7 +251,7 @@ class CRM_ManualDirectDebit_Page_AJAX {
    */
   public static function export() {
     $id = CRM_Utils_Request::retrieveValue('id', 'String');
-    $batch = new CRM_ManualDirectDebit_Batch_BatchHandler($id);
+    $batch = new BatchHandler($id);
     $batch->createExportFile();
   }
 

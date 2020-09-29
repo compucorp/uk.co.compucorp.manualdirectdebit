@@ -1,4 +1,5 @@
 <?php
+use CRM_ManualDirectDebit_Batch_BatchHandler as BatchHandler;
 
 /**
  * Page for displaying the list of financial batches
@@ -84,7 +85,7 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
     $batchTypes = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, NULL, 'name');
 
     $typeId = CRM_Utils_Request::retrieve('type_id', 'String', $this, FALSE);
-    $typeId = $typeId ?: array_search('instructions_batch', $batchTypes);
+    $typeId = $typeId ?: array_search(BatchHandler::BATCH_TYPE_INSTRUCTIONS, $batchTypes);
 
     $param = [
       'type_id' => $typeId,
@@ -115,12 +116,12 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
         ['id' => $id], ts('more'), FALSE, '', 'Batch', $id
       );
 
-      $param['entityTable'] = 'dd_payments' == $batchTypes[$batch['type_id']] ? 'civicrm_contribution' : 'civicrm_value_dd_mandate';
+      $param['entityTable'] = BatchHandler::BATCH_TYPE_PAYMENTS == $batchTypes[$batch['type_id']] ? 'civicrm_contribution' : 'civicrm_value_dd_mandate';
       $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction($batch['id'], $param);
       $batch['transaction_count'] = $batchTransaction->getTotalNumber();
     }
 
-    if('dd_payments' == $batchTypes[$typeId]){
+    if(BatchHandler::BATCH_TYPE_PAYMENTS == $batchTypes[$typeId]){
       $type = 'Payment';
       CRM_Utils_System::setTitle(ts('View Payment Batches'));
     } else {
@@ -128,7 +129,7 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
       CRM_Utils_System::setTitle(ts('View New Instruction Batches'));
     }
 
-    $submittedMessage = CRM_ManualDirectDebit_Batch_BatchHandler::getSubmitAlertMessage($typeId);
+    $submittedMessage = BatchHandler::getSubmitAlertMessage($typeId);
     $this->assign('submittedMessage', $submittedMessage);
     $this->assign('batches', $batchList);
     $this->assign('type', $type);

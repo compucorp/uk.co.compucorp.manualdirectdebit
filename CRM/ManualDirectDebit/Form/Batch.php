@@ -1,6 +1,7 @@
 <?php
 
 use CRM_ManualDirectDebit_ExtensionUtil as E;
+use CRM_ManualDirectDebit_Batch_BatchHandler as BatchHandler;
 
 /**
  * This class generates form components for Create Instructions Batch
@@ -24,7 +25,7 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
 
     CRM_Utils_System::setTitle(E::ts('Create %1', [1 => $this->batchType['label']]));
 
-    $newBatchID = CRM_ManualDirectDebit_Batch_BatchHandler::getMaxBatchId() + 1;
+    $newBatchID = BatchHandler::getMaxBatchId() + 1;
     $this->assign('batch_id', $newBatchID);
     $this->add('hidden', 'batch_id', $newBatchID);
     $this->add('hidden', 'type_id', $this->batchType['value']);
@@ -74,7 +75,7 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
    */
   public static function validateBatchID($fields, $files, $self) {
 
-    if ($fields['batch_id'] <= CRM_ManualDirectDebit_Batch_BatchHandler::getMaxBatchId()) {
+    if ($fields['batch_id'] <= BatchHandler::getMaxBatchId()) {
       $errors['batch_id'] = ts(
         'Batch ID %1 already exists. It is likely another batch has just been created a moment ago. Please %2 to reload the page and try again.',
         [
@@ -99,16 +100,16 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     $sql = "SELECT max(id) FROM civicrm_batch";
     $batchNo = CRM_Core_DAO::singleValueQuery($sql) + 1;
 
-    if ($this->batchType['name'] == 'instructions_batch') {
+    if ($this->batchType['name'] == BatchHandler::BATCH_TYPE_INSTRUCTIONS) {
       $defaults['title'] = ts('New Instruction Batch - %1', [1 => $batchNo]);
     }
 
-    if ($this->batchType['name'] == 'dd_payments') {
+    if ($this->batchType['name'] == BatchHandler::BATCH_TYPE_PAYMENTS) {
       $defaults['title'] = ts('Direct Debit Batch - %1', [1 => $batchNo]);
       $defaults['end_date_filter'] = (new DateTime())->format('Y-m-d');
     }
 
-    if ($this->batchType['name'] == 'cancellations_batch') {
+    if ($this->batchType['name'] == BatchHandler::BATCH_TYPE_CANCELLATIONS) {
       $defaults['title'] = ts('Cancelled Instruction Batch - %1', [1 => $batchNo]);
     }
 

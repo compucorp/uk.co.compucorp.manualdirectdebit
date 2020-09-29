@@ -2,6 +2,7 @@
 
 use CRM_ManualDirectDebit_Queue_Build_InstructionsQueueBuilder as InstructionsQueueBuilder;
 use CRM_ManualDirectDebit_Queue_Build_PaymentsQueueBuilder as PaymentsQueueBuilder;
+use CRM_ManualDirectDebit_Batch_BatchHandler as BatchHandler;
 
 class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
 
@@ -43,10 +44,11 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
   private function addTasksToQueue() {
     $batchType = $this->getBatchType();
     switch ($batchType) {
-      case 'instructions_batch':
+      case BatchHandler::BATCH_TYPE_INSTRUCTIONS:
         $queueBuilder = new InstructionsQueueBuilder($this->queue, $this->batchId);
         break;
-      case 'dd_payments':
+
+      case BatchHandler::BATCH_TYPE_PAYMENTS:
         $queueBuilder = new PaymentsQueueBuilder($this->queue, $this->batchId);
         break;
     }
