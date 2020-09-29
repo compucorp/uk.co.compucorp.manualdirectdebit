@@ -1,6 +1,7 @@
 <?php
 
 use CRM_ManualDirectDebit_ExtensionUtil as E;
+use CRM_ManualDirectDebit_Batch_BatchHandler as BatchHandler;
 
 /**
  * Collection of upgrade steps.
@@ -152,7 +153,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->addOptionValue([
       'option_group_id' => 'batch_type',
       'name' => 'cancellations_batch',
-      'label' => 'Direct Debit Cancellations',
+      'label' => 'Cancelled Instructions',
       'is_active' => 1,
       'weight' => 6,
       'description' => 'Direct debit mandates that need to be cancelled.',

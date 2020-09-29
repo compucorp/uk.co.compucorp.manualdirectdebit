@@ -1,4 +1,5 @@
 <?php
+use CRM_ManualDirectDebit_Batch_BatchHandler as BatchHandler;
 
 /**
  * This class is used to retrieve and display a range of direct debit mandates
@@ -233,7 +234,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @return array
    */
   private function setColumnHeader($columnHeader = []) {
-    $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID));
+    $batch = (new BatchHandler($this->batchID));
     if (empty($columnHeader)) {
       $columnHeader = [
         'contact_id' => ts('ID'),
@@ -263,7 +264,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @return array
    */
   private function setReturnValues($returnValues = []) {
-    $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID));
+    $batch = (new BatchHandler($this->batchID));
     if (empty($returnValues) || !is_array($returnValues)) {
       $returnValues = [
         'id' => $this->params['entityTable'] . '.id as id',
@@ -293,7 +294,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @return array
    */
   public function getRows() {
-    $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID));
+    $batch = (new BatchHandler($this->batchID));
     return $this->getBatchRows($batch);
   }
 
@@ -367,7 +368,8 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       $row['check'] = $this->getCheckRow($batch, $mandateItem['id']);
 
       switch ($batch->getBatchType()) {
-        case "instructions_batch":
+        case BatchHandler::BATCH_TYPE_INSTRUCTIONS:
+        case BatchHandler::BATCH_TYPE_CANCELLATIONS:
           if (!empty($mandateItem['contact_id'])) {
             $row['action'] = $this->getLinkToMandate($mandateItem['contact_id']);
           }
@@ -375,7 +377,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
           $rows[$mandateItem['mandate_id']] = $row;
           break;
 
-        case "dd_payments":
+        case BatchHandler::BATCH_TYPE_PAYMENTS:
           if (isset($mandateItem['contribute_id'])) {
             $contributionId = $mandateItem['contribute_id'];
           }
@@ -390,7 +392,6 @@ class CRM_ManualDirectDebit_Batch_Transaction {
           $rows[$contributionId] = $row;
           break;
       }
-
     }
 
     return $rows;
