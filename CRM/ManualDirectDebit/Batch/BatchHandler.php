@@ -1,10 +1,12 @@
 <?php
 
 /**
- * This class is used for batch handling
- *
+ * This class is used for batch handling.
  */
 class CRM_ManualDirectDebit_Batch_BatchHandler {
+  const BATCH_TYPE_INSTRUCTIONS = 'instructions_batch';
+  const BATCH_TYPE_PAYMENTS = 'dd_payments';
+  const BATCH_TYPE_CANCELLATIONS = 'cancellations_batch';
 
   /**
    * Batch
