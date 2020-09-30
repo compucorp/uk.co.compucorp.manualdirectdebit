@@ -11,7 +11,7 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
    *
    * @var array
    */
-  static $links = NULL;
+  public static $links = NULL;
 
   /**
    * Pager
@@ -79,8 +79,8 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
    * Finally it calls the parent's run method.
    */
   public function run() {
-    // get the requested action
-    $action = CRM_Utils_Request::retrieve('action', 'String', $this, FALSE, 'browse'); // default to 'browse'
+    // get the requested action - default to 'browse'
+    $action = CRM_Utils_Request::retrieve('action', 'String', $this, FALSE, 'browse');
     $this->assign('action', $action);
     $batchTypes = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, NULL, 'name');
 
@@ -121,10 +121,11 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
       $batch['transaction_count'] = $batchTransaction->getTotalNumber();
     }
 
-    if(BatchHandler::BATCH_TYPE_PAYMENTS == $batchTypes[$typeId]){
+    if (BatchHandler::BATCH_TYPE_PAYMENTS == $batchTypes[$typeId]) {
       $type = 'Payment';
       CRM_Utils_System::setTitle(ts('View Payment Batches'));
-    } else {
+    }
+    else {
       $type = 'Instruction';
       CRM_Utils_System::setTitle(ts('View New Instruction Batches'));
     }
