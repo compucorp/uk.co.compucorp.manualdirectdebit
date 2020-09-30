@@ -46,12 +46,11 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * What column does select in SQL query
    *
    * @var array
-   * @code
    *
+   * @code
    *  $returnValues = [
    *    'name' => 'tableName.column as alias',
    *  ]
-   *
    * @endcode
    */
   protected $returnValues = [];
@@ -60,12 +59,11 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * What column does select in SQL query
    *
    * @var array
-   * @code
    *
+   * @code
    *  $columnHeader = [
    *    'alias' => 'label',
    *  ]
-   *
    * @endcode
    */
   protected $columnHeader = [];
@@ -455,7 +453,6 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     }
 
     $this->addContributionReceiveDateCondition($query);
-
     $this->addContributionCancelDateCondition($query);
 
     if ($this->notPresent) {

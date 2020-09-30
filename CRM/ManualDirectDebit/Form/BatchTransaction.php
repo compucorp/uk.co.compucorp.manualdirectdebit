@@ -16,7 +16,7 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
   /**
    * Batch id.
    *
-   * @var integer
+   * @var int
    */
   protected $batchID;
 

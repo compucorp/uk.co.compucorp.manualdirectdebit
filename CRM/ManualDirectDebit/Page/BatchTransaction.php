@@ -14,7 +14,7 @@ class CRM_ManualDirectDebit_Page_BatchTransaction extends CRM_Core_Page_Basic {
   protected $links = NULL;
 
   /**
-   * @var integer
+   * @var int
    */
   protected $entityID;
 
@@ -22,8 +22,8 @@ class CRM_ManualDirectDebit_Page_BatchTransaction extends CRM_Core_Page_Basic {
    * Runs the page.
    */
   public function run() {
-    // get the requested action
-    $action = CRM_Utils_Request::retrieve('action', 'String', $this, FALSE, 'browse'); // default to 'browse'
+    // get the requested action - default to 'browse'
+    $action = CRM_Utils_Request::retrieve('action', 'String', $this, FALSE, 'browse');
 
     if ($action == CRM_Core_Action::VIEW) {
       $batchID = CRM_Utils_Request::retrieve('bid', 'Positive') ?: CRM_Utils_Array::value('batch_id', $_POST);

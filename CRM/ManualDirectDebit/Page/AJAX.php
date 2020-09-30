@@ -33,7 +33,7 @@ class CRM_ManualDirectDebit_Page_AJAX {
     $notPresent = CRM_Utils_Request::retrieveValue('notPresent', 'String', NULL);
 
     $batch = (new BatchHandler($entityID));
-    if($batch->getBatchType() == BatchHandler::BATCH_TYPE_PAYMENTS) {
+    if ($batch->getBatchType() == BatchHandler::BATCH_TYPE_PAYMENTS) {
       $sortMapper[] = 'receive_date';
     }
 
@@ -74,7 +74,7 @@ class CRM_ManualDirectDebit_Page_AJAX {
       'transaction_type',
     ];
 
-    if($batch->getBatchType() == BatchHandler::BATCH_TYPE_PAYMENTS) {
+    if ($batch->getBatchType() == BatchHandler::BATCH_TYPE_PAYMENTS) {
       $selectorElements[] = 'receive_date';
     }
     $selectorElements[] = 'action';
@@ -120,10 +120,10 @@ class CRM_ManualDirectDebit_Page_AJAX {
         // since we are using it to quote the field value.
         // str_replace helps to provide a break for new-line
         $sOutput .= '"' . $element . '" :"' . addcslashes(str_replace([
-            "\r\n",
-            "\n",
-            "\r",
-          ], '<br />', $value[$element]), '"\\') . '"';
+          "\r\n",
+          "\n",
+          "\r",
+        ], '<br />', $value[$element]), '"\\') . '"';
 
         // remove extra spaces and tab character that breaks dataTable CRM-12551
         $sOutput = preg_replace("/\s+/", " ", $sOutput);
@@ -218,6 +218,7 @@ class CRM_ManualDirectDebit_Page_AJAX {
               'batch_id' => $entityID,
             ];
             break;
+
           case 'discard':
             $batchStatus = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id', ['labelColumn' => 'name']);
             $params['status_id'] = CRM_Utils_Array::key('Discarded', $batchStatus);
