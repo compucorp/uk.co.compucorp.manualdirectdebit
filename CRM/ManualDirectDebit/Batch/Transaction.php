@@ -1,4 +1,5 @@
 <?php
+use CRM_ManualDirectDebit_Batch_BatchHandler as BatchHandler;
 
 /**
  * This class is used to retrieve and display a range of direct debit mandates
@@ -23,14 +24,14 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   /**
    * Search element
    *
-   * @var boolean
+   * @var bool
    */
   protected $notPresent;
 
   /**
    * Limit element
    *
-   * @var boolean
+   * @var bool
    */
   protected $total;
 
@@ -44,30 +45,28 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   /**
    * What column does select in SQL query
    *
+   * @var array
+   *
    * @code
    *
    *  $returnValues = [
    *    'name' => 'tableName.column as alias',
    *  ]
-   *
    * @endcode
-   *
-   * @var array
    */
   protected $returnValues = [];
 
   /**
    * What column does select in SQL query
    *
+   * @var array
+   *
    * @code
    *
    *  $columnHeader = [
    *    'alias' => 'label',
    *  ]
-   *
    * @endcode
-   *
-   * @var array
    */
   protected $columnHeader = [];
 
@@ -235,7 +234,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @return array
    */
   private function setColumnHeader($columnHeader = []) {
-    $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID));
+    $batch = (new BatchHandler($this->batchID));
     if (empty($columnHeader)) {
       $columnHeader = [
         'contact_id' => ts('ID'),
@@ -247,7 +246,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'transaction_type' => ts('Transaction Type'),
       ];
 
-      if($batch->getBatchType() == 'dd_payments') {
+      if ($batch->getBatchType() == BatchHandler::BATCH_TYPE_PAYMENTS) {
         $columnHeader['receive_date'] = ts('Received Date');
       }
     }
@@ -265,7 +264,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @return array
    */
   private function setReturnValues($returnValues = []) {
-    $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID));
+    $batch = (new BatchHandler($this->batchID));
     if (empty($returnValues) || !is_array($returnValues)) {
       $returnValues = [
         'id' => $this->params['entityTable'] . '.id as id',
@@ -279,7 +278,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'transaction_type' => 'civicrm_option_value.label as transaction_type',
       ];
 
-      if($batch->getBatchType() == 'dd_payments') {
+      if ($batch->getBatchType() == BatchHandler::BATCH_TYPE_PAYMENTS) {
         $returnValues['receive_date'] = 'DATE_FORMAT(civicrm_contribution.receive_date, "%d-%m-%Y") as receive_date';
       }
     }
@@ -295,10 +294,9 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @return array
    */
   public function getRows() {
-    $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID));
+    $batch = (new BatchHandler($this->batchID));
     return $this->getBatchRows($batch);
   }
-
 
   /**
    * Gets prepared data about previously serialized mandates
@@ -321,11 +319,11 @@ class CRM_ManualDirectDebit_Batch_Transaction {
 
       if (!empty($mandateValue['contact_id'])) {
         switch ($batch->getBatchType()) {
-          case "instructions_batch":
+          case BatchHandler::BATCH_TYPE_INSTRUCTIONS:
             $row['action'] = $this->getLinkToMandate($mandateValue['contact_id']);
             break;
 
-          case "dd_payments":
+          case BatchHandler::BATCH_TYPE_PAYMENTS:
             $row['action'] = $this->getLinkToContribution($mandateValue['contribute_id'], $mandateValue['contact_id']);
             break;
         }
@@ -370,7 +368,8 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       $row['check'] = $this->getCheckRow($batch, $mandateItem['id']);
 
       switch ($batch->getBatchType()) {
-        case "instructions_batch":
+        case BatchHandler::BATCH_TYPE_INSTRUCTIONS:
+        case BatchHandler::BATCH_TYPE_CANCELLATIONS:
           if (!empty($mandateItem['contact_id'])) {
             $row['action'] = $this->getLinkToMandate($mandateItem['contact_id']);
           }
@@ -378,7 +377,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
           $rows[$mandateItem['mandate_id']] = $row;
           break;
 
-        case "dd_payments":
+        case BatchHandler::BATCH_TYPE_PAYMENTS:
           if (isset($mandateItem['contribute_id'])) {
             $contributionId = $mandateItem['contribute_id'];
           }
@@ -393,7 +392,6 @@ class CRM_ManualDirectDebit_Batch_Transaction {
           $rows[$contributionId] = $row;
           break;
       }
-
     }
 
     return $rows;
@@ -457,9 +455,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     }
 
     $this->addContributionReceiveDateCondition($query);
-
     $this->addContributionCancelDateCondition($query);
-
 
     if ($this->notPresent) {
       $batchStatus = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id', ['labelColumn' => 'name']);
@@ -501,7 +497,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $mandateItems = CRM_Core_DAO::executeQuery($query->toSQL());
 
     $rows = [];
-    while($mandateItems->fetch()) {
+    while ($mandateItems->fetch()) {
       $mandateItem = [];
       foreach ($this->returnValues as $key => $value) {
         if (isset($mandateItems->$key)) {
@@ -516,7 +512,6 @@ class CRM_ManualDirectDebit_Batch_Transaction {
 
       $rows[] = $mandateItem;
     }
-
 
     return $rows;
   }
@@ -551,7 +546,6 @@ class CRM_ManualDirectDebit_Batch_Transaction {
 
     return $this->returnValues;
   }
-
 
   /**
    * Adds new columns for rows
@@ -641,7 +635,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
                      ['receive_date_start' => date('Ymd', strtotime($this->params['receive_date_low']))]
                    );
     }
-    if(!empty($this->params['receive_date_high'])) {
+    if (!empty($this->params['receive_date_high'])) {
       $query->where('DATE_FORMAT(civicrm_contribution.receive_date, "%Y%m%d") <= @receive_date_end',
                      ['receive_date_end' => date('Ymd', strtotime($this->params['receive_date_high']))]
                    );
@@ -665,7 +659,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
                      ['cancel_date_start' => date('Ymd', strtotime($this->params['contribution_cancel_date_low']))]
                    );
     }
-    if(!empty(!empty($this->params['contribution_cancel_date_high']))) {
+    if (!empty(!empty($this->params['contribution_cancel_date_high']))) {
       $query->where('civicrm_contribution.cancel_date <= @cancel_date_end',
                      ['cancel_date_end' => date('Ymd', strtotime($this->params['contribution_cancel_date_high']))]
                    );

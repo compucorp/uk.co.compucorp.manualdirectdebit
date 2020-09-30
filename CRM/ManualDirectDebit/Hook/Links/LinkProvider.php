@@ -20,7 +20,7 @@ class CRM_ManualDirectDebit_Hook_Links_LinkProvider {
    * @param $recurringContributionId
    */
   public function alterRecurContributionLinks(&$values, $recurringContributionId) {
-    $contactId =  CRM_Utils_Request::retrieve('cid', 'Integer');
+    $contactId = CRM_Utils_Request::retrieve('cid', 'Integer');
     $contactType = $this->getContactType($contactId);
 
     $this->links[] = [
@@ -62,7 +62,7 @@ class CRM_ManualDirectDebit_Hook_Links_LinkProvider {
   public function alterBatchLinks($objectId) {
     $batch = CRM_Batch_BAO_Batch::findById($objectId);
 
-    $instructionsBatchTypeId = CRM_Core_OptionGroup::getRowValues('batch_type', 'instructions_batch', 'name', 'String', FALSE);
+    $instructionsBatchTypeId = CRM_Core_OptionGroup::getRowValues('batch_type', CRM_ManualDirectDebit_Batch_BatchHandler::BATCH_TYPE_INSTRUCTIONS, 'name', 'String', FALSE);
     if ($batch->type_id == $instructionsBatchTypeId['value']) {
       foreach ($this->links as &$link) {
         switch ($link['name']) {
