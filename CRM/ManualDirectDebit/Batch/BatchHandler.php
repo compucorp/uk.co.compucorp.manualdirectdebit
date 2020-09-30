@@ -18,7 +18,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
   /**
    * Batch id
    *
-   * @var integer
+   * @var int
    */
   private $batchID;
 
@@ -131,7 +131,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       ts('Transaction Type'),
     ];
 
-    if($this->getBatchType() == self::BATCH_TYPE_PAYMENTS) {
+    if ($this->getBatchType() == self::BATCH_TYPE_PAYMENTS) {
       $headers[] = ts('Received Date');
     }
 
@@ -149,8 +149,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
    * Output CSV File
    *
    * @param array $headers
-   *
-   * @param array
+   * @param array $export
    */
   private function outputCSVFile($headers, $export) {
     $out = fopen('php://temp/maxmemory:' . (12 * 1024 * 1024), 'r+');
@@ -188,18 +187,18 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
     if ($batchTypes[$typeId] == self::BATCH_TYPE_INSTRUCTIONS) {
       $submittedMessage = '<p>' . ts('You are submitting all items within this batch:') . '</p>';
       $submittedMessage .= '<p>' . ts('- All mandates in the batch that currently have instruction code %1 will be transitioned to instruction code %2', [
-          1 => '0N',
-          2 => '01',
-        ]) . '</p>';
+        1 => '0N',
+        2 => '01',
+      ]) . '</p>';
       $submittedMessage .= '<p>' . ts('- The status of this batch will be updated to \'Submitted\'') . '</p>';
       $submittedMessage .= '<p>' . ts('Please note that this process is not reversible.') . '</p>';
     }
     elseif ($batchTypes[$typeId] == self::BATCH_TYPE_PAYMENTS) {
       $submittedMessage = '<p>' . ts('You are submitting all items within this batch:') . '</p>';
       $submittedMessage .= '<p>' . ts('- All mandates in the batch that currently have the code %1 will be transitioned to the code %2', [
-          1 => '01',
-          2 => '17',
-        ]) . '</p>';
+        1 => '01',
+        2 => '17',
+      ]) . '</p>';
 
       $submittedMessage .= '<p>' . ts('- All contributions in the batch with status \'Pending\' will be marked as \'Completed\'') . '</p>';
       $submittedMessage .= '<p>' . ts('- The status of this batch will be updated to \'Submitted\'') . '</p>';
@@ -339,10 +338,11 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       'transaction_type' => 'CONCAT("\t",civicrm_option_value.label) as transaction_type',
     ];
 
-    if($this->getBatchType() == self::BATCH_TYPE_PAYMENTS) {
+    if ($this->getBatchType() == self::BATCH_TYPE_PAYMENTS) {
       $returnValues['contribute_id'] = 'civicrm_contribution.id as contribute_id';
       $returnValues['receive_date'] = 'DATE_FORMAT(civicrm_contribution.receive_date, "%d-%m-%Y") as receive_date';
-    } else {
+    }
+    else {
       $returnValues['mandate_id'] = 'civicrm_value_dd_mandate.id as mandate_id';
     }
 

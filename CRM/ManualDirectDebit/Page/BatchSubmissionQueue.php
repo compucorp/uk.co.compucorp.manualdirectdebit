@@ -14,7 +14,7 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
     parent::__construct($title, $mode);
 
     $this->queue = CRM_ManualDirectDebit_Queue_BatchSubmission::getQueue();
-    $this->batchId =  CRM_Utils_Request::retrieveValue('batchId', 'Int');
+    $this->batchId = CRM_Utils_Request::retrieveValue('batchId', 'Int');
   }
 
   public function run() {
@@ -77,7 +77,7 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
     $runner = new CRM_Queue_Runner([
       'title' => ts('Submitting the batch, this may take a while depending on how many records are processed ..'),
       'queue' => $this->queue,
-      'errorMode'=> CRM_Queue_Runner::ERROR_ABORT,
+      'errorMode' => CRM_Queue_Runner::ERROR_ABORT,
       'onEnd' => array('CRM_ManualDirectDebit_Page_BatchSubmissionQueue', 'onEnd'),
       'onEndUrl' => CRM_Utils_System::url('civicrm/direct_debit/batch-transaction', ['reset' => 1, 'action' => 'view', 'bid' => $this->batchId]),
     ]);
@@ -89,4 +89,5 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
     $message = ts('Batch Submission Completed');
     CRM_Core_Session::setStatus($message, '', 'success');
   }
+
 }

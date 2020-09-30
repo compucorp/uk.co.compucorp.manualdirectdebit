@@ -20,7 +20,7 @@ class CRM_ManualDirectDebit_Hook_Links_LinkProvider {
    * @param $recurringContributionId
    */
   public function alterRecurContributionLinks(&$values, $recurringContributionId) {
-    $contactId =  CRM_Utils_Request::retrieve('cid', 'Integer');
+    $contactId = CRM_Utils_Request::retrieve('cid', 'Integer');
     $contactType = $this->getContactType($contactId);
 
     $this->links[] = [
