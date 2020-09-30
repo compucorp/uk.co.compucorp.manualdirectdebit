@@ -138,6 +138,8 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
    * @return array[]
    */
   private function assignCancellationsSearchProperties() {
+    CRM_Utils_System::setTitle(ts('Cancelled Instructions Batch - %1', [1 => $this->batch->id]));
+
     $this->addElement('hidden', 'entityTable', 'civicrm_value_dd_mandate');
     $this->assign('tableTitle', ts('Available instructions'));
     $this->assign('entityTable', 'civicrm_value_dd_mandate');
