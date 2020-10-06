@@ -123,12 +123,13 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
 
   /**
    * @depends testSaveDirectDebitMandate
-   * Tests assignContributionMandate function
+   * Tests ChangeMandateForContribution function
    * @return void
    * @throws CiviCRM_API3_Exception
    * @throws Exception
    */
   public function testChangeMandateForContribution() {
+
     $this->mandateValues['entity_id'] = $this->contact['id'];
     $storageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
     $mandate = $storageManager->saveDirectDebitMandate($this->contact['id'], $this->mandateValues);
