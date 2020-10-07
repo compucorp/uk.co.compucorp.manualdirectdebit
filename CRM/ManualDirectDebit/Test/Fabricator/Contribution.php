@@ -47,7 +47,26 @@ class CRM_ManualDirectDebit_Test_Fabricator_Contribution extends BaseFabricator 
       'financial_type_id' => "Member Dues",
       'total_amount' => 100,
       'receive_date' => $now->format('Y-m-d H:i:s'),
+      'payment_instrument' => self::getDirectDebitPaymentInstrumentID(),
+      'contribution_status_id' => self::getPendingStatusID(),
     ];
+  }
+
+  private static function getDirectDebitPaymentInstrumentID() {
+    return civicrm_api3('OptionValue', 'get', [
+      'sequential' => 1,
+      'option_group_id' => "payment_instrument",
+      'name' => "direct_debit",
+    ])['values'][0]['value'];
+
+  }
+
+  private static function getPendingStatusID() {
+    return civicrm_api3('OptionValue', 'get', [
+      'sequential' => 1,
+      'option_group_id' => "contribution_status",
+      'name' => "Pending",
+    ])['values'][0]['value'];
   }
 
 }

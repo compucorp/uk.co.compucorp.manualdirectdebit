@@ -23,6 +23,10 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
    * @var array
    */
   protected $contact;
+  /**
+   * @var mixed
+   */
+  private $originatorNumber;
 
   /**
    * setUp test
@@ -30,7 +34,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
    */
   public function setUp() {
     $this->contact = ContactFabricator::fabricate();
-    $originatorNumber = OriginatorNumberFabricator::fabricate()['values'][0]['value'];
+    $this->originatorNumber = OriginatorNumberFabricator::fabricate()['values'][0]['value'];
     $now = new DateTime();
     $this->mandateValues = [
       'entity_id' => $this->contact['id'],
@@ -42,12 +46,11 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
       'dd_ref' => 'DD Ref',
       'start_date' => $now->format('Y-m-d H:i:s'),
       'authorisation_date' => $now->format('Y-m-d H:i:s'),
-      'originator_number' => $originatorNumber,
+      'originator_number' => $this->originatorNumber,
     ];
 
     //Fabricate default settings
     SettingFabricator::fabricate();
-
   }
 
   /**
@@ -98,8 +101,10 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
    * @throws Exception
    */
   public function testAssignContributionMandate() {
+
     $fabricatedContribution = ContributionFabricator::fabricate(['contact_id' => $this->contact['id']]);
     $this->mandateValues['entity_id'] = $this->contact['id'];
+
     $storageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
     $mandate = $storageManager->saveDirectDebitMandate($this->contact['id'], $this->mandateValues);
     $storageManager->assignContributionMandate($fabricatedContribution['id'], $mandate->id);
@@ -114,7 +119,56 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
     $mandateIdCustomFieldId =
       CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName("mandate_id");
     $this->assertEquals($contribution['values'][0]['custom_' . $mandateIdCustomFieldId], $mandate->id);
+  }
 
+  /**
+   * @depends testSaveDirectDebitMandate
+   * Tests ChangeMandateForContribution function
+   * @return void
+   * @throws CiviCRM_API3_Exception
+   * @throws Exception
+   */
+  public function testChangeMandateForContribution() {
+
+    $this->mandateValues['entity_id'] = $this->contact['id'];
+    $storageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
+    $mandate = $storageManager->saveDirectDebitMandate($this->contact['id'], $this->mandateValues);
+
+    $fabricatedContribution = ContributionFabricator::fabricate([
+      'contact_id' => $this->contact['id'],
+    ]);
+
+    $storageManager->assignContributionMandate($fabricatedContribution['id'], $mandate->id);
+    $mandateIdCustomFieldId =
+      CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName("mandate_id");
+
+    $contribution = civicrm_api3('Contribution', 'get', [
+      'sequential' => 1,
+      'id' => $fabricatedContribution['id'],
+    ]);
+
+    $this->assertEquals($contribution['values'][0]['custom_' . $mandateIdCustomFieldId], $mandate->id);
+    $now = new DateTime();
+    $newMandate = [
+      'entity_id' => $this->contact['id'],
+      'bank_name' => 'HSBC',
+      'account_holder_name' => 'John Doe',
+      'ac_number' => '87654321',
+      'sort_code' => '56-32-12',
+      'dd_code' => 1,
+      'dd_ref' => 'DD Ref',
+      'start_date' => $now->format('Y-m-d H:i:s'),
+      'authorisation_date' => $now->format('Y-m-d H:i:s'),
+      'originator_number' => $this->originatorNumber,
+    ];
+
+    $newMandate = $storageManager->saveDirectDebitMandate($this->contact['id'], $newMandate);
+    $storageManager->changeMandateForContribution($newMandate->id, $mandate->id);
+    $contribution = civicrm_api3('Contribution', 'get', [
+      'sequential' => 1,
+      'id' => $fabricatedContribution['id'],
+    ]);
+    $this->assertEquals($contribution['values'][0]['custom_' . $mandateIdCustomFieldId], $newMandate->id);
   }
 
 }

@@ -74,7 +74,7 @@ class CRM_ManualDirectDebit_Hook_MandateContributionConnector {
    */
   public static function getInstance() {
     if (is_null(self::$instance)) {
-      self::$instance = new self;
+      self::$instance = new self();
     }
     return self::$instance;
   }
@@ -106,7 +106,6 @@ class CRM_ManualDirectDebit_Hook_MandateContributionConnector {
    */
   public function setMandateId($mandateId) {
     $this->mandateId = $mandateId;
-
     if (isset($this->contributionId)) {
       $this->createDependency();
     }
@@ -128,7 +127,9 @@ class CRM_ManualDirectDebit_Hook_MandateContributionConnector {
       }
     }
     else {
-      if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($this->currentPaymentInstrumentId)) {
+      if (isset($this->currentPaymentInstrumentId) &&
+        CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit(
+          $this->currentPaymentInstrumentId)) {
         $mandateStorage->assignContributionMandate($this->contributionId, $this->mandateId);
       }
     }
