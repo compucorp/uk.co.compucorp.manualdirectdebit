@@ -9,7 +9,7 @@
         </div>
         <div class="content float-left">
           From: <input data-crm-datepicker="{ldelim}&quot;time&quot;:false, &quot;allowClear&quot;:false{rdelim}" aria-label="From" name="created_date_from" type="text" value="{$created_date_from}" id="created_date_from" class="crm-form-text crm-hidden-date" />
-          To: <input data-crm-datepicker="{ldelim}&quot;time&quot;:false, &quot;allowClear&quot;:false{rdelim}" aria-label="To" name="created_date_to" type="text" value="{$created_date_from}" id="created_date_to" class="crm-form-text crm-hidden-date" />
+          To: <input data-crm-datepicker="{ldelim}&quot;time&quot;:false, &quot;allowClear&quot;:false{rdelim}" aria-label="To" name="created_date_to" type="text" value="{$created_date_to}" id="created_date_to" class="crm-form-text crm-hidden-date" />
         </div>
         <div class="float-left">&nbsp;</div>
         <div>
