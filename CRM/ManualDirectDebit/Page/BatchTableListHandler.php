@@ -103,7 +103,7 @@ class CRM_ManualDirectDebit_Page_BatchTableListHandler {
     $linksMask = array_sum(array_keys($rowLinks));
 
     if ($batchStatuses[$rowValues['status_id']] == 'Closed') {
-      $rowLinks =[];
+      $rowLinks = [];
     }
     $linksValues = ['id' => $rowValues['id'], 'status' => $rowValues['status_id']];
 
