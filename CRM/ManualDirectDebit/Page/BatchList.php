@@ -157,7 +157,7 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
       'context' => '',
     ];
 
-    switch (true) {
+    switch (TRUE) {
       case !empty($createdDateFrom) && !empty($createdDateTo):
         $param['created_date'] = ['BETWEEN' => [$createdDateFrom, $createdDateTo]];
         break;
