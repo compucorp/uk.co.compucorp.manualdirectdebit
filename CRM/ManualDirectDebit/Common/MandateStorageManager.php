@@ -342,7 +342,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
         WHERE civicrm_value_dd_information.mandate_id = %1
       ';
       CRM_Core_DAO::executeQuery($query, [
-        1 => [$mandateID, 'Integer'],
+        1 => [$mandateID, 'String'],
       ]);
 
       $dao = CRM_Core_BAO_CustomGroup::class;
