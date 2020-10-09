@@ -361,6 +361,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
     $dataForExport = [];
     switch ($this->getBatchType()) {
       case self::BATCH_TYPE_INSTRUCTIONS:
+      case self::BATCH_TYPE_CANCELLATIONS:
         $entityTable = 'civicrm_value_dd_mandate';
         break;
 
