@@ -1,4 +1,28 @@
 <div id="enableDisableStatusMsg" class="crm-container" style="display:none;"></div>
+
+<div class="crm-form-block crm-search-form-block">
+  <div class="page-civicrm-group">
+    <form id="searchForm">
+      <div class="crm-section">
+        <div class="content float-left">
+          Batch Type: {html_options name="type_id" id="type_id" class="crm-select2 crm-form-select" options=$batchTypes selected=$type_id}
+        </div>
+        <div class="content float-left">
+          From: <input data-crm-datepicker="{ldelim}&quot;time&quot;:false, &quot;allowClear&quot;:false{rdelim}" aria-label="From" name="created_date_from" type="text" value="{$created_date_from}" id="created_date_from" class="crm-form-text crm-hidden-date" />
+          To: <input data-crm-datepicker="{ldelim}&quot;time&quot;:false, &quot;allowClear&quot;:false{rdelim}" aria-label="To" name="created_date_to" type="text" value="{$created_date_from}" id="created_date_to" class="crm-form-text crm-hidden-date" />
+        </div>
+        <div class="float-left">&nbsp;</div>
+        <div>
+          <span class="crm-button crm-button-type-refresh crm-button_qf_Basic_refresh crm-i-button">
+            <i class="crm-i fa-check" aria-hidden="true"></i>
+            <input class="crm-form-submit default validate" crm-icon="fa-check" name="_qf_Basic_refresh" value="Search" type="submit" id="_qf_Basic_refresh">
+          </span>
+        </div>
+        <div class="clear"></div>
+      </div>
+    </form>
+  </div>
+</div>
 <div class="batch-list crm-results-block">
   {include file="CRM/common/pager.tpl" location="top"}
     {strip}
@@ -6,6 +30,7 @@
     <thead class="sticky">
     <tr>
       <th class="crm-batch-name">{ts}Batch Name{/ts}</th>
+      <th class="crm-batch-name">{ts}Batch Type{/ts}</th>
       <th class="crm-batch-item_count">{ts}{$type} Count{/ts}</th>
       <th class="crm-batch-status">{ts}Status{/ts}</th>
       <th class="crm-batch-created_date">{ts}Created Date{/ts}</th>
@@ -18,6 +43,9 @@
       <tr class="crm-entity" data-entity="batch" data-id="{$batch.id}">
         <td class="crm-batch-name">
           {$batch.name}
+        </td>
+        <td class="crm-batch-item_count">
+          {$batch.batch_type_name}
         </td>
         <td class="crm-batch-item_count">
           {$batch.transaction_count}

@@ -40,8 +40,6 @@ class CRM_ManualDirectDebit_Page_BatchTableListHandler {
    * @return array
    */
   private static function getPageBatches($filterParams) {
-    $batches = [];
-
     $apiParams['status_id'] = ['NOT IN' => ['Data Entry']];
 
     if (!empty($filterParams['id'])) {
@@ -50,6 +48,10 @@ class CRM_ManualDirectDebit_Page_BatchTableListHandler {
 
     if (!empty($filterParams['type_id'])) {
       $apiParams['type_id'] = $filterParams['type_id'];
+    }
+
+    if (!empty($filterParams['created_date'])) {
+      $apiParams['created_date'] = $filterParams['created_date'];
     }
 
     if (!empty($filterParams['rowCount']) && is_numeric($filterParams['rowCount'])
@@ -77,10 +79,10 @@ class CRM_ManualDirectDebit_Page_BatchTableListHandler {
 
     $result = civicrm_api3('Batch', 'get', $apiParams);
     if (!empty($result['values'])) {
-      $batches = $result['values'];
+      return $result['values'];
     }
 
-    return $batches;
+    return [];
   }
 
   /**

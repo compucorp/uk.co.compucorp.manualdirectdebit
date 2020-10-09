@@ -21,6 +21,13 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
   protected $_pager;
 
   /**
+   * List of machine names mapped to batch type value.
+   *
+   * @var array
+   */
+  private $batchTypeMachineNames = [];
+
+  /**
    * Get BAO Name.
    *
    * @return string
@@ -82,24 +89,103 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
     // get the requested action - default to 'browse'
     $action = CRM_Utils_Request::retrieve('action', 'String', $this, FALSE, 'browse');
     $this->assign('action', $action);
-    $batchTypes = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, NULL, 'name');
 
-    $typeId = CRM_Utils_Request::retrieve('type_id', 'String', $this, FALSE);
-    $typeId = $typeId ?: array_search(BatchHandler::BATCH_TYPE_INSTRUCTIONS, $batchTypes);
+    $typeIdInRequest = CRM_Utils_Request::retrieve('type_id', 'String', $this, FALSE, NULL);
+    $this->setPageTitle($typeIdInRequest);
+
+    $param = $this->buildSearchParams($typeIdInRequest);
+    $this->pager($param);
+    [$param['offset'], $param['rowCount']] = $this->_pager->getOffsetAndRowCount();
+
+    $this->assign('batches', $this->getBatchList($param));
+    $this->assign('submittedMessage', BatchHandler::getSubmitAlertMessage($typeIdInRequest));
+    $this->assign('type', $this->getEntityTypeName($typeIdInRequest));
+    $this->assign('type_id', $typeIdInRequest);
+    $this->assign('created_date_from', CRM_Utils_Request::retrieve('created_date_from', 'String', $this, FALSE, NULL));
+    $this->assign('created_date_to', CRM_Utils_Request::retrieve('created_date_to', 'String', $this, FALSE, NULL));
+    $this->assign('batchTypes', $this->getBatchTypeOptions());
+
+    return parent::run();
+  }
+
+  /**
+   * Sets the title for the page, depending on the given batch type id.
+   *
+   * @param int $batchTypeID
+   */
+  private function setPageTitle($batchTypeID) {
+    if (BatchHandler::BATCH_TYPE_PAYMENTS == $this->getBatchTypeMachineName($batchTypeID)) {
+      CRM_Utils_System::setTitle(ts('View Payment Batches'));
+    }
+    else {
+      CRM_Utils_System::setTitle(ts('Manage Instruction Batches'));
+    }
+  }
+
+  /**
+   * Obtains machine name for the given batch type id.
+   *
+   * Returns machine name for the given type value, or an empty string if it is
+   * not found.
+   *
+   * @param int $batchTypeID
+   *
+   * @return string
+   */
+  private function getBatchTypeMachineName($batchTypeID) {
+    if (count($this->batchTypeMachineNames) === 0) {
+      $this->batchTypeMachineNames = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, NULL, 'name');
+    }
+
+    return CRM_Utils_Array::value($batchTypeID, $this->batchTypeMachineNames, '');
+  }
+
+  /**
+   * Builds parameters that will be used to search for batches.
+   *
+   * @param $typeIdInRequest
+   *
+   * @return array
+   * @throws \CRM_Core_Exception
+   */
+  private function buildSearchParams($typeIdInRequest) {
+    $createdDateFrom = CRM_Utils_Request::retrieve('created_date_from', 'String', $this, FALSE, NULL);
+    $createdDateTo = CRM_Utils_Request::retrieve('created_date_to', 'String', $this, FALSE, NULL);
 
     $param = [
-      'type_id' => $typeId,
+      'type_id' => $typeIdInRequest,
       'context' => '',
     ];
 
-    $this->pager($param);
+    switch (true) {
+      case !empty($createdDateFrom) && !empty($createdDateTo):
+        $param['created_date'] = ['BETWEEN' => [$createdDateFrom, $createdDateTo]];
+        break;
 
-    list($param['offset'], $param['rowCount']) = $this->_pager->getOffsetAndRowCount();
+      case !empty($createdDateFrom):
+        $param['created_date'] = ['>=' => $createdDateFrom];
+        break;
 
+      case !empty($createdDateTo):
+        $param['created_date'] = ['<=' => $createdDateTo];
+        break;
+    }
+
+    return $param;
+  }
+
+  /**
+   * Obtains list of batches that meet the given search criteria.
+   *
+   * @param array $param
+   *
+   * @return array
+   */
+  private function getBatchList($param) {
     $batchList = CRM_ManualDirectDebit_Page_BatchTableListHandler::generateRows($param);
     $batchStatuses = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id', ['labelColumn' => 'name']);
+    $batchTypeNames = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, NULL, 'label');
 
-    $param = [];
     foreach ($batchList as $id => &$batch) {
       $action = array_sum(array_keys($this->links()));
 
@@ -116,46 +202,81 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
         ['id' => $id], ts('more'), FALSE, '', 'Batch', $id
       );
 
-      $param['entityTable'] = BatchHandler::BATCH_TYPE_PAYMENTS == $batchTypes[$batch['type_id']] ? 'civicrm_contribution' : 'civicrm_value_dd_mandate';
+      $param = [];
+      $param['entityTable'] = BatchHandler::BATCH_TYPE_PAYMENTS == $this->getBatchTypeMachineName($batch['type_id']) ? 'civicrm_contribution' : 'civicrm_value_dd_mandate';
       $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction($batch['id'], $param);
       $batch['transaction_count'] = $batchTransaction->getTotalNumber();
+      $batch['batch_type_name'] = $batchTypeNames[$batch['type_id']];
     }
 
-    if (BatchHandler::BATCH_TYPE_PAYMENTS == $batchTypes[$typeId]) {
-      $type = 'Payment';
-      CRM_Utils_System::setTitle(ts('View Payment Batches'));
-    }
-    else {
-      $type = 'Instruction';
-      CRM_Utils_System::setTitle(ts('View New Instruction Batches'));
-    }
-
-    $submittedMessage = BatchHandler::getSubmitAlertMessage($typeId);
-    $this->assign('submittedMessage', $submittedMessage);
-    $this->assign('batches', $batchList);
-    $this->assign('type', $type);
-
-    return parent::run();
+    return $batchList;
   }
 
   /**
-   * @param $param
+   * Determines entity type name form the given batch type value.
+   *
+   * @param string $typeId
+   *
+   * @return string
    */
-  public function pager($param) {
-    $params = [];
-
-    $params['status'] = ts('Group') . ' %%StatusMessage%%';
-    $params['csvString'] = NULL;
-    $params['buttonTop'] = 'PagerTopButton';
-    $params['buttonBottom'] = 'PagerBottomButton';
-    $params['rowCount'] = $this->get(CRM_Utils_Pager::PAGE_ROWCOUNT);
-    if (!$params['rowCount']) {
-      $params['rowCount'] = CRM_Utils_Pager::ROWCOUNT;;
+  private function getEntityTypeName($typeId) {
+    if (BatchHandler::BATCH_TYPE_PAYMENTS == $this->getBatchTypeMachineName($typeId)) {
+      $entityTypeName = 'Payment';
+    }
+    else {
+      $entityTypeName = 'Instruction';
     }
 
-    $params['total'] = CRM_Batch_BAO_Batch::getBatchCount($param);
-    $this->_pager = new CRM_Utils_Pager($params);
+    return $entityTypeName;
+  }
+
+  /**
+   * Builds options for batch types for the search form.
+   *
+   * @return array
+   */
+  private function getBatchTypeOptions() {
+    $batchTypeNames = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, NULL, 'label');
+
+    return ['' => 'All'] + $batchTypeNames;
+  }
+
+  /**
+   * @param $batchSearchParameters
+   */
+  public function pager($batchSearchParameters) {
+    $pagerParameters = [];
+
+    $pagerParameters['status'] = ts('Group') . ' %%StatusMessage%%';
+    $pagerParameters['csvString'] = NULL;
+    $pagerParameters['buttonTop'] = 'PagerTopButton';
+    $pagerParameters['buttonBottom'] = 'PagerBottomButton';
+    $pagerParameters['rowCount'] = $this->get(CRM_Utils_Pager::PAGE_ROWCOUNT);
+    if (!$pagerParameters['rowCount']) {
+      $pagerParameters['rowCount'] = CRM_Utils_Pager::ROWCOUNT;;
+    }
+
+    $pagerParameters['total'] = $this->getBatchCount($batchSearchParameters);
+    $this->_pager = new CRM_Utils_Pager($pagerParameters);
     $this->assign_by_ref('pager', $this->_pager);
+  }
+
+  /**
+   * Counts total amount of batches that meet the given search criteria.
+   *
+   * @param array $batchSearchParameters
+   *
+   * @return array
+   * @throws \CiviCRM_API3_Exception
+   */
+  private function getBatchCount($batchSearchParameters) {
+    $apiParams = CRM_Batch_BAO_Batch::whereClause($batchSearchParameters);
+
+    if (isset($batchSearchParameters['created_date'])) {
+      $apiParams['created_date'] = $batchSearchParameters['created_date'];
+    }
+
+    return civicrm_api3('Batch', 'getCount', $batchSearchParameters);
   }
 
   /**

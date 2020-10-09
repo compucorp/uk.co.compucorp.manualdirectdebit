@@ -159,9 +159,31 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       'description' => 'Direct debit mandates that need to be cancelled.',
     ]);
     $this->addNav($this->buildCreateCancelledInstructionsBatchMenuItem());
+    $this->updateMenuLabelsFromViewToManage();
     CRM_Core_BAO_Navigation::resetNavigation();
 
     return TRUE;
+  }
+
+  /**
+   * Updates menu items for View New Instructions/Payment Batches.
+   *
+   * Changes the labels for 'View New Instruction Batches' to 'Manage
+   * Instruction Batches', and 'View Payment Collection Batches' to 'Manage
+   * Payment Collection Batches'.
+   */
+  private function updateMenuLabelsFromViewToManage() {
+    $viewInstructionsItem = new CRM_Core_BAO_Navigation();
+    $viewInstructionsItem->name = 'view_new_instruction_batches';
+    $viewInstructionsItem->find(TRUE);
+    $viewInstructionsItem->label = 'Manage Instruction Batches';
+    $viewInstructionsItem->save();
+
+    $viewPaymentsItem = new CRM_Core_BAO_Navigation();
+    $viewPaymentsItem->name = 'view_payment_batches';
+    $viewPaymentsItem->find(TRUE);
+    $viewPaymentsItem->label = 'Manage Payment Collection Batches';
+    $viewPaymentsItem->save();
   }
 
   /**
@@ -511,7 +533,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
         'parent_name' => 'direct_debit',
       ],
       [
-        'label' => ts('View New Instruction Batches'),
+        'label' => ts('Manage Instruction Batches'),
         'name' => 'view_new_instruction_batches',
         'url' => 'civicrm/direct_debit/batch-list?reset=1&type_id=' . array_search(BatchHandler::BATCH_TYPE_INSTRUCTIONS, $batchTypes),
         'permission' => 'can manage direct debit batches',
@@ -520,7 +542,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
         'parent_name' => 'direct_debit',
       ],
       [
-        'label' => ts('View Payment Collection Batches'),
+        'label' => ts('Manage Payment Collection Batches'),
         'name' => 'view_payment_batches',
         'url' => 'civicrm/direct_debit/batch-list?reset=1&type_id=' . array_search(BatchHandler::BATCH_TYPE_PAYMENTS, $batchTypes),
         'permission' => 'can manage direct debit batches',
