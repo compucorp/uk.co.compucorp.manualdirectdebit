@@ -183,8 +183,9 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
    */
   public static function getSubmitAlertMessage($typeId) {
     $batchTypes = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, NULL, 'name');
+    $batchTypeName = CRM_Utils_Array::value($typeId, $batchTypes, '');
 
-    if ($batchTypes[$typeId] == self::BATCH_TYPE_INSTRUCTIONS) {
+    if ($batchTypeName == self::BATCH_TYPE_INSTRUCTIONS) {
       $submittedMessage = '<p>' . ts('You are submitting all items within this batch:') . '</p>';
       $submittedMessage .= '<p>' . ts('- All mandates in the batch that currently have instruction code %1 will be transitioned to instruction code %2', [
         1 => '0N',
@@ -193,7 +194,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       $submittedMessage .= '<p>' . ts('- The status of this batch will be updated to \'Submitted\'') . '</p>';
       $submittedMessage .= '<p>' . ts('Please note that this process is not reversible.') . '</p>';
     }
-    elseif ($batchTypes[$typeId] == self::BATCH_TYPE_PAYMENTS) {
+    elseif ($batchTypeName == self::BATCH_TYPE_PAYMENTS) {
       $submittedMessage = '<p>' . ts('You are submitting all items within this batch:') . '</p>';
       $submittedMessage .= '<p>' . ts('- All mandates in the batch that currently have the code %1 will be transitioned to the code %2', [
         1 => '01',
@@ -379,6 +380,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
     foreach ($mandateItems as $mandateItem) {
       switch ($this->getBatchType()) {
         case self::BATCH_TYPE_INSTRUCTIONS:
+        case self::BATCH_TYPE_CANCELLATIONS:
           $entityId = $mandateItem['mandate_id'];
           unset($mandateItem['mandate_id']);
           $dataForExport[$entityId] = $mandateItem;
