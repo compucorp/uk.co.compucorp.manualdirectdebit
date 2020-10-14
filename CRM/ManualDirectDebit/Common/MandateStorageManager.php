@@ -12,6 +12,11 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
   const DIRECT_DEBIT_TABLE_NAME = 'civicrm_value_dd_mandate';
 
   /**
+   * Names available for dd_code field.
+   */
+  const DD_CODE_NAME_CANCELDIRECTDEBIT = 'cancel_a_direct_debit';
+
+  /**
    * Assigns depandency between contribution and mandate
    *
    * @param $contributionId

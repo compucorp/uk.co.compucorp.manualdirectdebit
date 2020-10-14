@@ -268,7 +268,6 @@ function _manualdirectdebit_getContactType($contactId) {
 
 /**
  * Implements hook_civicrm_custom().
- *
  */
 function manualdirectdebit_civicrm_custom($op, $groupID, $entityID, &$params) {
   if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($groupID)) {
@@ -281,6 +280,10 @@ function manualdirectdebit_civicrm_custom($op, $groupID, $entityID, &$params) {
       $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_DataGenerator($entityID, $params);
       $mandateDataGenerator->generateMandateData();
     }
+
+    $mandateStorageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
+    $cancellationChecker = new CRM_ManualDirectDebit_Hook_Custom_CancellationBatchChecker($entityID, $params, $mandateStorageManager);
+    $cancellationChecker->process();
   }
 }
 
@@ -296,6 +299,11 @@ function manualdirectdebit_civicrm_postSave_civicrm_contribution($dao) {
  * Implements hook_civicrm_post().
  */
 function manualdirectdebit_civicrm_post($op, $objectName, $objectId, &$objectRef) {
+  if ($op == 'create' && $objectName == 'Contribution') {
+    $postContributionHook = new CRM_ManualDirectDebit_Hook_Post_Contribution($objectId);
+    $postContributionHook->process();
+  }
+
   if ($op == 'create' && $objectName == 'Contribution') {
     $postContributionHook = new CRM_ManualDirectDebit_Hook_Post_Contribution($objectId);
     $postContributionHook->process();
