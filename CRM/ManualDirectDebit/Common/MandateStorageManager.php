@@ -12,6 +12,11 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
   const DIRECT_DEBIT_TABLE_NAME = 'civicrm_value_dd_mandate';
 
   /**
+   * Names available for dd_code field.
+   */
+  const DD_CODE_NAME_CANCELDIRECTDEBIT = 'cancel_a_direct_debit';
+
+  /**
    * Assigns depandency between contribution and mandate
    *
    * @param $contributionId
@@ -175,8 +180,8 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
     $setValueTemplate = implode(', ', $setValueTemplateFields);
 
     // write into Data Base
-    $query = "UPDATE " . self::DIRECT_DEBIT_TABLE_NAME . " 
-    SET $setValueTemplate 
+    $query = "UPDATE " . self::DIRECT_DEBIT_TABLE_NAME . "
+    SET $setValueTemplate
     WHERE " . self::DIRECT_DEBIT_TABLE_NAME . ".id = $mandateId";
     CRM_Core_DAO::executeQuery($query, $fieldsValues);
 
@@ -307,10 +312,10 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
   public function changeMandateForContribution($mandateId, $oldMandateId) {
     $completedStatusId = CRM_ManualDirectDebit_Common_OptionValue::getValueForOptionValue('contribution_status', 'Completed');
 
-    $query = "UPDATE `civicrm_value_dd_information` AS dd_information 
-              LEFT JOIN `civicrm_contribution` AS contribution ON dd_information.entity_id = contribution.id 
-              SET dd_information.mandate_id = $mandateId 
-              WHERE dd_information.mandate_id = $oldMandateId 
+    $query = "UPDATE `civicrm_value_dd_information` AS dd_information
+              LEFT JOIN `civicrm_contribution` AS contribution ON dd_information.entity_id = contribution.id
+              SET dd_information.mandate_id = $mandateId
+              WHERE dd_information.mandate_id = $oldMandateId
               AND contribution.contribution_status_id != $completedStatusId";
     CRM_Core_DAO::executeQuery($query);
   }
@@ -360,8 +365,8 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
    */
   public function getMandate($mandateID) {
     $sqlSelectDebitMandateID = '
-      SELECT * 
-      FROM ' . self::DIRECT_DEBIT_TABLE_NAME . ' 
+      SELECT *
+      FROM ' . self::DIRECT_DEBIT_TABLE_NAME . '
       WHERE id = %1
     ';
     $queryResult = CRM_Core_DAO::executeQuery($sqlSelectDebitMandateID, [
@@ -381,8 +386,8 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
    */
   public function getMandatesForContact($contactID) {
     $sqlSelectDebitMandateID = '
-      SELECT * 
-      FROM ' . self::DIRECT_DEBIT_TABLE_NAME . ' 
+      SELECT *
+      FROM ' . self::DIRECT_DEBIT_TABLE_NAME . '
       WHERE `entity_id` = %1
     ';
     $queryResult = CRM_Core_DAO::executeQuery($sqlSelectDebitMandateID, [
