@@ -13,7 +13,7 @@ class CRM_ManualDirectDebit_Hook_Custom_CancellationBatchChecker {
   private $contactID;
   private $params;
   private $mandateStorageManager;
-  private $dd_codes;
+  private $ddCodes;
 
   /**
    * CRM_ManualDirectDebit_Hook_Custom_CancellationBatchChecker constructor.
@@ -26,7 +26,7 @@ class CRM_ManualDirectDebit_Hook_Custom_CancellationBatchChecker {
     $this->contactID = $contactID;
     $this->params = $params;
     $this->mandateStorageManager = $mandateStorageManager;
-    $this->dd_codes = $this->getDDCodes();
+    $this->ddCodes = $this->getDDCodes();
   }
 
   /**
@@ -92,7 +92,7 @@ class CRM_ManualDirectDebit_Hook_Custom_CancellationBatchChecker {
    * @return bool
    */
   private function isCancelledMandate($mandate) {
-    if ($this->dd_codes[$mandate['dd_code']] === MandateStorageManager::DD_CODE_NAME_CANCELDIRECTDEBIT) {
+    if ($this->ddCodes[$mandate['dd_code']] === MandateStorageManager::DD_CODE_NAME_CANCELDIRECTDEBIT) {
       return TRUE;
     }
 
