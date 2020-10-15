@@ -3,7 +3,6 @@
 require_once 'manualdirectdebit.civix.php';
 
 use CRM_ManualDirectDebit_ExtensionUtil as E;
-use Symfony\Component\DependencyInjection\Definition;
 
 /**
  * Implements hook_civicrm_config().
@@ -149,7 +148,6 @@ function manualdirectdebit_civicrm_navigationMenu(&$menu) {
   ];
   _manualdirectdebit_civix_insert_navigation_menu($menu, 'Administer/', $directDebitMenuItem);
 
-
   $subMenuItems = [
     [
       'name' => ts('Direct Debit Codes'),
@@ -188,7 +186,7 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
   $paymentInstrumentId = CRM_Utils_Array::value('payment_instrument_id', $form->getVar('_submitValues'));
   $isDirectDebit = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($paymentInstrumentId);
 
-  switch (true) {
+  switch (TRUE) {
     case $formName == 'CRM_Contribute_Form_UpdateSubscription' && $action == CRM_Core_Action::UPDATE:
       $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_RecurContribution_DirectDebitMandate($form);
       $manualDirectDebit->saveMandateData();
@@ -226,8 +224,7 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
  * Implements hook_civicrm_pageRun().
  */
 function manualdirectdebit_civicrm_pageRun(&$page) {
-  switch(get_class($page)) {
-
+  switch (get_class($page)) {
     case 'CRM_Contribute_Page_ContributionRecur':
       $injectCustomGroup = new CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInjector($page);
       $injectCustomGroup->inject();
@@ -298,7 +295,7 @@ function manualdirectdebit_civicrm_postSave_civicrm_contribution($dao) {
 }
 
 /**
- * Implements hook_civicrm_post.
+ * Implements hook_civicrm_post().
  */
 function manualdirectdebit_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   if ($op == 'create' && $objectName == 'Contribution') {
@@ -313,15 +310,16 @@ function manualdirectdebit_civicrm_post($op, $objectName, $objectId, &$objectRef
 }
 
 /**
- * Implements hook_civicrm_buildForm()
+ * Implements hook_civicrm_buildForm().
  */
 function manualdirectdebit_civicrm_buildForm($formName, &$form) {
   if ($formName == 'CRM_Activity_Form_ActivityLinks') {
     $openContributionId = CRM_Utils_Request::retrieveValue('openContribution', 'Integer', FALSE);
-    if ($openContributionId){
+    if ($openContributionId) {
       $form->add('hidden', 'optionContributionId', $openContributionId);
     }
   }
+
   if ($formName == 'CRM_Contact_Form_CustomData') {
     if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($form->getVar('_groupID'))) {
       $customData = new CRM_ManualDirectDebit_Hook_BuildForm_CustomData($form);
@@ -351,7 +349,7 @@ function manualdirectdebit_civicrm_buildForm($formName, &$form) {
 }
 
 /**
- * Implements hook_civicrm_validateForm()
+ * Implements hook_civicrm_validateForm().
  */
 function manualdirectdebit_civicrm_validateForm($formName, &$fields, &$files, &$form, &$errors) {
 
@@ -385,7 +383,7 @@ function manualdirectdebit_civicrm_links($op, $objectName, $objectId, &$links, &
 }
 
 /**
- * Implements hook_membershipextras_postOfflineAutoRenewal()
+ * Implements hook_membershipextras_postOfflineAutoRenewal().
  */
 function manualdirectdebit_membershipextras_postOfflineAutoRenewal($membershipId, $recurContributionId, $previousRecurContributionId) {
   $activity = new CRM_ManualDirectDebit_Hook_PostOfflineAutoRenewal_Activity($recurContributionId);
@@ -395,25 +393,25 @@ function manualdirectdebit_membershipextras_postOfflineAutoRenewal($membershipId
   $mandate->process();
 }
 
-function manualdirectdebit_civicrm_searchTasks( $objectName, &$tasks ){
-  if($objectName == 'contribution') {
+function manualdirectdebit_civicrm_searchTasks($objectName, &$tasks) {
+  if ($objectName == 'contribution') {
     $tasks[] = [
       'title' => 'Send Direct Debit Notifications',
       'class' => 'CRM_ManualDirectDebit_Form_Email_Contribution',
-      'result' => FALSE
+      'result' => FALSE,
     ];
   }
 
-  if($objectName == 'membership') {
+  if ($objectName == 'membership') {
     $tasks[] = [
       'title' => 'Send Direct Debit Notifications',
       'class' => 'CRM_ManualDirectDebit_Form_Email_Membership',
-      'result' => FALSE
+      'result' => FALSE,
     ];
     $tasks[] = [
       'title' => 'Print Direct Debit Letters',
       'class' => 'CRM_ManualDirectDebit_Form_PrintMergeDocument',
-      'result' => FALSE
+      'result' => FALSE,
     ];
   }
 

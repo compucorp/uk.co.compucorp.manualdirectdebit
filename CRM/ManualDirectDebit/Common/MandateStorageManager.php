@@ -39,7 +39,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
    * @param $mandateId
    */
   public function assignRecurringContributionMandate($contributionRecurId, $mandateId) {
-    $existingMandateId= CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($contributionRecurId);
+    $existingMandateId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($contributionRecurId);
     if ($existingMandateId && $existingMandateId == $mandateId) {
       return;
     }
@@ -122,7 +122,8 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
 
       $mandateId = $this->getLastInsertedMandateId($currentContactId);
       $this->launchCustomHook($currentContactId, $mandateValues);
-    } catch (Exception $exception) {
+    }
+    catch (Exception $exception) {
       $transaction->rollback();
 
       throw $exception;
@@ -340,13 +341,14 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
         WHERE civicrm_value_dd_information.mandate_id = %1
       ';
       CRM_Core_DAO::executeQuery($query, [
-        1 => [$mandateID, 'Integer']
+        1 => [$mandateID, 'Integer'],
       ]);
 
       $dao = CRM_Core_BAO_CustomGroup::class;
       $groupID = CRM_Core_DAO::getFieldValue($dao, 'direct_debit_mandate', 'id', 'name');
       CRM_Core_BAO_CustomValue::deleteCustomValue($mandateID, $groupID);
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
       $transaction->rollback();
       $message = "An error occurred deleting mandate with id ({$mandateID}): " . $e->getMessage();
 
