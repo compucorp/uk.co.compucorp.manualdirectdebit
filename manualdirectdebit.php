@@ -320,6 +320,7 @@ function manualdirectdebit_civicrm_buildForm($formName, &$form) {
       $form->add('hidden', 'optionContributionId', $openContributionId);
     }
   }
+
   if ($formName == 'CRM_Contact_Form_CustomData') {
     if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($form->getVar('_groupID'))) {
       $customData = new CRM_ManualDirectDebit_Hook_BuildForm_CustomData($form);

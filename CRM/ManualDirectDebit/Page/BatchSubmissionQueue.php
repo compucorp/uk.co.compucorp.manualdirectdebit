@@ -26,7 +26,8 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
       $this->validateBatch();
       $this->addTasksToQueue();
       $this->runQueue();
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
       CRM_Core_Session::setStatus($e->getMessage(), 'Error Submitting Batch!', 'error');
       $this->redirectToBatchViewPage();
     }
