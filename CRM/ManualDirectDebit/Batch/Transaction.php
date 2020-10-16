@@ -610,8 +610,8 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'view' => [
           'name' => ts('View'),
           'title' => ts('View Contribution'),
-          'url' => "civicrm/contact/view/contribution",
-          'qs' => "reset=1&id=%%contribution_id%%&cid=%%contact_id%%&action=view&context=contribution&selectedChild=contribute",
+          'url' => "civicrm/contact/view",
+          'qs' => "reset=1&openContribution=%%contribution_id%%&cid=%%contact_id%%&action=view&context=contribution&selectedChild=contribute",
         ],
       ],
       NULL,
@@ -621,7 +621,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       ]
     );
 
-    return $linkToRecurringContribution;
+    return strtr($linkToRecurringContribution, ['action-item' => '']);
   }
 
   /**
