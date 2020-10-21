@@ -319,7 +319,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       if (!empty($mandateValue['contact_id'])) {
         switch ($batch->getBatchType()) {
           case "instructions_batch":
-            $row['action'] = $this->getLinkToMandate($mandateValue['contact_id']);
+            $row['action'] = $this->getLinkToMandate($mandateId, $mandateValue['contact_id']);
             break;
 
           case "dd_payments":
@@ -369,7 +369,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       switch ($batch->getBatchType()) {
         case "instructions_batch":
           if (!empty($mandateItem['contact_id'])) {
-            $row['action'] = $this->getLinkToMandate($mandateItem['contact_id']);
+            $row['action'] = $this->getLinkToMandate($mandateItem['id'], $mandateItem['contact_id']);
           }
 
           $rows[$mandateItem['mandate_id']] = $row;
@@ -564,11 +564,12 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   /**
    * Gets link to mandate
    *
+   * @param $mandateID
    * @param $contactId
    *
-   * @return string
+   * @return string|null
    */
-  private function getLinkToMandate($contactId) {
+  private function getLinkToMandate($mandateID, $contactId) {
     $mandateCustomGroupId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getGroupIDByName('direct_debit_mandate');
     $linkToMandate = CRM_Core_Action::formLink(
       [
@@ -576,13 +577,14 @@ class CRM_ManualDirectDebit_Batch_Transaction {
           'name' => ts('View'),
           'title' => ts('View Mandate'),
           'url' => "civicrm/contact/view/cd",
-          'qs' => "reset=1&cid=%%contact_id%%&selectedChild=custom_%%mandate_custom_group_id%%&gid=%%mandate_custom_group_id%%",
+          'qs' => 'reset=1&type=Individual&gid=%%mandate_custom_group_id%%&cid=%%contact_id%%&multiRecordDisplay=single&mode=view&recId=%%mandate_id%%',
         ],
       ],
       NULL,
       [
         'contact_id' => $contactId,
         'mandate_custom_group_id' => $mandateCustomGroupId,
+        'mandate_id' => $mandateID,
       ]
     );
 
