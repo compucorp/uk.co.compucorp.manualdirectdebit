@@ -16,7 +16,7 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     parent::preProcess();
 
     $batchTypeID = CRM_Utils_Request::retrieveValue('type_id', 'String', NULL);
-    $this->batchType =  CRM_Core_OptionGroup::getRowValues('batch_type', $batchTypeID, 'value', 'String', FALSE);
+    $this->batchType = CRM_Core_OptionGroup::getRowValues('batch_type', $batchTypeID, 'value', 'String', FALSE);
 
     // Set the user context.
     $session = CRM_Core_Session::singleton();
@@ -45,10 +45,12 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
       TRUE
     );
 
+    $cancelURL = CRM_Utils_System::url('civicrm/');
     $this->addButtons([
       [
         'type' => 'cancel',
         'name' => ts('Cancel'),
+        'js' => ['onclick' => "location.href='{$cancelURL}'; return false;"],
       ],
       [
         'type' => 'next',
@@ -106,7 +108,6 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
       $defaults['end_date_filter'] = (new DateTime())->format('Y-m-d');
     }
 
-
     return $defaults;
   }
 
@@ -118,11 +119,9 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     $batchStatus = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id');
     $params = $this->controller->exportValues($this->_name);
 
-    $params['data'] = json_encode(
-      ['values' => [
-        'originator_number' => $params['originator_number'],
-      ]]
-    );
+    $params['data'] = json_encode([
+      'values' => ['originator_number' => $params['originator_number']],
+    ]);
 
     $params['modified_date'] = date('YmdHis');
     $params['modified_id'] = $session->get('userID');
