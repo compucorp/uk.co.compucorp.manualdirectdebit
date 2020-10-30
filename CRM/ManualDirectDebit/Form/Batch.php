@@ -24,6 +24,10 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     $session->replaceUserContext(CRM_Utils_System::url('civicrm/direct_debit/batch', "reset=1&action=add&type_id=" . $this->batchType['value']));
 
     CRM_Utils_System::setTitle(E::ts('Create %1', [1 => $this->batchType['label']]));
+    if ($this->batchType['name'] === BatchHandler::BATCH_TYPE_CANCELLATIONS) {
+      CRM_Utils_System::setTitle(E::ts('Create Cancelled Instructions Batch'));
+      $this->batchType['label'] .= ' Batch';
+    }
 
     $newBatchID = BatchHandler::getMaxBatchId() + 1;
     $this->assign('batch_id', $newBatchID);
