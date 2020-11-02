@@ -466,7 +466,9 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       }
       $excluded->join('entity_batch', 'LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . $this->params['entityTable'] . '.id AND civicrm_entity_batch.entity_table = \'' . $this->params['entityTable'] . '\'');
       $excluded->join('batch', 'LEFT JOIN civicrm_batch ON civicrm_entity_batch.batch_id = civicrm_batch.id');
+      $excluded->join('current_batch', 'LEFT JOIN civicrm_batch current_batch ON civicrm_batch.id = ' . $this->batchID);
       $excluded->where('civicrm_batch.status_id <> ' . CRM_Utils_Array::key('Discarded', $batchStatus));
+      $excluded->where('civicrm_batch.type_id = current_batch.type_id');
 
       $query->where($this->params['entityTable'] . '.id NOT IN (' . $excluded->toSQL() . ')');
     }
