@@ -236,7 +236,12 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
    * @return array
    */
   private function getBatchTypeOptions() {
-    $batchTypeNames = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, NULL, 'label');
+    $condition = " AND (
+      v.name = '" . BatchHandler::BATCH_TYPE_INSTRUCTIONS . "'
+      OR v.name = '" . BatchHandler::BATCH_TYPE_PAYMENTS . "'
+      OR v.name = '" . BatchHandler::BATCH_TYPE_CANCELLATIONS . "'
+    )";
+    $batchTypeNames = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, $condition, 'label');
 
     return ['' => 'All'] + $batchTypeNames;
   }
