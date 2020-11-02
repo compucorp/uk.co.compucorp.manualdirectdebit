@@ -55,6 +55,7 @@ class CRM_ManualDirectDebit_Page_BatchTransaction extends CRM_Core_Page_Basic {
     $this->entityID = CRM_Utils_Request::retrieve('bid', 'Positive');
 
     $this->edit($action, $this->entityID);
+
     return parent::run();
   }
 
