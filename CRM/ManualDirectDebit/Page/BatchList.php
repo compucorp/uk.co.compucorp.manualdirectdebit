@@ -150,7 +150,14 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
    */
   private function buildSearchParams($typeIdInRequest) {
     $createdDateFrom = CRM_Utils_Request::retrieve('created_date_from', 'String', $this, FALSE, NULL);
+    if (!empty($createdDateFrom)) {
+      $createdDateFrom .= ' 00:00:00';
+    }
+
     $createdDateTo = CRM_Utils_Request::retrieve('created_date_to', 'String', $this, FALSE, NULL);
+    if (!empty($createdDateTo)) {
+      $createdDateTo .= ' 23:59:59';
+    }
 
     $param = [
       'type_id' => $typeIdInRequest,
@@ -236,7 +243,12 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
    * @return array
    */
   private function getBatchTypeOptions() {
-    $batchTypeNames = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, NULL, 'label');
+    $condition = " AND (
+      v.name = '" . BatchHandler::BATCH_TYPE_INSTRUCTIONS . "'
+      OR v.name = '" . BatchHandler::BATCH_TYPE_PAYMENTS . "'
+      OR v.name = '" . BatchHandler::BATCH_TYPE_CANCELLATIONS . "'
+    )";
+    $batchTypeNames = CRM_Core_OptionGroup::values('batch_type', FALSE, FALSE, FALSE, $condition, 'label');
 
     return ['' => 'All'] + $batchTypeNames;
   }

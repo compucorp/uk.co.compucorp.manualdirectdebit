@@ -31,7 +31,7 @@ class CRM_ManualDirectDebit_Page_BatchTransaction extends CRM_Core_Page_Basic {
       $param = ['id' => $batchID, 'context' => ''];
       $batch = CRM_ManualDirectDebit_Page_BatchTableListHandler::generateRows($param);
       $batch = $batch[$batchID];
-      $param['entityTable'] = $batchTypes[$batch['type_id']] == BatchHandler::BATCH_TYPE_INSTRUCTIONS ? 'civicrm_value_dd_mandate' : 'civicrm_contribution';
+      $param['entityTable'] = $batchTypes[$batch['type_id']] == BatchHandler::BATCH_TYPE_PAYMENTS ? 'civicrm_contribution' : 'civicrm_value_dd_mandate';
       $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction($batch['id'], $param);
 
       $batchInfo = [
