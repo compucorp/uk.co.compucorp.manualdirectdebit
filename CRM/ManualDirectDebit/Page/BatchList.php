@@ -150,7 +150,14 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
    */
   private function buildSearchParams($typeIdInRequest) {
     $createdDateFrom = CRM_Utils_Request::retrieve('created_date_from', 'String', $this, FALSE, NULL);
+    if (!empty($createdDateFrom)) {
+      $createdDateFrom .= ' 00:00:00';
+    }
+
     $createdDateTo = CRM_Utils_Request::retrieve('created_date_to', 'String', $this, FALSE, NULL);
+    if (!empty($createdDateTo)) {
+      $createdDateTo .= ' 23:59:59';
+    }
 
     $param = [
       'type_id' => $typeIdInRequest,
@@ -159,15 +166,15 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
 
     switch (TRUE) {
       case !empty($createdDateFrom) && !empty($createdDateTo):
-        $param['created_date'] = ['BETWEEN' => [$createdDateFrom . ' 00:00:00', $createdDateTo . ' 23:59:59']];
+        $param['created_date'] = ['BETWEEN' => [$createdDateFrom, $createdDateTo]];
         break;
 
       case !empty($createdDateFrom):
-        $param['created_date'] = ['>=' => $createdDateFrom . ' 00:00:00'];
+        $param['created_date'] = ['>=' => $createdDateFrom];
         break;
 
       case !empty($createdDateTo):
-        $param['created_date'] = ['<=' => $createdDateTo . ' 23:59:59'];
+        $param['created_date'] = ['<=' => $createdDateTo];
         break;
     }
 
