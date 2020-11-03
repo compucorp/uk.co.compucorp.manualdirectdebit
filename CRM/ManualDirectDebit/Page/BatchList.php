@@ -55,12 +55,12 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
         CRM_Core_Action::EXPORT => [
           'name' => ts('Export'),
           'title' => ts('Export Transaction'),
-          'extra' => 'onclick = "assignRemove( %%id%%,\'' . 'export' . '\' );"',
+          'extra' => 'onclick = "assignRemove( %%id%%, \'export\' );"',
         ],
         CRM_Core_Action::ENABLE => [
           'name' => ts('Submit'),
           'title' => ts('Submit Transaction'),
-          'extra' => 'onclick = "submitBatch(%%id%%);"',
+          'extra' => 'onclick = "submitBatch(%%id%%, \'%%submitMessage%%\');"',
         ],
         CRM_Core_Action::UPDATE => [
           'name' => ts('Update'),
@@ -71,7 +71,7 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
         CRM_Core_Action::DISABLE => [
           'name' => ts('Discard'),
           'title' => ts('Discard Transaction'),
-          'extra' => 'onclick = "assignRemove( %%id%%,\'' . 'discard' . '\' );"',
+          'extra' => 'onclick = "assignRemove( %%id%%, \'discard\' );"',
         ],
       ];
     }
@@ -205,8 +205,16 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
         $action -= CRM_Core_Action::DISABLE;
       }
 
-      $batch['action'] = CRM_Core_Action::formLink(self::links(), $action,
-        ['id' => $id], ts('more'), FALSE, '', 'Batch', $id
+      $submitMessage = base64_encode(BatchHandler::getSubmitAlertMessage($batch['type_id']));
+      $batch['action'] = CRM_Core_Action::formLink(
+        self::links(),
+        $action,
+        ['id' => $id, 'submitMessage' => $submitMessage],
+        ts('more'),
+        FALSE,
+        '',
+        'Batch',
+        $id
       );
 
       $param = [];
