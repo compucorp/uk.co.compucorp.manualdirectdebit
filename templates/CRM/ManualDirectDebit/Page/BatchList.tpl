@@ -84,14 +84,12 @@
     order: []
   });
 
-  function submitBatch(batchId) {
+  function submitBatch(batchId, batchMessage) {
     CRM.$("#enableDisableStatusMsg").dialog({
       title: {/literal}'{ts escape="js"}Submit Batch{/ts}'{literal},
       modal: true,
       open: function () {
-        var msg = {/literal}{if $submittedMessage}"{$submittedMessage}"{else}"{ts escape="js"}Are you sure you want to submit this batch? This process is not revertable.{/ts}"{/if}{literal};
-
-        CRM.$('#enableDisableStatusMsg').show().html(msg);
+        CRM.$('#enableDisableStatusMsg').show().html(atob(batchMessage));
       },
       buttons: {
         {/literal}"{ts escape='js'}Cancel{/ts}"{literal}: function () {
