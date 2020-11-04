@@ -149,6 +149,12 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->createDirectDebitPaymentProcessor();
   }
 
+  /**
+   * Adds option to create instruction cancellation batches and re-orders menu.
+   *
+   * @return bool
+   * @throws \CiviCRM_API3_Exception
+   */
   public function upgrade_0014() {
     $this->addOptionValue([
       'option_group_id' => 'batch_type',
@@ -158,32 +164,14 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       'weight' => 6,
       'description' => 'Direct debit mandates that need to be cancelled.',
     ]);
+
+    $this->removeNav('view_new_instruction_batches');
+    $this->removeNav('view_payment_batches');
     $this->addNav($this->buildCreateCancelledInstructionsBatchMenuItem());
-    $this->updateMenuLabelsFromViewToManage();
+    $this->addNav($this->buildManageDirectDebitBatchesMenuItem());
     CRM_Core_BAO_Navigation::resetNavigation();
 
     return TRUE;
-  }
-
-  /**
-   * Updates menu items for View New Instructions/Payment Batches.
-   *
-   * Changes the labels for 'View New Instruction Batches' to 'Manage
-   * Instruction Batches', and 'View Payment Collection Batches' to 'Manage
-   * Payment Collection Batches'.
-   */
-  private function updateMenuLabelsFromViewToManage() {
-    $viewInstructionsItem = new CRM_Core_BAO_Navigation();
-    $viewInstructionsItem->name = 'view_new_instruction_batches';
-    $viewInstructionsItem->find(TRUE);
-    $viewInstructionsItem->label = 'Manage Instruction Batches';
-    $viewInstructionsItem->save();
-
-    $viewPaymentsItem = new CRM_Core_BAO_Navigation();
-    $viewPaymentsItem->name = 'view_payment_batches';
-    $viewPaymentsItem->find(TRUE);
-    $viewPaymentsItem->label = 'Manage Payment Collection Batches';
-    $viewPaymentsItem->save();
   }
 
   /**
@@ -219,6 +207,23 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       'permission' => 'can manage direct debit batches',
       'operator' => NULL,
       'separator' => NULL,
+      'parent_name' => 'direct_debit',
+    ];
+  }
+
+  /**
+   * Builds array with data required to create Manage DD Batches menu item.
+   *
+   * @return array
+   */
+  private function buildManageDirectDebitBatchesMenuItem() {
+    return [
+      'label' => ts('Manage Direct Debit Batches'),
+      'name' => 'view_direct_debit_batches',
+      'url' => 'civicrm/direct_debit/batch-list?reset=1',
+      'permission' => 'can manage direct debit batches',
+      'operator' => NULL,
+      'separator' => 1,
       'parent_name' => 'direct_debit',
     ];
   }
@@ -532,25 +537,8 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
         'separator' => NULL,
         'parent_name' => 'direct_debit',
       ],
-      [
-        'label' => ts('Manage Instruction Batches'),
-        'name' => 'view_new_instruction_batches',
-        'url' => 'civicrm/direct_debit/batch-list?reset=1&type_id=' . array_search(BatchHandler::BATCH_TYPE_INSTRUCTIONS, $batchTypes),
-        'permission' => 'can manage direct debit batches',
-        'operator' => NULL,
-        'separator' => 1,
-        'parent_name' => 'direct_debit',
-      ],
-      [
-        'label' => ts('Manage Payment Collection Batches'),
-        'name' => 'view_payment_batches',
-        'url' => 'civicrm/direct_debit/batch-list?reset=1&type_id=' . array_search(BatchHandler::BATCH_TYPE_PAYMENTS, $batchTypes),
-        'permission' => 'can manage direct debit batches',
-        'operator' => NULL,
-        'separator' => NULL,
-        'parent_name' => 'direct_debit',
-      ],
       $this->buildCreateCancelledInstructionsBatchMenuItem(),
+      $this->buildManageDirectDebitBatchesMenuItem(),
     ];
 
     foreach ($menuItems as $item) {
