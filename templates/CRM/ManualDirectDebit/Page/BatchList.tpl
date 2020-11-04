@@ -4,13 +4,13 @@
   <div class="page-civicrm-group">
     <form id="searchForm">
         <div class="float-left">
-          <label for="type_id">Batch Type:</label>
+          <label for="type_id">{ts}Batch Type:{/ts}</label>
           {html_options name="type_id" id="type_id" class="crm-select2 crm-form-select" options=$batchTypes selected=$type_id}
         </div>
         <div class="batch-create-date-fields float-right">
-          <label for="created_date_from">From:</label>
+          <label for="created_date_from">{ts}From:{/ts}</label>
           <input data-crm-datepicker="{ldelim}&quot;time&quot;:false, &quot;allowClear&quot;:false{rdelim}" aria-label="From" name="created_date_from" type="text" value="{$created_date_from}" id="created_date_from" class="crm-form-text crm-hidden-date" />
-          <label for="created_date_to">To:</label>
+          <label for="created_date_to">{ts}To:{/ts}</label>
           <input data-crm-datepicker="{ldelim}&quot;time&quot;:false, &quot;allowClear&quot;:false{rdelim}" aria-label="To" name="created_date_to" type="text" value="{$created_date_to}" id="created_date_to" class="crm-form-text crm-hidden-date" />
         </div>
         <div class="clear">&nbsp;</div>
