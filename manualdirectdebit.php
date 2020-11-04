@@ -255,6 +255,10 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
       CRM_Core_Resources::singleton()
         ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/paymentMethodMandateSelection.js');
       break;
+
+    case CRM_ManualDirectDebit_Page_BatchList::class:
+      CRM_Core_Resources::singleton()->addStyleFile(E::LONG_NAME, 'css/batchSearch.css');
+      break;
   }
 }
 
