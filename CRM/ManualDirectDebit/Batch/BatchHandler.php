@@ -206,7 +206,7 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       $submittedMessage .= '<p>' . ts('Please note that this process is not reversible.') . '</p>';
     }
     else {
-      $submittedMessage = '<p>' . ts('Are you sure you want to submit this batch?') . '</p>';
+      $submittedMessage = '<p>' . ts('You are submitting all items within this batch:') . '</p>';
       $submittedMessage .= '<p>' . ts('Please note that this process is not reversible.') . '</p>';
     }
 
