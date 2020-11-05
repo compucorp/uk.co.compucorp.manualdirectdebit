@@ -114,11 +114,18 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
    * @param int $batchTypeID
    */
   private function setPageTitle($batchTypeID) {
-    if (BatchHandler::BATCH_TYPE_PAYMENTS == $this->getBatchTypeMachineName($batchTypeID)) {
-      CRM_Utils_System::setTitle(ts('View Payment Batches'));
-    }
-    else {
-      CRM_Utils_System::setTitle(ts('Manage Instruction Batches'));
+    switch ($this->getBatchTypeMachineName($batchTypeID)) {
+      case BatchHandler::BATCH_TYPE_PAYMENTS:
+        CRM_Utils_System::setTitle(ts('Manage Payment Batches'));
+        break;
+
+      case BatchHandler::BATCH_TYPE_INSTRUCTIONS:
+      case BatchHandler::BATCH_TYPE_CANCELLATIONS:
+        CRM_Utils_System::setTitle(ts('Manage Instruction Batches'));
+        break;
+
+      default:
+        CRM_Utils_System::setTitle(ts('Manage Direct Debit Batches'));
     }
   }
 
@@ -235,11 +242,18 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
    * @return string
    */
   private function getEntityTypeName($typeId) {
-    if (BatchHandler::BATCH_TYPE_PAYMENTS == $this->getBatchTypeMachineName($typeId)) {
-      $entityTypeName = 'Payment';
-    }
-    else {
-      $entityTypeName = 'Instruction';
+    switch ($this->getBatchTypeMachineName($typeId)) {
+      case BatchHandler::BATCH_TYPE_PAYMENTS:
+        $entityTypeName = 'Payment';
+        break;
+
+      case BatchHandler::BATCH_TYPE_INSTRUCTIONS:
+      case BatchHandler::BATCH_TYPE_CANCELLATIONS:
+        $entityTypeName = 'Instruction';
+        break;
+
+      default:
+        $entityTypeName = '';
     }
 
     return $entityTypeName;
