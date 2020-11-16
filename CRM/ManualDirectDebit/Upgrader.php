@@ -128,7 +128,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     "direct_debit_mandate",
     "direct_debit_information",
     "direct_debit_message_template",
-    "direct_debit_collection_reminder_sendflag"
+    "direct_debit_collection_reminder_sendflag",
   ];
 
   public function install() {
@@ -179,7 +179,8 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
           'is_reserved' => 1,
         ];
         civicrm_api3('OptionValue', 'create', $updateParams);
-      } else {
+      }
+      else {
         $activityTypeParams['option_group_id'] = 'activity_type';
         $activityTypeParams['filter'] = 1;
         $activityTypeParams['is_reserved'] = 1;
@@ -286,7 +287,8 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       $this->createMessageTemplates();
 
       return TRUE;
-    } catch (CiviCRM_API3_Exception $e) {
+    }
+    catch (CiviCRM_API3_Exception $e) {
       return FALSE;
     }
   }
@@ -299,9 +301,9 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   private function setDefaultMinimumMandateReferenceLength() {
     $configFields = CRM_ManualDirectDebit_Common_SettingsManager::getConfigFields();
     civicrm_api3('setting', 'create', [
-        'manualdirectdebit_minimum_reference_prefix_length' =>
-        $configFields['manualdirectdebit_minimum_reference_prefix_length']['default']
-      ]);
+      'manualdirectdebit_minimum_reference_prefix_length' =>
+      $configFields['manualdirectdebit_minimum_reference_prefix_length']['default'],
+    ]);
   }
 
   public function upgrade_0004() {
@@ -309,7 +311,8 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       $this->createMessageTemplates();
 
       return TRUE;
-    } catch (CiviCRM_API3_Exception $e) {
+    }
+    catch (CiviCRM_API3_Exception $e) {
       return FALSE;
     }
   }
@@ -319,7 +322,8 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       $this->createScheduledJob();
 
       return TRUE;
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
       return FALSE;
     }
   }
@@ -393,8 +397,8 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
   private function createScheduledJob() {
     $domainID = CRM_Core_Config::domainID();
 
-    if($this->isEntityAlreadyExist("Job", 'Send Direct Debit Payment Collection Reminders', 'name')){
-      $this->alterEntity('Job','Send Direct Debit Payment Collection Reminders','name',FALSE,'uninstall');
+    if ($this->isEntityAlreadyExist("Job", 'Send Direct Debit Payment Collection Reminders', 'name')) {
+      $this->alterEntity('Job', 'Send Direct Debit Payment Collection Reminders', 'name', FALSE, 'uninstall');
     }
 
     $params = [
@@ -571,7 +575,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
       ],
     ];
 
-    foreach($paramsPerType as $typeParams) {
+    foreach ($paramsPerType as $typeParams) {
       $params = array_merge($defaultProcessorPrams, $typeParams);
       civicrm_api3('PaymentProcessor', 'create', $params);
     }
@@ -583,7 +587,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
 
   private function setDefaultSettingValues() {
     $configFields = CRM_ManualDirectDebit_Common_SettingsManager::getConfigFields();
-    foreach ($configFields  as $name => $config) {
+    foreach ($configFields as $name => $config) {
       civicrm_api3('setting', 'create', [$name => $config['default']]);
     }
   }
@@ -759,7 +763,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
    * Deletes Direct Debit payment processor
    */
   private function deletePaymentProcessor() {
-    foreach([0, 1] as $isTest) {
+    foreach ([0, 1] as $isTest) {
       civicrm_api3('PaymentProcessor', 'get', [
         'name' => 'Direct Debit',
         'is_test' => $isTest,
