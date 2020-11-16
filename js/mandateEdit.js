@@ -1,9 +1,8 @@
 CRM.$('document').ready(function () {
   var customGroupTitle = CRM.$('.section-shown.form-item .crm-accordion-header').first().text().trim();
+
   if (customGroupTitle == "Direct Debit Mandate") {
-
     CRM.$('.form-item a.button').parent().hide();
-
     CRM.$('.crm-hover-button.crm-custom-value-del').each(function () {
       var that = this;
       var mandateTitle = CRM.$(this).attr('title').split(' ');
@@ -73,4 +72,37 @@ CRM.$('document').ready(function () {
     return url;
   }
 
+  CRM.$('#mandate_delete_btn').each(function () {
+    var that = this;
+
+    CRM.$(this).click(function () {
+      CRM.confirm({
+        title: ts('Delete Mandate?'),
+        message: ts('Are you sure you want to delete this mandate? This action cannot be undone.'),
+        options: {
+          no: ts('Cancel'),
+          yes: ts('Apply')
+        }
+      }).on('crmConfirm:yes', function() {
+        var mandateData = JSON.parse(CRM.$(that).attr('data-post'));
+
+        CRM.api3('ManualDirectDebit', 'deletemandate', {
+          mandate_id: mandateData.valueID,
+        }).done(function(result) {
+          if (result.is_error) {
+            CRM.alert(result.error_message, null, 'error');
+          } else {
+            var mandateDiealog = CRM.$('div.ui-dialog-content.ui-widget-content.modal-dialog.crm-ajax-container');
+            mandateDiealog.dialog('destroy');
+            CRM.alert(ts('Mandate has been deleted.'), null, 'success');
+            CRM.refreshParent('#crm-main-content-wrapper');
+          }
+        });
+      }).on('crmConfirm:no', function() {
+        return;
+      });
+
+      return false;
+    });
+  });
 });

@@ -231,12 +231,13 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
       break;
 
     case 'CRM_Contact_Page_View_CustomData':
-      $contactId = $page->getVar('_contactId');
-      CRM_Core_Resources::singleton()->addVars('uk.co.compucorp.manualdirectdebit', [
-        'contactType' => _manualdirectdebit_getContactType($contactId),
-      ]);
-      CRM_Core_Resources::singleton()
-        ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/mandateEdit.js');
+      $path = CRM_Utils_System::currentPath();
+      $multiRecordDisplay = CRM_Utils_Request::retrieveValue('multiRecordDisplay', 'String', '');
+      $mode = CRM_Utils_Request::retrieveValue('mode', 'String', '');
+      $mandateStorageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
+
+      $pageProcessor = new CRM_ManualDirectDebit_Hook_PageRun_ViewCustomData($path, $multiRecordDisplay, $mode, $mandateStorageManager, $page);
+      $pageProcessor->process();
       break;
 
     case 'CRM_Contribute_Page_Tab':
