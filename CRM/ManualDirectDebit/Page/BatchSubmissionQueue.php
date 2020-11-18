@@ -2,6 +2,8 @@
 
 use CRM_ManualDirectDebit_Queue_Build_InstructionsQueueBuilder as InstructionsQueueBuilder;
 use CRM_ManualDirectDebit_Queue_Build_PaymentsQueueBuilder as PaymentsQueueBuilder;
+use CRM_ManualDirectDebit_Batch_BatchHandler as BatchHandler;
+use CRM_ManualDirectDebit_Common_MandateStorageManager as MandateStorageManager;
 
 class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
 
@@ -13,22 +15,97 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
     parent::__construct($title, $mode);
 
     $this->queue = CRM_ManualDirectDebit_Queue_BatchSubmission::getQueue();
-    $this->batchId =  CRM_Utils_Request::retrieveValue('batchId', 'Int');
+    $this->batchId = CRM_Utils_Request::retrieveValue('batchId', 'Int');
   }
 
+  /**
+   * Runs batch submission.
+   */
   public function run() {
-    if (!$this->validBatchStatus()) {
-      CRM_Core_Session::setStatus('The batch is not in a valid status for submission', '', 'error');
+    try {
+      $this->validateBatch();
+      $this->addTasksToQueue();
+      $this->runQueue();
+    }
+    catch (Exception $e) {
+      CRM_Core_Session::setStatus($e->getMessage(), 'Error Submitting Batch!', 'error');
+      $this->redirectToBatchViewPage();
+    }
+  }
 
-      return;
+  /**
+   * Validates the batch is ok to be submitted.
+   *
+   * @throws \Exception
+   */
+  private function validateBatch() {
+    $this->validBatchStatus();
+
+    if ($this->getBatchType() === BatchHandler::BATCH_TYPE_CANCELLATIONS) {
+      $this->validateCancellationsBatch();
+    }
+  }
+
+  /**
+   * Validates the status of the batch is appropriate to be submietted.
+   *
+   * Status of the batch needs to be either 'Opened' or 'Reopened' in order to
+   * be submitted.
+   *
+   * @throws \Exception
+   */
+  private function validBatchStatus() {
+    if (!in_array($this->getBatchStatus(), ['Open', 'Reopened'])) {
+      throw new Exception('The batch is not in a valid status for submission');
+    }
+  }
+
+  /**
+   * Validates the batch to make sure there are no active mandates.
+   *
+   * @throws \Exception
+   */
+  private function validateCancellationsBatch() {
+    $nonCancelledMandates = $this->getNonCancelledMandates();
+    if (count($nonCancelledMandates) > 0) {
+      $message = ts('The batch contains the following mandates that no longer have the status of 0C:');
+      $message .= '<ul><li>';
+      $message .= implode('</li><li>', $nonCancelledMandates);
+      $message .= '</li></ul>';
+
+      throw new Exception($message);
+    }
+  }
+
+  /**
+   * Obtains list of non-cancelled mandates for the batch.
+   *
+   * @return array
+   * @throws \CiviCRM_API3_Exception
+   */
+  private function getNonCancelledMandates() {
+    $result = civicrm_api3('EntityBatch', 'get', [
+      'sequential' => 1,
+      'batch_id' => $this->batchId,
+      'entity_table' => MandateStorageManager::DIRECT_DEBIT_TABLE_NAME,
+    ]);
+
+    if ($result['count'] < 1) {
+      return [];
     }
 
-    $this->addTasksToQueue();
-    $this->runQueue();
-  }
+    $man = new MandateStorageManager();
+    $ddCodes = CRM_Core_OptionGroup::values('direct_debit_codes', FALSE, FALSE, FALSE, NULL, 'name');
 
-  private function validBatchStatus() {
-    return in_array($this->getBatchStatus(), ['Open', 'Reopened']);
+    $noncancelledMandates = [];
+    foreach ($result['values'] as $batchItem) {
+      $mandate = $man->getMandate($batchItem['entity_id']);
+      if ($ddCodes[$mandate->dd_code] != MandateStorageManager::DD_CODE_NAME_CANCELDIRECTDEBIT) {
+        $noncancelledMandates[] = $mandate->dd_ref;
+      }
+    }
+
+    return $noncancelledMandates;
   }
 
   private function getBatchStatus() {
@@ -37,22 +114,30 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
       'labelColumn' => 'name',
       'status' => " v.value={$statusID}",
     ]);
+
     return $batchStatuses[$statusID];
   }
 
   private function addTasksToQueue() {
     $batchType = $this->getBatchType();
+
     switch ($batchType) {
-      case 'instructions_batch':
+      case BatchHandler::BATCH_TYPE_INSTRUCTIONS:
         $queueBuilder = new InstructionsQueueBuilder($this->queue, $this->batchId);
+        $queueBuilder->buildQueue();
+        $this->addBatchSubmissionCompletionTask();
         break;
-      case 'dd_payments':
+
+      case BatchHandler::BATCH_TYPE_PAYMENTS:
         $queueBuilder = new PaymentsQueueBuilder($this->queue, $this->batchId);
+        $queueBuilder->buildQueue();
+        $this->addBatchSubmissionCompletionTask();
+        break;
+
+      case BatchHandler::BATCH_TYPE_CANCELLATIONS:
+        $this->addBatchSubmissionCompletionTask();
         break;
     }
-    $queueBuilder->buildQueue();
-
-    $this->addBatchSubmissionCompletionTask();
   }
 
   private function getBatchType() {
@@ -75,7 +160,7 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
     $runner = new CRM_Queue_Runner([
       'title' => ts('Submitting the batch, this may take a while depending on how many records are processed ..'),
       'queue' => $this->queue,
-      'errorMode'=> CRM_Queue_Runner::ERROR_ABORT,
+      'errorMode' => CRM_Queue_Runner::ERROR_ABORT,
       'onEnd' => array('CRM_ManualDirectDebit_Page_BatchSubmissionQueue', 'onEnd'),
       'onEndUrl' => CRM_Utils_System::url('civicrm/direct_debit/batch-transaction', ['reset' => 1, 'action' => 'view', 'bid' => $this->batchId]),
     ]);
@@ -87,4 +172,16 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
     $message = ts('Batch Submission Completed');
     CRM_Core_Session::setStatus($message, '', 'success');
   }
+
+  /**
+   * Redirects to BatchView Page.
+   */
+  private function redirectToBatchViewPage() {
+    $redirectPath = 'civicrm/direct_debit/batch-transaction';
+    $redirectParams = http_build_query(['reset' => 1, 'bid' => $this->batchId, 'action' => 'view']);
+    $redirectURL = CRM_Utils_System::url($redirectPath, $redirectParams);
+
+    CRM_Utils_System::redirect($redirectURL);
+  }
+
 }
