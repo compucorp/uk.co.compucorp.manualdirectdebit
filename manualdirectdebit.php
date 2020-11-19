@@ -231,12 +231,13 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
       break;
 
     case 'CRM_Contact_Page_View_CustomData':
-      $contactId = $page->getVar('_contactId');
-      CRM_Core_Resources::singleton()->addVars('uk.co.compucorp.manualdirectdebit', [
-        'contactType' => _manualdirectdebit_getContactType($contactId),
-      ]);
-      CRM_Core_Resources::singleton()
-        ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/mandateEdit.js');
+      $path = CRM_Utils_System::currentPath();
+      $multiRecordDisplay = CRM_Utils_Request::retrieveValue('multiRecordDisplay', 'String', '');
+      $mode = CRM_Utils_Request::retrieveValue('mode', 'String', '');
+      $mandateStorageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
+
+      $pageProcessor = new CRM_ManualDirectDebit_Hook_PageRun_ViewCustomData($path, $multiRecordDisplay, $mode, $mandateStorageManager, $page);
+      $pageProcessor->process();
       break;
 
     case 'CRM_Contribute_Page_Tab':
@@ -255,6 +256,10 @@ function manualdirectdebit_civicrm_pageRun(&$page) {
       CRM_Core_Resources::singleton()
         ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/paymentMethodMandateSelection.js');
       break;
+
+    case CRM_ManualDirectDebit_Page_BatchList::class:
+      CRM_Core_Resources::singleton()->addStyleFile(E::LONG_NAME, 'css/batchSearch.css');
+      break;
   }
 }
 
@@ -267,7 +272,6 @@ function _manualdirectdebit_getContactType($contactId) {
 
 /**
  * Implements hook_civicrm_custom().
- *
  */
 function manualdirectdebit_civicrm_custom($op, $groupID, $entityID, &$params) {
   if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($groupID)) {
@@ -279,6 +283,10 @@ function manualdirectdebit_civicrm_custom($op, $groupID, $entityID, &$params) {
     if ($op == 'edit' || $op == 'update') {
       $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_DataGenerator($entityID, $params);
       $mandateDataGenerator->generateMandateData();
+
+      $mandateStorageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
+      $cancellationChecker = new CRM_ManualDirectDebit_Hook_Custom_CancellationBatchChecker($entityID, $params, $mandateStorageManager);
+      $cancellationChecker->process();
     }
   }
 }
@@ -299,6 +307,11 @@ function manualdirectdebit_civicrm_post($op, $objectName, $objectId, &$objectRef
     $postContributionHook = new CRM_ManualDirectDebit_Hook_Post_Contribution($objectId);
     $postContributionHook->process();
   }
+
+  if ($op == 'create' && $objectName == 'Contribution') {
+    $postContributionHook = new CRM_ManualDirectDebit_Hook_Post_Contribution($objectId);
+    $postContributionHook->process();
+  }
 }
 
 /**
@@ -311,6 +324,7 @@ function manualdirectdebit_civicrm_buildForm($formName, &$form) {
       $form->add('hidden', 'optionContributionId', $openContributionId);
     }
   }
+
   if ($formName == 'CRM_Contact_Form_CustomData') {
     if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($form->getVar('_groupID'))) {
       $customData = new CRM_ManualDirectDebit_Hook_BuildForm_CustomData($form);

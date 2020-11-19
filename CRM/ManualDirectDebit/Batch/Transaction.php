@@ -1,4 +1,5 @@
 <?php
+use CRM_ManualDirectDebit_Batch_BatchHandler as BatchHandler;
 
 /**
  * This class is used to retrieve and display a range of direct debit mandates
@@ -45,12 +46,11 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * What column does select in SQL query
    *
    * @var array
-   * @code
    *
+   * @code
    *  $returnValues = [
    *    'name' => 'tableName.column as alias',
    *  ]
-   *
    * @endcode
    */
   protected $returnValues = [];
@@ -59,12 +59,11 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * What column does select in SQL query
    *
    * @var array
-   * @code
    *
+   * @code
    *  $columnHeader = [
    *    'alias' => 'label',
    *  ]
-   *
    * @endcode
    */
   protected $columnHeader = [];
@@ -233,7 +232,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @return array
    */
   private function setColumnHeader($columnHeader = []) {
-    $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID));
+    $batch = (new BatchHandler($this->batchID));
     if (empty($columnHeader)) {
       $columnHeader = [
         'contact_id' => ts('ID'),
@@ -245,7 +244,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'transaction_type' => ts('Transaction Type'),
       ];
 
-      if ($batch->getBatchType() == 'dd_payments') {
+      if ($batch->getBatchType() == BatchHandler::BATCH_TYPE_PAYMENTS) {
         $columnHeader['receive_date'] = ts('Received Date');
       }
     }
@@ -263,7 +262,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @return array
    */
   private function setReturnValues($returnValues = []) {
-    $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID));
+    $batch = (new BatchHandler($this->batchID));
     if (empty($returnValues) || !is_array($returnValues)) {
       $returnValues = [
         'id' => $this->params['entityTable'] . '.id as id',
@@ -277,7 +276,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'transaction_type' => 'civicrm_option_value.label as transaction_type',
       ];
 
-      if ($batch->getBatchType() == 'dd_payments') {
+      if ($batch->getBatchType() == BatchHandler::BATCH_TYPE_PAYMENTS) {
         $returnValues['receive_date'] = 'DATE_FORMAT(civicrm_contribution.receive_date, "%d-%m-%Y") as receive_date';
       }
     }
@@ -293,7 +292,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @return array
    */
   public function getRows() {
-    $batch = (new CRM_ManualDirectDebit_Batch_BatchHandler($this->batchID));
+    $batch = (new BatchHandler($this->batchID));
     return $this->getBatchRows($batch);
   }
 
@@ -318,11 +317,11 @@ class CRM_ManualDirectDebit_Batch_Transaction {
 
       if (!empty($mandateValue['contact_id'])) {
         switch ($batch->getBatchType()) {
-          case "instructions_batch":
-            $row['action'] = $this->getLinkToMandate($mandateValue['contact_id']);
+          case BatchHandler::BATCH_TYPE_INSTRUCTIONS:
+            $row['action'] = $this->getLinkToMandate($mandateId, $mandateValue['contact_id']);
             break;
 
-          case "dd_payments":
+          case BatchHandler::BATCH_TYPE_PAYMENTS:
             $row['action'] = $this->getLinkToContribution($mandateValue['contribute_id'], $mandateValue['contact_id']);
             break;
         }
@@ -367,15 +366,16 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       $row['check'] = $this->getCheckRow($batch, $mandateItem['id']);
 
       switch ($batch->getBatchType()) {
-        case "instructions_batch":
+        case BatchHandler::BATCH_TYPE_INSTRUCTIONS:
+        case BatchHandler::BATCH_TYPE_CANCELLATIONS:
           if (!empty($mandateItem['contact_id'])) {
-            $row['action'] = $this->getLinkToMandate($mandateItem['contact_id']);
+            $row['action'] = $this->getLinkToMandate($mandateItem['id'], $mandateItem['contact_id']);
           }
 
           $rows[$mandateItem['mandate_id']] = $row;
           break;
 
-        case "dd_payments":
+        case BatchHandler::BATCH_TYPE_PAYMENTS:
           if (isset($mandateItem['contribute_id'])) {
             $contributionId = $mandateItem['contribute_id'];
           }
@@ -390,7 +390,6 @@ class CRM_ManualDirectDebit_Batch_Transaction {
           $rows[$contributionId] = $row;
           break;
       }
-
     }
 
     return $rows;
@@ -454,7 +453,6 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     }
 
     $this->addContributionReceiveDateCondition($query);
-
     $this->addContributionCancelDateCondition($query);
 
     if ($this->notPresent) {
@@ -468,7 +466,9 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       }
       $excluded->join('entity_batch', 'LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . $this->params['entityTable'] . '.id AND civicrm_entity_batch.entity_table = \'' . $this->params['entityTable'] . '\'');
       $excluded->join('batch', 'LEFT JOIN civicrm_batch ON civicrm_entity_batch.batch_id = civicrm_batch.id');
+      $excluded->join('current_batch', 'LEFT JOIN civicrm_batch current_batch ON current_batch.id = ' . $this->batchID);
       $excluded->where('civicrm_batch.status_id <> ' . CRM_Utils_Array::key('Discarded', $batchStatus));
+      $excluded->where('civicrm_batch.type_id = current_batch.type_id');
 
       $query->where($this->params['entityTable'] . '.id NOT IN (' . $excluded->toSQL() . ')');
     }
@@ -564,11 +564,12 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   /**
    * Gets link to mandate
    *
+   * @param $mandateID
    * @param $contactId
    *
-   * @return string
+   * @return string|null
    */
-  private function getLinkToMandate($contactId) {
+  private function getLinkToMandate($mandateID, $contactId) {
     $mandateCustomGroupId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getGroupIDByName('direct_debit_mandate');
     $linkToMandate = CRM_Core_Action::formLink(
       [
@@ -576,13 +577,14 @@ class CRM_ManualDirectDebit_Batch_Transaction {
           'name' => ts('View'),
           'title' => ts('View Mandate'),
           'url' => "civicrm/contact/view/cd",
-          'qs' => "reset=1&cid=%%contact_id%%&selectedChild=custom_%%mandate_custom_group_id%%&gid=%%mandate_custom_group_id%%",
+          'qs' => 'reset=1&type=Individual&gid=%%mandate_custom_group_id%%&cid=%%contact_id%%&multiRecordDisplay=single&mode=view&recId=%%mandate_id%%',
         ],
       ],
       NULL,
       [
         'contact_id' => $contactId,
         'mandate_custom_group_id' => $mandateCustomGroupId,
+        'mandate_id' => $mandateID,
       ]
     );
 
