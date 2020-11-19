@@ -517,8 +517,8 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
         'name' => 'direct_debit',
         'url' => NULL,
         'permission' => 'can manage direct debit batches',
-        'separator' => NULL,
-        'parent_name' => 'menumain',
+        'separator' => 1,
+        'parent_name' => 'Contributions',
       ],
       [
         'label' => ts('Create New Instructions Batch'),
