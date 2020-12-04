@@ -307,11 +307,6 @@ function manualdirectdebit_civicrm_post($op, $objectName, $objectId, &$objectRef
     $postContributionHook = new CRM_ManualDirectDebit_Hook_Post_Contribution($objectId);
     $postContributionHook->process();
   }
-// TODO!!
-  if ($op == 'create' && $objectName == 'Contribution') {
-    $postContributionHook = new CRM_ManualDirectDebit_Hook_Post_Contribution($objectId);
-    $postContributionHook->process();
-  }
 }
 
 /**
@@ -399,9 +394,6 @@ function manualdirectdebit_membershipextras_postOfflineAutoRenewal($membershipId
 
 /**
  * Implements hook_membershipextras_calculateContributionReceiveDate().
- *
- * @param string $receiveDate
- * @param array $contributionCreationParams
  */
 function manualdirectdebit_membershipextras_calculateContributionReceiveDate(&$receiveDate, &$contributionCreationParams) {
   $settingsManager = new CRM_ManualDirectDebit_Common_SettingsManager();
