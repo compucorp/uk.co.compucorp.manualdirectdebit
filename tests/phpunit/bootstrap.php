@@ -17,6 +17,8 @@ if (CIVICRM_UF === 'UnitTests') {
   Civi\Test::headless()->apply();
 }
 
+require_once 'BaseHeadlessTest.php';
+
 /**
  * Call the "cv" command.
  *
