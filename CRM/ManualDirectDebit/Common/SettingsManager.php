@@ -4,6 +4,8 @@
  * Class provide information about Direct Debit Mandate Settings
  */
 class CRM_ManualDirectDebit_Common_SettingsManager {
+  const SECOND_INSTALMENT_BEHAVIOUR_ONE_MONTH_AFTER = 'one_month_after';
+  const SECOND_INSTALMENT_BEHAVIOUR_FORCE_SECOND_MONTH = 'force_second_month';
 
   public static $minimumDaysToFirstPayment;
 
