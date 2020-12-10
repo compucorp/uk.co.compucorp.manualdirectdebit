@@ -21,6 +21,7 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
       'default_reference_prefix' => CRM_Utils_Array::value('manualdirectdebit_default_reference_prefix', $settingValues),
       'minimum_reference_prefix_length' => CRM_Utils_Array::value('manualdirectdebit_minimum_reference_prefix_length', $settingValues),
       'minimum_days_to_first_payment' => CRM_Utils_Array::value('manualdirectdebit_minimum_days_to_first_payment', $settingValues),
+      'second_instalment_date_behaviour' => CRM_Utils_Array::value('manualdirectdebit_second_instalment_date_behaviour', $settingValues),
     ];
 
     $settings['new_instruction_run_dates'] = $this->incrementAllArrayValues(
@@ -110,6 +111,7 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
       'manualdirectdebit_new_instruction_run_dates',
       'manualdirectdebit_payment_collection_run_dates',
       'manualdirectdebit_minimum_days_to_first_payment',
+      'manualdirectdebit_second_instalment_date_behaviour',
     ];
 
     return civicrm_api3('setting', 'get', [
