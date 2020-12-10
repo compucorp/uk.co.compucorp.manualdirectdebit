@@ -25,6 +25,7 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
     $settings['payment_collection_run_dates'] = $this->incrementAllArrayValues(
       $settingValues['values'][0]['manualdirectdebit_payment_collection_run_dates']);
     $settings['minimum_days_to_first_payment'] = $settingValues['values'][0]['manualdirectdebit_minimum_days_to_first_payment'];
+    $settings['second_instalment_date_behaviour'] = $settingValues['values'][0]['manualdirectdebit_second_instalment_date_behaviour'];
 
     return $settings;
   }
@@ -104,6 +105,7 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
       'manualdirectdebit_new_instruction_run_dates',
       'manualdirectdebit_payment_collection_run_dates',
       'manualdirectdebit_minimum_days_to_first_payment',
+      'manualdirectdebit_second_instalment_date_behaviour',
     ];
 
     return civicrm_api3('setting', 'get', [
