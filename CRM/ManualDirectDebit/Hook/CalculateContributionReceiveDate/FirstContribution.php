@@ -1,5 +1,4 @@
 <?php
-use CRM_ManualDirectDebit_Common_SettingsManager as SettingsManager;
 
 /**
  * Class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_FirstContribution.

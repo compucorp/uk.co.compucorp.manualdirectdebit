@@ -7,7 +7,7 @@ use CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator as ReceiveDate
  *
  * Calculates receive date for contributions beyond the second instalment.
  */
-class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribution extends CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_ContributionBase {
+class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribution extends CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribution {
 
   /**
    * Number of instalment in payment plan.
@@ -15,13 +15,6 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribut
    * @var int
    */
   private $contributionNumber;
-
-  /**
-   * Helper object used to calculate receive dates.
-   *
-   * @var \CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator
-   */
-  private $receiveDateCalculator;
 
   /**
    * CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribution constructor.
@@ -37,15 +30,15 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribut
    */
   public function __construct($contributionNumber, &$receiveDate, array $params, SettingsManager $settingsManager, ReceiveDateCalculator $calculator) {
     $this->contributionNumber = $contributionNumber;
-    $this->receiveDateCalculator = $calculator;
 
-    parent::__construct($receiveDate, $params, $settingsManager);
+    parent::__construct($receiveDate, $params, $settingsManager, $calculator);
   }
 
   /**
    * @inheritDoc
    *
    * @throws \CiviCRM_API3_Exception
+   * @throws \Exception
    */
   public function process() {
     $previousInstalmentDate = $this->getPreviousContributionReceiveDate();
@@ -55,28 +48,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribut
     $numberOfIntervals = $recurringContribution['frequency_interval'];
     $frequencyUnit = $recurringContribution['frequency_unit'];
 
-    switch ($frequencyUnit) {
-      case 'day':
-        $interval = "P{$numberOfIntervals}D";
-        $receiveDate->add(new DateInterval($interval));
-        break;
-
-      case 'week':
-        $interval = "P{$numberOfIntervals}W";
-        $receiveDate->add(new DateInterval($interval));
-        break;
-
-      case 'month':
-        $receiveDate = $this->receiveDateCalculator->getSameDayNextMonth($receiveDate, $numberOfIntervals);
-        break;
-
-      case 'year':
-        $interval = "P{$numberOfIntervals}Y";
-        $receiveDate->add(new DateInterval($interval));
-        break;
-    }
-
-    $this->receiveDate = $receiveDate->format('Y-m-d H:i:s');
+    $this->receiveDate = $this->calculateNextInstalmentReceiveDate($receiveDate, $numberOfIntervals, $frequencyUnit);
   }
 
   /**
@@ -96,26 +68,6 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribut
     ]);
 
     return $result['values'][$this->contributionNumber - 2]['receive_date'];
-  }
-
-  /**
-   * Obtains recurrring contribution used for the payment plan.
-   *
-   * @return array
-   * @throws \CiviCRM_API3_Exception
-   */
-  private function getRecurringContribution() {
-    $result = civicrm_api3('ContributionRecur', 'get', [
-      'sequential' => 1,
-      'id' => $this->params['contribution_recur_id'],
-      'options' => ['limit' => 0],
-    ]);
-
-    if ($result['count'] > 0) {
-      return $result['values'][0];
-    }
-
-    return [];
   }
 
 }
