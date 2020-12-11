@@ -6,6 +6,7 @@ use CRM_MembershipExtras_Test_Fabricator_Membership as MembershipFabricator;
 use CRM_ManualDirectDebit_Test_Fabricator_Contribution as ContributionFabricator;
 use CRM_MembershipExtras_Test_Fabricator_LineItem as LineItemFabricator;
 use CRM_ManualDirectDebit_Common_SettingsManager as SettingsManager;
+use CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator as ReceiveDateCalculator;
 use CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribution as SecondContributionReceiveDateCalculator;
 
 /**
@@ -64,6 +65,20 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
     return $result;
   }
 
+  /**
+   * Builds a mock class to manage DD settings.
+   *
+   * @return mixed
+   */
+  private function buildSettingsManagerMock($settings) {
+    $settingsManager = $this->createMock(SettingsManager::class);
+    $settingsManager
+      ->method('getManualDirectDebitSettings')
+      ->willReturn(array_merge($this->defaultDDSettings, $settings));
+
+    return $settingsManager;
+  }
+
   public function testForceSecondContributionOnSecondMonthWhenStartDateToFirstPaymentIsMoreThan30Days() {
     $membershipStartDate = '2020-01-01';
     $firstInstalmentReceiveDate = '2020-02-05 00:00:00';
@@ -81,15 +96,14 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
     $settings = [
       'second_instalment_date_behaviour' => SettingsManager::SECOND_INSTALMENT_BEHAVIOUR_FORCE_SECOND_MONTH,
     ];
-    $settingsManager = $this->createMock(SettingsManager::class);
-    $settingsManager
-      ->method('getManualDirectDebitSettings')
-      ->willReturn(array_merge($this->defaultDDSettings, $settings));
+    $settingsManager = $this->buildSettingsManagerMock($settings);
+    $receiveDateCalculatorHelper = new ReceiveDateCalculator();
 
     $receiveDateCalculator = new SecondContributionReceiveDateCalculator(
       $receiveDate,
       $this->defaultContributionParams,
-      $settingsManager
+      $settingsManager,
+      $receiveDateCalculatorHelper
     );
     $receiveDateCalculator->process();
 
@@ -102,7 +116,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
     $programmedSecondInstalmentReceiveDate = $receiveDate = $this->defaultContributionParams['receive_date'] = '2020-02-15 00:00:00';
 
     $recurringContribution = $this->setupPlan($membershipStartDate, $firstInstalmentReceiveDate, [
-      'amount' => 1200,
+      'amount' => 120,
       'frequency_unit' => 'month',
       'frequency_interval' => 1,
       'installments' => 12,
@@ -113,15 +127,14 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
     $settings = [
       'second_instalment_date_behaviour' => SettingsManager::SECOND_INSTALMENT_BEHAVIOUR_FORCE_SECOND_MONTH,
     ];
-    $settingsManager = $this->createMock(SettingsManager::class);
-    $settingsManager
-      ->method('getManualDirectDebitSettings')
-      ->willReturn(array_merge($this->defaultDDSettings, $settings));
+    $settingsManager = $this->buildSettingsManagerMock($settings);
+    $receiveDateCalculatorHelper = new ReceiveDateCalculator();
 
     $receiveDateCalculator = new SecondContributionReceiveDateCalculator(
       $receiveDate,
       $this->defaultContributionParams,
-      $settingsManager
+      $settingsManager,
+      $receiveDateCalculatorHelper
     );
     $receiveDateCalculator->process();
 
@@ -145,15 +158,14 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
     $settings = [
       'second_instalment_date_behaviour' => SettingsManager::SECOND_INSTALMENT_BEHAVIOUR_ONE_MONTH_AFTER,
     ];
-    $settingsManager = $this->createMock(SettingsManager::class);
-    $settingsManager
-      ->method('getManualDirectDebitSettings')
-      ->willReturn(array_merge($this->defaultDDSettings, $settings));
+    $settingsManager = $this->buildSettingsManagerMock($settings);
+    $receiveDateCalculatorHelper = new ReceiveDateCalculator();
 
     $receiveDateCalculator = new SecondContributionReceiveDateCalculator(
       $receiveDate,
       $this->defaultContributionParams,
-      $settingsManager
+      $settingsManager,
+      $receiveDateCalculatorHelper
     );
     $receiveDateCalculator->process();
 

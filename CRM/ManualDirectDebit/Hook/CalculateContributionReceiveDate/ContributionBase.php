@@ -93,10 +93,30 @@ abstract class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_Contr
   }
 
   /**
+   * Obtains recurrring contribution used for the payment plan.
+   *
+   * @return array
+   * @throws \CiviCRM_API3_Exception
+   */
+  protected function getRecurringContribution() {
+    $result = civicrm_api3('ContributionRecur', 'get', [
+      'sequential' => 1,
+      'id' => $this->params['contribution_recur_id'],
+      'options' => ['limit' => 0],
+    ]);
+
+    if ($result['count'] > 0) {
+      return $result['values'][0];
+    }
+
+    return [];
+  }
+
+  /**
    * Changes the receive date for the instalment, if necessary.
    *
    * @return mixed
    */
-  public abstract function process();
+  abstract public function process();
 
 }

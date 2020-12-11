@@ -1,10 +1,35 @@
 <?php
 use CRM_ManualDirectDebit_Common_SettingsManager as SettingsManager;
+use CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator as ReceiveDateCalculator;
 
 /**
  * Class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribution.
  */
 class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribution extends CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_ContributionBase {
+
+  /**
+   * Helper object used to calculate receive dates.
+   *
+   * @var \CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator
+   */
+  protected $receiveDateCalculator;
+
+  /**
+   * CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribution constructor.
+   *
+   * @param string $receiveDate
+   * @param array $params
+   * @param \CRM_ManualDirectDebit_Common_SettingsManager $settingsManager
+   * @param \CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator $calculator
+   *
+   * @throws \CRM_Extension_Exception
+   * @throws \CiviCRM_API3_Exception
+   */
+  public function __construct(&$receiveDate, array $params, SettingsManager $settingsManager, ReceiveDateCalculator $calculator) {
+    parent::__construct($receiveDate, $params, $settingsManager);
+
+    $this->receiveDateCalculator = $calculator;
+  }
 
   /**
    * @inheritDoc
@@ -18,7 +43,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
       return;
     }
 
-    $this->forceSecondInstalmentOnSecondMonth();
+    $this->forceSecondInstalmentOnSecondPeriod();
   }
 
   /**
@@ -43,17 +68,20 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
    * @throws \CiviCRM_API3_Exception
    * @throws \Exception
    */
-  private function forceSecondInstalmentOnSecondMonth() {
+  private function forceSecondInstalmentOnSecondPeriod() {
+    $recurringContribution = $this->getRecurringContribution();
     $firstContribution = $this->getFirstContribution();
-    $firstContributionReceiveDate = new DateTime($firstContribution['receive_date']);
     $membershipsStartDate = $this->getMembershipsStartDate($firstContribution);
 
-    $interval = $membershipsStartDate->diff($firstContributionReceiveDate);
-    $dias = $interval->format('%a');
+    $firstMembershipCycleDate = new DateTime(
+      $membershipsStartDate->format('Y-m-' . $recurringContribution['cycle_day'])
+    );
 
-    if ($dias > 30) {
-      $this->receiveDate = $firstContributionReceiveDate->format('Y-m-d H:i:s');
-    }
+    $this->receiveDate = $this->calculateNextInstalmentReceiveDate(
+      $firstMembershipCycleDate,
+      $recurringContribution['frequency_interval'],
+      $recurringContribution['frequency_unit']
+    );
   }
 
   /**
@@ -122,7 +150,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
       return $result['values'];
     }
 
-     return [];
+    return [];
   }
 
   /**
@@ -145,6 +173,41 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
     }
 
     return [];
+  }
+
+  /**
+   * Calculates the date for the next instalment, given a date and a frequency.
+   *
+   * @param \DateTime $referenceInstalmentDate
+   * @param $numberOfIntervals
+   * @param $frequencyUnit
+   *
+   * @return string
+   * @throws \Exception
+   */
+  protected function calculateNextInstalmentReceiveDate(\DateTime $referenceInstalmentDate, $numberOfIntervals, $frequencyUnit) {
+    switch ($frequencyUnit) {
+      case 'day':
+        $interval = "P{$numberOfIntervals}D";
+        $referenceInstalmentDate->add(new DateInterval($interval));
+        break;
+
+      case 'week':
+        $interval = "P{$numberOfIntervals}W";
+        $referenceInstalmentDate->add(new DateInterval($interval));
+        break;
+
+      case 'month':
+        $referenceInstalmentDate = $this->receiveDateCalculator->getSameDayNextMonth($referenceInstalmentDate, $numberOfIntervals);
+        break;
+
+      case 'year':
+        $interval = "P{$numberOfIntervals}Y";
+        $referenceInstalmentDate->add(new DateInterval($interval));
+        break;
+    }
+
+    return $referenceInstalmentDate->format('Y-m-d H:i:s');
   }
 
 }
