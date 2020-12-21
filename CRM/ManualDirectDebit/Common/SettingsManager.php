@@ -4,6 +4,8 @@
  * Class provide information about Direct Debit Mandate Settings
  */
 class CRM_ManualDirectDebit_Common_SettingsManager {
+  const SECOND_INSTALMENT_BEHAVIOUR_ONE_MONTH_AFTER = 'one_month_after';
+  const SECOND_INSTALMENT_BEHAVIOUR_FORCE_SECOND_MONTH = 'force_second_month';
 
   public static $minimumDaysToFirstPayment;
 
@@ -49,7 +51,7 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
    * @return int|null
    */
   public static function getMinimumDayForFirstPayment() {
-    if (isset(self::$minimumDaysToFirstPayment) && !empty(self::$minimumDaysToFirstPayment)){
+    if (isset(self::$minimumDaysToFirstPayment) && !empty(self::$minimumDaysToFirstPayment)) {
       return self::$minimumDaysToFirstPayment;
     }
 
@@ -59,11 +61,12 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
       'sequential' => 1,
     ]);
 
-    if(isset($settingValues[$settingTitle]) && !empty($settingValues[$settingTitle])){
+    if (isset($settingValues[$settingTitle]) && !empty($settingValues[$settingTitle])) {
       self::$minimumDaysToFirstPayment = $settingValues[$settingTitle];
       return self::$minimumDaysToFirstPayment;
-    } else {
-      throw new CiviCRM_API3_Exception(t("Please, configure minimum days to first payment"),'required_setting_not_configured');
+    }
+    else {
+      throw new CiviCRM_API3_Exception(ts("Please, configure minimum days to first payment"), 'required_setting_not_configured');
     }
   }
 
@@ -83,8 +86,8 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
 
     if (!isset($settingValues) || empty($settingValues)) {
       $result = civicrm_api3('System', 'flush');
-      if ($result['is_error'] == 0){
-        $settingValues =  $this->fetchSettingsValues();
+      if ($result['is_error'] == 0) {
+        $settingValues = $this->fetchSettingsValues();
       }
     }
     return $settingValues;
@@ -120,18 +123,17 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
     if (!isset($allowedConfigFields) || empty($allowedConfigFields)) {
       $result = civicrm_api3('System', 'flush');
 
-      if ($result['is_error'] == 0){
-        $allowedConfigFields =  self::fetchSettingFields();
+      if ($result['is_error'] == 0) {
+        $allowedConfigFields = self::fetchSettingFields();
       }
     }
 
     return $allowedConfigFields;
   }
 
-
   private static function fetchSettingFields() {
-    return civicrm_api3('setting', 'getfields',[
-      'filters' =>[ 'group' => 'manualdirectdebit'],
+    return civicrm_api3('setting', 'getfields', [
+      'filters' => ['group' => 'manualdirectdebit'],
     ])['values'];
   }
 
