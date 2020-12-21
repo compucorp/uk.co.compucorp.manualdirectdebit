@@ -36,6 +36,26 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_FirstContribut
     'payment_instrument_id' => 'direct_debit',
   ];
 
+  /**
+   * Sets up a mock settings manager.
+   *
+   * Builds a mock settings manager object, making it return the given settings
+   * array merged with the default settings, when getManualDirectDebitSettings
+   * method is called.
+   *
+   * @param array $settings
+   *
+   * @return \CRM_ManualDirectDebit_Common_SettingsManager
+   */
+  private function setUpMockSettingsManager(array $settings) {
+    $settingsManager = $this->createMock(SettingsManager::class);
+    $settingsManager
+      ->method('getManualDirectDebitSettings')
+      ->willReturn(array_merge($this->defaultDDSettings, $settings));
+
+    return $settingsManager;
+  }
+
   public function testCalculateReceiveDateOnFirstRunDateWithMinDaysOverFirstPayDateUsesSecondPayDate() {
     $receiveDate = '2020-01-01';
     $settings = [
@@ -43,10 +63,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_FirstContribut
       'minimum_days_to_first_payment' => 4,
       'payment_collection_run_dates' => [1, 15],
     ];
-    $settingsManager = $this->createMock(SettingsManager::class);
-    $settingsManager
-      ->method('getManualDirectDebitSettings')
-      ->willReturn(array_merge($this->defaultDDSettings, $settings));
+    $settingsManager = $this->setUpMockSettingsManager($settings);
 
     $receiveDateCalculator = new FirstContributionReceiveDateCalculator(
       $receiveDate,
@@ -65,10 +82,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_FirstContribut
       'minimum_days_to_first_payment' => 5,
       'payment_collection_run_dates' => [1, 15],
     ];
-    $settingsManager = $this->createMock(SettingsManager::class);
-    $settingsManager
-      ->method('getManualDirectDebitSettings')
-      ->willReturn(array_merge($this->defaultDDSettings, $settings));
+    $settingsManager = $this->setUpMockSettingsManager($settings);
 
     $receiveDateCalculator = new FirstContributionReceiveDateCalculator(
       $receiveDate,
@@ -87,10 +101,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_FirstContribut
       'minimum_days_to_first_payment' => 5,
       'payment_collection_run_dates' => [1, 15],
     ];
-    $settingsManager = $this->createMock(SettingsManager::class);
-    $settingsManager
-      ->method('getManualDirectDebitSettings')
-      ->willReturn(array_merge($this->defaultDDSettings, $settings));
+    $settingsManager = $this->setUpMockSettingsManager($settings);
 
     $receiveDateCalculator = new FirstContributionReceiveDateCalculator(
       $receiveDate,
@@ -109,10 +120,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_FirstContribut
       'minimum_days_to_first_payment' => 5,
       'payment_collection_run_dates' => [1, 15],
     ];
-    $settingsManager = $this->createMock(SettingsManager::class);
-    $settingsManager
-      ->method('getManualDirectDebitSettings')
-      ->willReturn(array_merge($this->defaultDDSettings, $settings));
+    $settingsManager = $this->setUpMockSettingsManager($settings);
 
     $this->defaultContributionParams['payment_instrument_id'] = 'EFT';
     $receiveDateCalculator = new FirstContributionReceiveDateCalculator(
@@ -142,53 +150,28 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_FirstContribut
     ];
 
     foreach ($scenarios as $scenarioName => $testData) {
-      $startDate = $testData[0];
-      $minDaysToFirstPayment = $testData[1];
-      $newInstructionDates = $testData[2];
-      $paymentCollectionRunDates = $testData[3];
+      $receiveDate = $testData[0];
+      $settings = [
+        'minimum_days_to_first_payment' => $testData[1],
+        'new_instruction_run_dates' => $testData[2],
+        'payment_collection_run_dates' => $testData[3],
+      ];
       $expectedReceiveDateForFirstContribution = $testData[4];
-      $calculatedReceiveDate = $this->calculateReceiveDate($startDate, $minDaysToFirstPayment, $newInstructionDates, $paymentCollectionRunDates);
+
+      $settingsManager = $this->setUpMockSettingsManager($settings);
+      $receiveDateCalculator = new FirstContributionReceiveDateCalculator(
+        $receiveDate,
+        $this->defaultContributionParams,
+        $settingsManager
+      );
+      $receiveDateCalculator->process();
 
       $this->assertEquals(
         $expectedReceiveDateForFirstContribution,
-        $calculatedReceiveDate,
+        $receiveDate,
         "Scenario $scenarioName failed!"
       );
     }
-  }
-
-  /**
-   * Calculates the receive date for the first contribution.
-   *
-   * @param string $startDate
-   * @param int $minDaysToFirstPayment
-   * @param array $newInstructionDates
-   * @param array $paymentCollectionRunDates
-   *
-   * @return mixed
-   * @throws \CRM_Extension_Exception
-   * @throws \CiviCRM_API3_Exception
-   */
-  private function calculateReceiveDate($startDate, $minDaysToFirstPayment, $newInstructionDates, $paymentCollectionRunDates) {
-    $receiveDate = $startDate;
-    $settings = [
-      'new_instruction_run_dates' => $newInstructionDates,
-      'minimum_days_to_first_payment' => $minDaysToFirstPayment,
-      'payment_collection_run_dates' => $paymentCollectionRunDates,
-    ];
-    $settingsManager = $this->createMock(SettingsManager::class);
-    $settingsManager
-      ->method('getManualDirectDebitSettings')
-      ->willReturn(array_merge($this->defaultDDSettings, $settings));
-
-    $receiveDateCalculator = new FirstContributionReceiveDateCalculator(
-      $receiveDate,
-      $this->defaultContributionParams,
-      $settingsManager
-    );
-    $receiveDateCalculator->process();
-
-    return $receiveDate;
   }
 
 }

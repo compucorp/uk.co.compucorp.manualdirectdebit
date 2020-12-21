@@ -89,8 +89,9 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_FirstContribut
     $receiveDateTime = new DateTime($this->receiveDate);
     $nextInstructionRunDate = $this->getNextValidDateAfter($receiveDateTime, $this->ddSettings['new_instruction_run_dates']);
 
-    if ($this->ddSettings['minimum_days_to_first_payment']) {
-      $nextInstructionRunDate->add(new DateInterval("P{$this->ddSettings['minimum_days_to_first_payment']}D"));
+    $minimumDaysToFirstPayment = $this->ddSettings['minimum_days_to_first_payment'];
+    if ($minimumDaysToFirstPayment) {
+      $nextInstructionRunDate->add(new DateInterval("P{$minimumDaysToFirstPayment}D"));
     }
 
     $nextPaymentCollectionDate = $this->getNextValidDateAfter($nextInstructionRunDate, $this->ddSettings['payment_collection_run_dates']);
