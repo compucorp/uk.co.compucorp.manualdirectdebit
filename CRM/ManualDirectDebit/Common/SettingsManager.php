@@ -66,7 +66,7 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
       return self::$minimumDaysToFirstPayment;
     }
     else {
-      throw new CiviCRM_API3_Exception(t("Please, configure minimum days to first payment"), 'required_setting_not_configured');
+      throw new CiviCRM_API3_Exception(ts("Please, configure minimum days to first payment"), 'required_setting_not_configured');
     }
   }
 
