@@ -15,14 +15,18 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
   public function getManualDirectDebitSettings() {
     $settingValues = $this->getSettingsValues();
 
-    $settings = [];
-    $settings['default_reference_prefix'] = $settingValues['values'][0]['manualdirectdebit_default_reference_prefix'];
-    $settings['minimum_reference_prefix_length'] = $settingValues['values'][0]['manualdirectdebit_minimum_reference_prefix_length'];
+    $settings = [
+      'default_reference_prefix' => CRM_Utils_Array::value('manualdirectdebit_default_reference_prefix', $settingValues),
+      'minimum_reference_prefix_length' => CRM_Utils_Array::value('manualdirectdebit_minimum_reference_prefix_length', $settingValues),
+      'minimum_days_to_first_payment' => CRM_Utils_Array::value('manualdirectdebit_minimum_days_to_first_payment', $settingValues),
+    ];
+
     $settings['new_instruction_run_dates'] = $this->incrementAllArrayValues(
-      $settingValues['values'][0]['manualdirectdebit_new_instruction_run_dates']);
+      CRM_Utils_Array::value('manualdirectdebit_new_instruction_run_dates', $settingValues)
+    );
     $settings['payment_collection_run_dates'] = $this->incrementAllArrayValues(
-      $settingValues['values'][0]['manualdirectdebit_payment_collection_run_dates']);
-    $settings['minimum_days_to_first_payment'] = $settingValues['values'][0]['manualdirectdebit_minimum_days_to_first_payment'];
+      CRM_Utils_Array::value('manualdirectdebit_payment_collection_run_dates', $settingValues)
+    );
 
     return $settings;
   }
@@ -87,7 +91,8 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
         $settingValues =  $this->fetchSettingsValues();
       }
     }
-    return $settingValues;
+
+    return $settingValues['values'][0];
   }
 
   /**
