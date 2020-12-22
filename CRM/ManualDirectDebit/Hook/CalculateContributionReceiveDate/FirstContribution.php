@@ -86,12 +86,14 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_FirstContribut
       return;
     }
 
-    $paddedReceiveDate = new DateTime($this->receiveDate);
-    if ($this->ddSettings['minimum_days_to_first_payment']) {
-      $paddedReceiveDate->add(new DateInterval("P{$this->ddSettings['minimum_days_to_first_payment']}D"));
+    $receiveDateTime = new DateTime($this->receiveDate);
+    $nextInstructionRunDate = $this->getNextValidDateAfter($receiveDateTime, $this->ddSettings['new_instruction_run_dates']);
+
+    $minimumDaysToFirstPayment = $this->ddSettings['minimum_days_to_first_payment'];
+    if ($minimumDaysToFirstPayment) {
+      $nextInstructionRunDate->add(new DateInterval("P{$minimumDaysToFirstPayment}D"));
     }
 
-    $nextInstructionRunDate = $this->getNextValidDateAfter($paddedReceiveDate, $this->ddSettings['new_instruction_run_dates']);
     $nextPaymentCollectionDate = $this->getNextValidDateAfter($nextInstructionRunDate, $this->ddSettings['payment_collection_run_dates']);
     $this->receiveDate = $nextPaymentCollectionDate->format('Y-m-d H:i:s');
   }
@@ -131,7 +133,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_FirstContribut
           $paymentCollectionMonth = ($month < 10 ? '0' . $month : $month);
           $nextAvailableDate = new DateTime("{$year}-{$paymentCollectionMonth}-{$paymentCollectionDay}");
 
-          if ($nextAvailableDate >= $referenceDate) {
+          if ($nextAvailableDate > $referenceDate) {
             return $nextAvailableDate;
           }
         }
