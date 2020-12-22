@@ -68,7 +68,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribut
   /**
    * Builds a mock class to manage DD settings.
    *
-   * @return mixed
+   * @return \CRM_ManualDirectDebit_Common_SettingsManager
    */
   private function buildSettingsManagerMock($settings) {
     $settingsManager = $this->createMock(SettingsManager::class);
@@ -77,6 +77,23 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribut
       ->willReturn(array_merge($this->defaultDDSettings, $settings));
 
     return $settingsManager;
+  }
+
+  /**
+   * Builds mock receive date calculator object.
+   *
+   * @param string $dayNextMonth
+   *
+   * @return \CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator
+   * @throws \Exception
+   */
+  private function buildReceiveDateCalculatorMock($dayNextMonth) {
+    $calculator = $this->createMock(ReceiveDateCalculator::class);
+    $calculator
+      ->method('getSameDayNextMonth')
+      ->willReturn(new DateTime($dayNextMonth));
+
+    return $calculator;
   }
 
   /**
@@ -182,7 +199,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribut
     $this->defaultContributionParams['contribution_recur_id'] = $recurringContribution['id'];
 
     $settingsManager = $this->buildSettingsManagerMock([]);
-    $receiveDateCalculatorHelper = new ReceiveDateCalculator();
+    $receiveDateCalculatorHelper = $this->buildReceiveDateCalculatorMock('2020-04-15');
     $receiveDateCalculator = new OtherContributionReceiveDateCalculator(
       4,
       $receiveDate,

@@ -79,6 +79,23 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
     return $settingsManager;
   }
 
+  /**
+   * Builds mock receive date calculator object.
+   *
+   * @param string $dayNextMonth
+   *
+   * @return \CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator
+   * @throws \Exception
+   */
+  private function buildReceiveDateCalculatorMock($dayNextMonth) {
+    $calculator = $this->createMock(ReceiveDateCalculator::class);
+    $calculator
+      ->method('getSameDayNextMonth')
+      ->willReturn(new DateTime($dayNextMonth));
+
+    return $calculator;
+  }
+
   public function testForceSecondContributionOnSecondMonthWhenStartDateToFirstPaymentIsMoreThan30Days() {
     $membershipStartDate = '2020-01-01';
     $firstInstalmentReceiveDate = '2020-02-05 00:00:00';
@@ -97,7 +114,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
       'second_instalment_date_behaviour' => SettingsManager::SECOND_INSTALMENT_BEHAVIOUR_FORCE_SECOND_MONTH,
     ];
     $settingsManager = $this->buildSettingsManagerMock($settings);
-    $receiveDateCalculatorHelper = new ReceiveDateCalculator();
+    $receiveDateCalculatorHelper = $this->buildReceiveDateCalculatorMock('2020-02-05');
 
     $receiveDateCalculator = new SecondContributionReceiveDateCalculator(
       $receiveDate,
@@ -128,7 +145,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
       'second_instalment_date_behaviour' => SettingsManager::SECOND_INSTALMENT_BEHAVIOUR_FORCE_SECOND_MONTH,
     ];
     $settingsManager = $this->buildSettingsManagerMock($settings);
-    $receiveDateCalculatorHelper = new ReceiveDateCalculator();
+    $receiveDateCalculatorHelper = $this->buildReceiveDateCalculatorMock('2020-02-15');
 
     $receiveDateCalculator = new SecondContributionReceiveDateCalculator(
       $receiveDate,
@@ -159,7 +176,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
       'second_instalment_date_behaviour' => SettingsManager::SECOND_INSTALMENT_BEHAVIOUR_ONE_MONTH_AFTER,
     ];
     $settingsManager = $this->buildSettingsManagerMock($settings);
-    $receiveDateCalculatorHelper = new ReceiveDateCalculator();
+    $receiveDateCalculatorHelper = $this->buildReceiveDateCalculatorMock('2020-03-05');
 
     $receiveDateCalculator = new SecondContributionReceiveDateCalculator(
       $receiveDate,
