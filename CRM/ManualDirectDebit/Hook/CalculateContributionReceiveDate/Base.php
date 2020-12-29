@@ -7,7 +7,7 @@ use CRM_ManualDirectDebit_Common_SettingsManager as SettingsManager;
  * Holds methods and attributes to all classes that calculate receive dates for
  * instalments in a payment plan.
  */
-abstract class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_ContributionBase {
+abstract class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_Base {
   /**
    * Start date of the payment plan and the receive date of first instalment.
    *
@@ -102,11 +102,10 @@ abstract class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_Contr
     $result = civicrm_api3('ContributionRecur', 'get', [
       'sequential' => 1,
       'id' => $this->params['contribution_recur_id'],
-      'options' => ['limit' => 0],
     ]);
 
     if ($result['count'] > 0) {
-      return $result['values'][0];
+      return array_shift($result['values']);
     }
 
     return [];
