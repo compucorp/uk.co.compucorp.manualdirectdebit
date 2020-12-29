@@ -5,7 +5,7 @@ use CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator as ReceiveDate
 /**
  * Class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribution.
  */
-class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribution extends CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_ContributionBase {
+class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribution extends CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_Base {
 
   /**
    * Helper object used to calculate receive dates.

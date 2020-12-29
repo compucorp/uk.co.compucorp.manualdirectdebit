@@ -6,7 +6,7 @@
  * Implements hook to calculate the receive date of the first contribution of a
  * payment plan.
  */
-class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_FirstContribution extends CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_ContributionBase {
+class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_FirstContribution extends CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_Base {
 
   /**
    * Calculates receive date for payment plan if payment method is DD.
