@@ -395,14 +395,40 @@ function manualdirectdebit_membershipextras_postOfflineAutoRenewal($membershipId
 /**
  * Implements hook_membershipextras_calculateContributionReceiveDate().
  */
-function manualdirectdebit_membershipextras_calculateContributionReceiveDate(&$receiveDate, &$contributionCreationParams) {
+function manualdirectdebit_membershipextras_calculateContributionReceiveDate($contributionNumber, &$receiveDate, $contributionCreationParams) {
   $settingsManager = new CRM_ManualDirectDebit_Common_SettingsManager();
-  $firstReceiveDateCalculator = new CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_FirstContribution(
-    $receiveDate,
-    $contributionCreationParams,
-    $settingsManager
-  );
-  $firstReceiveDateCalculator->process();
+  $calculator = new CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator();
+
+  switch ($contributionNumber) {
+    case 1:
+      $receiveDateCalculator = new CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_FirstContribution(
+        $receiveDate,
+        $contributionCreationParams,
+        $settingsManager
+      );
+      $receiveDateCalculator->process();
+      break;
+
+    case 2:
+      $receiveDateCalculator = new CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribution(
+        $receiveDate,
+        $contributionCreationParams,
+        $settingsManager,
+        $calculator
+      );
+      $receiveDateCalculator->process();
+      break;
+
+    default:
+      $receiveDateCalculator = new CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribution(
+        $contributionNumber,
+        $receiveDate,
+        $contributionCreationParams,
+        $settingsManager,
+        $calculator
+      );
+      $receiveDateCalculator->process();
+  }
 }
 
 function manualdirectdebit_civicrm_searchTasks($objectName, &$tasks) {
