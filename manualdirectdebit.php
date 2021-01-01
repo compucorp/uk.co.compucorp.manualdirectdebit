@@ -448,6 +448,7 @@ function manualdirectdebit_civicrm_queryObjects(&$queryObjects, $type) {
 function manualdirectdebit_civicrm_alterReportVar($varType, &$var, $reportForm) {
   $listeners = [
     new CRM_ManualDirectDebit_Hook_Alter_ContactDetailReport(),
+    new CRM_ManualDirectDebit_Hook_Alter_ContributeDetailReport(),
   ];
 
   foreach ($listeners as $currentListener) {
