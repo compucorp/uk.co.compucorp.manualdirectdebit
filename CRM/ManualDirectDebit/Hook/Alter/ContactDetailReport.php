@@ -51,10 +51,49 @@ class CRM_ManualDirectDebit_Hook_Alter_ContactDetailReport {
    * @return bool
    */
   private function shouldUpdate($reportForm) {
-    if (
-      isset($reportForm->getVar('_params')['fields']['dd_instruction_batch_id'])
-      || isset($reportForm->getVar('_params')['dd_instruction_batch_id_value'])
-      || isset($reportForm->getVar('_params')['dd_instruction_batch_id_op'])
+    $params = $reportForm->getVar('_params');
+    if ($this->checkField($params, 'dd_instruction_batch_id')
+      || $this->checkFilter($params, 'dd_instruction_batch_id')
+    ) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
+   * Checks if field exists
+   *
+   * @param array $params
+   * @param string $field
+   *
+   * @return bool
+   */
+  private function checkField($params, $field) {
+    if (isset(($params['fields'][$field]))) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
+   * Checks if filter exists
+   *
+   * @param array $params
+   * @param string $filter
+   *
+   * @return bool
+   */
+  private function checkFilter($params, $filter) {
+    $filterName = $filter . '_value';
+    $filterOpName = $filter . '_op';
+    if (isset($params[$filterOpName])
+      && in_array($params[$filterOpName], ['nll', 'nnll'])
+    ) {
+      return TRUE;
+    }
+    if (isset($params[$filterOpName])
+      && in_array($params[$filterOpName], ['in', 'notin'])
+      && !empty($params[$filterName])
     ) {
       return TRUE;
     }
