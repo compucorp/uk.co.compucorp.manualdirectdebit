@@ -441,3 +441,17 @@ function manualdirectdebit_civicrm_queryObjects(&$queryObjects, $type) {
     $queryObjects[] = new CRM_ManualDirectDebit_Hook_QueryObjects_Contribution();
   }
 }
+
+/**
+ * Implements hook_civicrm_alterReportVar().
+ */
+function manualdirectdebit_civicrm_alterReportVar($varType, &$var, $reportForm) {
+  $listeners = [
+    new CRM_ManualDirectDebit_Hook_Alter_ContactDetailReport(),
+    new CRM_ManualDirectDebit_Hook_Alter_ContributeDetailReport(),
+  ];
+
+  foreach ($listeners as $currentListener) {
+    $currentListener->handle($varType, $var, $reportForm);
+  }
+}

@@ -25,12 +25,9 @@ class CRM_ManualDirectDebit_Hook_QueryObjects_Contribution extends CRM_Contact_B
     $from = '';
     if ($fieldName == 'contribution_batch') {
       $from = "
-        $side JOIN (
-          SELECT civicrm_entity_batch.entity_id, civicrm_entity_batch.batch_id
-          FROM civicrm_entity_batch, civicrm_batch
-          WHERE civicrm_entity_batch.entity_table = 'civicrm_contribution'
-          AND civicrm_entity_batch.batch_id = civicrm_batch.id
-        ) payment_batches ON payment_batches.entity_id = civicrm_contribution.id
+        $side JOIN civicrm_entity_batch payment_batches
+        ON (payment_batches.entity_table = 'civicrm_contribution'
+        AND payment_batches.entity_id = civicrm_contribution.id)
       ";
     }
 
