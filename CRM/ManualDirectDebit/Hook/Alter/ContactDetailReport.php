@@ -11,7 +11,7 @@ class CRM_ManualDirectDebit_Hook_Alter_ContactDetailReport {
    *
    * @var array
    */
-  protected $_batches = [];
+  private $_batches = [];
 
   /**
    * Handle the hook.
@@ -36,7 +36,7 @@ class CRM_ManualDirectDebit_Hook_Alter_ContactDetailReport {
    *
    * @return bool
    */
-  protected function shouldHandle($reportFormClass) {
+  private function shouldHandle($reportFormClass) {
     if ($reportFormClass === CRM_Report_Form_Contact_Detail::class) {
       return TRUE;
     }
@@ -50,7 +50,7 @@ class CRM_ManualDirectDebit_Hook_Alter_ContactDetailReport {
    *
    * @return bool
    */
-  protected function shouldUpdate($reportForm) {
+  private function shouldUpdate($reportForm) {
     if (
       isset($reportForm->getVar('_params')['fields']['dd_instruction_batch_id'])
       || isset($reportForm->getVar('_params')['dd_instruction_batch_id_value'])
@@ -66,7 +66,7 @@ class CRM_ManualDirectDebit_Hook_Alter_ContactDetailReport {
    *
    * @param array $columns
    */
-  protected function updateColumns(&$columns) {
+  private function updateColumns(&$columns) {
     $batches = $this->getBatches();
     $columns['civicrm_value_dd_mandate']['fields']['dd_instruction_batch_id'] = [
       'title' => ts('Instruction Batch'),
@@ -87,7 +87,7 @@ class CRM_ManualDirectDebit_Hook_Alter_ContactDetailReport {
    *
    * @param CRM_Report_Form_Contact_Detail $reportForm
    */
-  protected function updateSql(&$reportForm) {
+  private function updateSql(&$reportForm) {
     if (!$this->shouldUpdate($reportForm)) {
       return;
     }
@@ -116,7 +116,7 @@ class CRM_ManualDirectDebit_Hook_Alter_ContactDetailReport {
    *
    * @param array $rows
    */
-  protected function updateRows(&$rows) {
+  private function updateRows(&$rows) {
     $batches = $this->getBatches();
     foreach ($rows as $rowNum => $row) {
       if (isset($rows[$rowNum]['civicrm_value_dd_mandate_dd_instruction_batch_id'])) {
@@ -130,7 +130,7 @@ class CRM_ManualDirectDebit_Hook_Alter_ContactDetailReport {
    *
    * @return array $batches
    */
-  protected function getBatches() {
+  private function getBatches() {
     if (count($this->_batches)) {
       return $this->_batches;
     }
@@ -144,6 +144,7 @@ class CRM_ManualDirectDebit_Hook_Alter_ContactDetailReport {
 
     $params = [
       'type_id' => ['IN' => $batchTypeIds],
+      'options' => ['limit' => 0],
       'return' => ['id', 'title'],
     ];
     $result = civicrm_api3('Batch', 'get', $params);
