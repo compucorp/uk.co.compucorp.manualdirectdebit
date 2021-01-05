@@ -98,7 +98,7 @@ return [
     'quick_form_type' => 'Element',
     'default' => SettingsManager::SECOND_INSTALMENT_BEHAVIOUR_ONE_MONTH_AFTER,
     'is_required' => TRUE,
-    'is_help' => FALSE,
+    'is_help' => TRUE,
     'html_attributes' => [
       SettingsManager::SECOND_INSTALMENT_BEHAVIOUR_ONE_MONTH_AFTER => ts('Take second instalment 1 month after the first instalment'),
       SettingsManager::SECOND_INSTALMENT_BEHAVIOUR_FORCE_SECOND_MONTH => ts('Take second instalment in the second month of membership'),
@@ -107,7 +107,7 @@ return [
       'class' => 'crm-select2',
       'placeholder' => ts('- select -'),
     ],
-    'section' => 'payment_config',
+    'section' => 'instalment_config',
   ],
   'manualdirectdebit_days_in_advance_for_collection_reminder' => [
     'group_name' => 'Manual Direct Debit',
@@ -147,7 +147,6 @@ return [
  * @param int $limit
  *
  * @return  array
- *
  */
 function generateSequenceNumbers($limit) {
   $sequence = [];
