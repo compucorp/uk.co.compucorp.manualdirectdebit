@@ -63,7 +63,7 @@
                 <td>&nbsp;</td>
               {/if}
               </tr>
-              {include file="CRM/Contribute/Form/Search/Common.tpl"}
+              {include file="CRM/ManualDirectDebit/Form/Search/Common.tpl"}
             </table>
       <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>
           </div>
