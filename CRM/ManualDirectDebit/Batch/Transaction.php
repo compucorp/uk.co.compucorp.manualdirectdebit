@@ -221,6 +221,22 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'op' => 'IN',
         'field' => 'civicrm_contribution_recur.contribution_status_id',
       ],
+      'contact_tags' => [
+        'op' => 'IN',
+        'field' => 'civicrm_entity_tag.tag_id',
+      ],
+      'group' => [
+        'op' => 'IN',
+        'field' => 'civicrm_group_contact.group_id',
+      ],
+      'contribution_amount_low' => [
+        'op' => '>=',
+        'field' => 'civicrm_contribution.total_amount',
+      ],
+      'contribution_amount_high' => [
+        'op' => '<=',
+        'field' => 'civicrm_contribution.total_amount',
+      ],
     ];
   }
 
@@ -435,6 +451,8 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $query->join('entity_batch', 'LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . $this->params['entityTable'] . '.id AND civicrm_entity_batch.entity_table = \'' . $this->params['entityTable'] . '\'');
     $query->join('civicrm_option_group', 'LEFT JOIN civicrm_option_group ON civicrm_option_group.name = "direct_debit_codes"');
     $query->join('civicrm_option_value', 'LEFT JOIN civicrm_option_value ON civicrm_option_group.id = civicrm_option_value.option_group_id AND civicrm_option_value.value = ' . self::DD_MANDATE_TABLE . '.dd_code');
+    $query->join('civicrm_entity_tag', 'LEFT JOIN civicrm_entity_tag ON civicrm_entity_tag.entity_id = civicrm_contact.id AND civicrm_entity_tag.entity_table = \'civicrm_contact\'');
+    $query->join('civicrm_group_contact', 'LEFT JOIN civicrm_group_contact ON civicrm_group_contact.contact_id = civicrm_contact.id AND civicrm_group_contact.status = \'Added\'');
 
     //select
     $query->select(implode(' , ', $this->returnValues));
