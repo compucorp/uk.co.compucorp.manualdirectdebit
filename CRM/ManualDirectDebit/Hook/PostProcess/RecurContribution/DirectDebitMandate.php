@@ -43,4 +43,5 @@ class CRM_ManualDirectDebit_Hook_PostProcess_RecurContribution_DirectDebitMandat
 
     return [];
   }
+
 }

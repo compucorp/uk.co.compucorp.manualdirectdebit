@@ -48,13 +48,13 @@ class CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInje
    * @return bool
    */
   public function inject() {
-    if(! CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($this->currentPaymentMethodId)){
+    if (!CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($this->currentPaymentMethodId)) {
       return FALSE;
     }
 
     $mandateId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($this->currentContributionId);
 
-    if (is_null($mandateId)){
+    if (is_null($mandateId)) {
       CRM_Core_Session::setStatus(t("Mandate doesn't exist"), $title = 'Error', $type = 'alert');
 
       return FALSE;
@@ -89,7 +89,6 @@ class CRM_ManualDirectDebit_Hook_PageRun_ContributionRecur_DirectDebitFieldsInje
         ]);
     }
   }
-
 
   /**
    * Gets mandate cgcount

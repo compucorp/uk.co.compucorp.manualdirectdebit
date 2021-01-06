@@ -19,7 +19,7 @@ class CRM_ManualDirectDebit_Queue_Task_BatchSubmission_PaymentItem {
       }
     }
 
-    $totalExecutionTime = (microtime(true) - $processingStartTime);
+    $totalExecutionTime = (microtime(TRUE) - $processingStartTime);
     $endProcessingMessage = 'Finished processing the task In : ' . $totalExecutionTime . 'Seconds';
     $ctx->log->info($endProcessingMessage);
 

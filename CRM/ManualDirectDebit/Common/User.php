@@ -39,7 +39,6 @@ class CRM_ManualDirectDebit_Common_User {
     return $contactId;
   }
 
-
   /**
    * Gets drupal admin id
    *
@@ -48,7 +47,7 @@ class CRM_ManualDirectDebit_Common_User {
   private static function getDrupalAdminUserId() {
     $dbSelect = db_select('users', 'users');
     $dbSelect->join('users_roles', 'roles', 'roles.uid = users.uid');
-    $drupalUserList = $dbSelect->fields('users',['uid'])
+    $drupalUserList = $dbSelect->fields('users', ['uid'])
       ->where('roles.rid = ' . variable_get('user_admin_role'))
       ->range(0, 1)
       ->execute()
@@ -60,7 +59,6 @@ class CRM_ManualDirectDebit_Common_User {
 
     return FALSE;
   }
-
 
   /**
    * Gets contact id by drupal contact id
@@ -74,11 +72,12 @@ class CRM_ManualDirectDebit_Common_User {
       $contactId = civicrm_api3('UFMatch', 'getvalue', [
         'return' => "contact_id",
         'uf_id' => $drupalAdminId,
-        'options' => ['limit' => 1]
+        'options' => ['limit' => 1],
       ]);
 
       return (int) $contactId;
-    } catch (CiviCRM_API3_Exception $e) {
+    }
+    catch (CiviCRM_API3_Exception $e) {
       return FALSE;
     }
   }

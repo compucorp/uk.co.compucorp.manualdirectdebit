@@ -7,7 +7,7 @@ class CRM_ManualDirectDebit_ScheduleJob_ReminderOffsetDays {
   /**
    * Reminder offset in days
    *
-   * @var NULL|int|false
+   * @var null|int|false
    */
   private static $reminderOffsetDays = NULL;
 
@@ -34,7 +34,7 @@ class CRM_ManualDirectDebit_ScheduleJob_ReminderOffsetDays {
     $settingName = "manualdirectdebit_days_in_advance_for_collection_reminder";
     try {
       $settings = civicrm_api3('setting', 'get', [
-        'return' => [$settingName]
+        'return' => [$settingName],
       ]);
     }
     catch (CiviCRM_API3_Exception $e) {

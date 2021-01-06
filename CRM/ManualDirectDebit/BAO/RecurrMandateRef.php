@@ -90,7 +90,8 @@ class CRM_ManualDirectDebit_BAO_RecurrMandateRef extends CRM_ManualDirectDebit_D
 
     if (isset($queryResult->id) && !empty($queryResult->id)) {
       return $queryResult->id;
-    } else {
+    }
+    else {
       return NULL;
     }
   }

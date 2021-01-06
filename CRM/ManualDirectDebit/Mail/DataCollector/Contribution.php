@@ -27,4 +27,5 @@ class CRM_ManualDirectDebit_Mail_DataCollector_Contribution extends CRM_ManualDi
   protected function setContributionId() {
     $this->contributionId = $this->enteredContributionId;
   }
+
 }

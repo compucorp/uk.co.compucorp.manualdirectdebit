@@ -15,7 +15,7 @@ class CRM_ManualDirectDebit_Queue_Task_BatchSubmission_InstructionItem {
       }
     }
 
-    $totalExecutionTime = (microtime(true) - $processingStartTime);
+    $totalExecutionTime = (microtime(TRUE) - $processingStartTime);
     $endProcessingMessage = 'Finished processing the task In : ' . $totalExecutionTime . 'Seconds';
     $ctx->log->info($endProcessingMessage);
 
@@ -33,4 +33,5 @@ class CRM_ManualDirectDebit_Queue_Task_BatchSubmission_InstructionItem {
     $query = 'UPDATE civicrm_value_dd_mandate SET civicrm_value_dd_mandate.dd_code = "' . array_search($codeName, $ddCodes) . '" WHERE civicrm_value_dd_mandate.id = ' . $mandateId;
     CRM_Core_DAO::executeQuery($query);
   }
+
 }

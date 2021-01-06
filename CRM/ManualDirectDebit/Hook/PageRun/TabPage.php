@@ -9,7 +9,7 @@ class CRM_ManualDirectDebit_Hook_PageRun_TabPage {
   /**
    * Contribution Id
    *
-   * @var
+   * @var int
    */
   private $contributionId;
 

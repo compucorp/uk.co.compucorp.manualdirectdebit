@@ -7,11 +7,11 @@ class CRM_ManualDirectDebit_Queue_BatchSubmission {
   private static $queue;
 
   public static function getQueue() {
-    if(!self::$queue) {
+    if (!self::$queue) {
       self::$queue = CRM_Queue_Service::singleton()->create([
         'type' => 'Sql',
         'name' => self::QUEUE_NAME,
-        'reset' => false,
+        'reset' => FALSE,
       ]);
     }
 

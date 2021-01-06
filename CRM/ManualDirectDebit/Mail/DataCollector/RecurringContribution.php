@@ -3,7 +3,7 @@
 /**
  * Collect data for message template by recurring contribution id
  */
-class CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution extends CRM_ManualDirectDebit_Mail_DataCollector_Base{
+class CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution extends CRM_ManualDirectDebit_Mail_DataCollector_Base {
 
   /**
    * Entered recurring contribution id
@@ -30,7 +30,7 @@ class CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution extends CRM
       $this->contributionId = $contributionId;
     }
     else {
-      throw new CiviCRM_API3_Exception("Can't find contribution id by recurring contribution id",'dd_3');
+      throw new CiviCRM_API3_Exception("Can't find contribution id by recurring contribution id", 'dd_3');
     }
   }
 
@@ -43,7 +43,7 @@ class CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution extends CRM
     $result = civicrm_api3('Contribution', 'get', [
       'sequential' => 1,
       'contribution_recur_id' => $this->enteredRecurringContributionId,
-      'options' => ['sort' => 'id DESC', 'limit' => 1]
+      'options' => ['sort' => 'id DESC', 'limit' => 1],
     ]);
 
     return $result['count'] == 1 ? $result['values'][0]['id'] : FALSE;

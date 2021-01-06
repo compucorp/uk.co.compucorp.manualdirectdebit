@@ -2,7 +2,7 @@
 
 use CRM_ManualDirectDebit_BAO_RecurrMandateRef as RecurrMandateRef;
 
-class  CRM_ManualDirectDebit_Hook_PostOfflineAutoRenewal_Mandate {
+class CRM_ManualDirectDebit_Hook_PostOfflineAutoRenewal_Mandate {
 
   private $contributionRecurId;
 

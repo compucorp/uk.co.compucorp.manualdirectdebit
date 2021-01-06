@@ -68,7 +68,8 @@ class CRM_ManualDirectDebit_Hook_BuildForm_InjectCustomGroup {
   private function getMinimumDayForFirstPayment() {
     try {
       $minimumDaysToFirstPayment = CRM_ManualDirectDebit_Common_SettingsManager::getMinimumDayForFirstPayment();
-    } catch (CiviCRM_API3_Exception $error) {
+    }
+    catch (CiviCRM_API3_Exception $error) {
       $minimumDaysToFirstPayment = 0;
     }
 

@@ -71,7 +71,7 @@ class CRM_ManualDirectDebit_Hook_Custom_DataGenerator {
     $mandateReference = NULL;
     if (!empty($contactLastRecurContribution['values'][0]['id'])) {
       $contributionRecurId = $contactLastRecurContribution['values'][0]['id'];
-      $mandateReference =  CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($contributionRecurId);
+      $mandateReference = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($contributionRecurId);
     }
 
     if (!empty($mandateReference)) {

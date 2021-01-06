@@ -23,7 +23,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Payment {
   /**
    * List of DD codes in the system.
    *
-   * @var
+   * @var array
    */
   private static $ddCodes;
 
@@ -83,7 +83,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Payment {
     $extraAttributes = [];
     $isEditRecurContributionForm = $this->form->_formName == 'UpdateSubscription';
     if ($isEditRecurContributionForm) {
-      $extraAttributes['disabled'] = true;
+      $extraAttributes['disabled'] = TRUE;
     }
 
     $contactID = CRM_Utils_Request::retrieve('cid', 'Int');
@@ -105,8 +105,8 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Payment {
    */
   private function getNewlyCreatedMandateID($contactID) {
     $sqlSelectDebitMandateID = "
-      SELECT MAX(`id`) AS id 
-      FROM " . CRM_ManualDirectDebit_Common_MandateStorageManager::DIRECT_DEBIT_TABLE_NAME . " 
+      SELECT MAX(`id`) AS id
+      FROM " . CRM_ManualDirectDebit_Common_MandateStorageManager::DIRECT_DEBIT_TABLE_NAME . "
       WHERE `entity_id` = %1
       AND id NOT IN (
         SELECT mandate_id
@@ -151,8 +151,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Payment {
         $currentMandate['dd_ref'] . ' - ' .
         $this->getMandateCode($currentMandate['dd_code']) . ' - ' .
         $currentMandate['ac_number'] . ' - ' .
-        CRM_Utils_Date::customFormat($currentMandate['start_date'], $config->dateformatFull)
-      ;
+        CRM_Utils_Date::customFormat($currentMandate['start_date'], $config->dateformatFull);
     }
 
     $result[0] = 'Create New Mandate...';

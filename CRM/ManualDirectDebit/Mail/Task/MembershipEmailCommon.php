@@ -168,11 +168,11 @@ class CRM_ManualDirectDebit_Mail_Task_MembershipEmailCommon extends CRM_Contact_
       SELECT membership.id AS contribution_id 
       FROM civicrm_membership AS membership
       WHERE membership.contact_id = %1
-        AND membership.id IN(". $validatedMembershipIdsImploded .")
+        AND membership.id IN(" . $validatedMembershipIdsImploded . ")
     ";
 
     $dao = CRM_Core_DAO::executeQuery($query, [
-      1 => [(int) $contactId, 'Integer']
+      1 => [(int) $contactId, 'Integer'],
     ]);
 
     $contactMembershipIds = [];
