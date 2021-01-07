@@ -37,9 +37,9 @@
           {ts}Edit Search Criteria{/ts}
         </div>
         <div class="crm-accordion-body">
-          <div id="searchForm" class="crm-block crm-form-block crm-contact-custom-search-activity-search-form-block">
+          <div id="manualDirectDebitSearchForm" class="crm-block crm-form-block crm-manual-direct-debit-search-form-block">
             <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="top"}</div>
-            <table class="form-layout-compressed">
+            <table class="form-layout">
               <tr>
                 <td class="font-size12pt" colspan="2">
                   {$form.sort_name.label}<br>
@@ -256,7 +256,7 @@ function buildTransactionSelectorAssign() {
       aoData = aoData.concat(searchData);
 
 
-      CRM.$('#searchForm :input').each(function() {
+      CRM.$('#manualDirectDebitSearchForm :input').each(function() {
         if (CRM.$(this).val()) {
           aoData.push(
             {name:CRM.$(this).attr('id'), value: CRM.$(this).val()}
