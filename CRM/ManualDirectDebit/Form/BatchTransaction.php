@@ -164,7 +164,6 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
    */
   private function assignDDPaymentsSearchProperties() {
     $ddCodes = CRM_Core_OptionGroup::values('direct_debit_codes');
-    $paymentInstrument = CRM_Core_OptionGroup::values('payment_instrument', FALSE, FALSE, FALSE, NULL, 'name');
     $recurStatus = $contributionStatus = CRM_Core_OptionGroup::values('contribution_status', FALSE, FALSE, FALSE, NULL, 'name');
     unset($recurStatus[array_search('Cancelled', $contributionStatus)]);
 
@@ -193,16 +192,6 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
       [
         'name' => 'recur_status',
         'value' => array_keys($recurStatus),
-      ],
-      [
-        'name' => 'contribution_status',
-        'value' => [
-          array_search('Pending', $contributionStatus),
-        ],
-      ],
-      [
-        'name' => 'payment_instrument',
-        'value' => array_search('direct_debit', $paymentInstrument),
       ],
     ];
   }

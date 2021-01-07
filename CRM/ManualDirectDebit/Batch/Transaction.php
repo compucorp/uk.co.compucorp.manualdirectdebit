@@ -169,7 +169,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'op' => '=',
         'field' => self::DD_MANDATE_TABLE . '.originator_number',
       ],
-      'contribution_status' => [
+      'contribution_status_id' => [
         'op' => 'IN',
         'field' => 'civicrm_contribution.contribution_status_id',
       ],
