@@ -447,6 +447,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $query->join('value_dd_information', 'LEFT JOIN civicrm_value_dd_information ON civicrm_value_dd_information.mandate_id = civicrm_value_dd_mandate.id');
     $query->join('contribution', 'LEFT JOIN civicrm_contribution ON civicrm_contribution.id = civicrm_value_dd_information.entity_id');
     $query->join('contact', 'LEFT JOIN civicrm_contact ON civicrm_contribution.contact_id = civicrm_contact.id');
+    $query->join('email', 'LEFT JOIN civicrm_email ON (civicrm_contact.id = civicrm_email.contact_id AND civicrm_email.is_primary = 1)');
     $query->join('contribution_recur', 'LEFT JOIN civicrm_contribution_recur ON civicrm_contribution.contribution_recur_id = civicrm_contribution_recur.id');
     $query->join('entity_batch', 'LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . $this->params['entityTable'] . '.id AND civicrm_entity_batch.entity_table = \'' . $this->params['entityTable'] . '\'');
     $query->join('civicrm_option_group', 'LEFT JOIN civicrm_option_group ON civicrm_option_group.name = "direct_debit_codes"');
@@ -471,6 +472,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     }
 
     $this->addContributionReceiveDateCondition($query);
+    $this->addSortNameCondition($query);
 
     if ($this->notPresent) {
       $batchStatus = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id', ['labelColumn' => 'name']);
@@ -658,6 +660,21 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       $query->where('DATE_FORMAT(civicrm_contribution.receive_date, "%Y%m%d") <= @receive_date_end',
                      ['receive_date_end' => date('Ymd', strtotime($this->params['receive_date_high']))]
                    );
+    }
+  }
+
+  /**
+   * Add query where condition for contact name/email.
+   *
+   * @param $query
+   */
+  private function addSortNameCondition(&$query) {
+    if (!empty($this->params['sort_name'])) {
+      $sort_name = $this->params['sort_name'];
+      if (mb_strpos($sort_name, '%') === FALSE) {
+        $sort_name = "%{$sort_name}%";
+      }
+      $query->where('civicrm_contact.sort_name LIKE @sort_name OR civicrm_contact.nick_name LIKE @sort_name OR civicrm_email.email LIKE @sort_name', ['sort_name' => $sort_name]);
     }
   }
 

@@ -517,4 +517,36 @@ class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
     $this->assertEquals(24, $total);
   }
 
+  /**
+   * Search by sort name
+   */
+  private function searchBySortName() {
+    $notPresent = TRUE;
+    $params = $this->getSearchParams();
+
+    // Search by a non existatant name
+    $params['sort_name'] = 'a_name_shouldn_t_exist';
+    $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction($this->batch['id'], $params, [], [], $notPresent);
+    $total = $batchTransaction->getTotalNumber();
+    $this->assertEquals(0, $total);
+
+    // Search by full name
+    $params['sort_name'] = 'Compucorp, Bot';
+    $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction($this->batch['id'], $params, [], [], $notPresent);
+    $total = $batchTransaction->getTotalNumber();
+    $this->assertEquals(12, $total);
+
+    // Search by a name using wildcard implicitly
+    $params['sort_name'] = 'Comp';
+    $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction($this->batch['id'], $params, [], [], $notPresent);
+    $total = $batchTransaction->getTotalNumber();
+    $this->assertEquals(12, $total);
+
+    // Search by a name using wildcard explicitly
+    $params['sort_name'] = 'Comp%';
+    $batchTransaction = new CRM_ManualDirectDebit_Batch_Transaction($this->batch['id'], $params, [], [], $notPresent);
+    $total = $batchTransaction->getTotalNumber();
+    $this->assertEquals(12, $total);
+  }
+
 }
