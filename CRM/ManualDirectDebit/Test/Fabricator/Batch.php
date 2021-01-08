@@ -21,7 +21,7 @@ class CRM_ManualDirectDebit_Test_Fabricator_Batch extends BaseFabricator {
   protected static $defaultParams = [
     'name' => 'Direct_Debit_Batch_1',
     'title'   => 'Direct Debit Batch - 1',
-    'status_id' => 1
+    'status_id' => 1,
   ];
 
   /**
