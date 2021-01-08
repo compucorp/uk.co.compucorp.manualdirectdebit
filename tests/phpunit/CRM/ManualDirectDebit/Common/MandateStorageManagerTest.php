@@ -57,6 +57,21 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
     SettingFabricator::fabricate();
 
     $this->storageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
+    $this->clearMandateContributionConnectorProperties();
+  }
+
+  /**
+   * Clear MandateContributionConnector properties
+   *
+   * Sometimes the object has properties from previous test because its class follow the singlton pattern
+   * we need to clear those properties between tests by accessing its private method
+   */
+  public function clearMandateContributionConnectorProperties() {
+    $mandateContributionConnector = CRM_ManualDirectDebit_Hook_MandateContributionConnector::getInstance();
+    $class = new \ReflectionClass($mandateContributionConnector);
+    $method = $class->getMethod("refreshProperties");
+    $method->setAccessible(TRUE);
+    $method->invokeArgs($mandateContributionConnector, []);
   }
 
   /**

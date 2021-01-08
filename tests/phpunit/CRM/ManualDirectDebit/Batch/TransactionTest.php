@@ -55,6 +55,22 @@ class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
 
     $this->group1 = $this->createGroup(['name' => 'group1']);
     $this->group2 = $this->createGroup(['name' => 'group2']);
+
+    $this->clearMandateContributionConnectorProperties();
+  }
+
+  /**
+   * Clear MandateContributionConnector properties
+   *
+   * Sometimes the object has properties from previous test because its class follow the singlton pattern
+   * we need to clear those properties between tests by accessing its private method
+   */
+  public function clearMandateContributionConnectorProperties() {
+    $mandateContributionConnector = CRM_ManualDirectDebit_Hook_MandateContributionConnector::getInstance();
+    $class = new \ReflectionClass($mandateContributionConnector);
+    $method = $class->getMethod("refreshProperties");
+    $method->setAccessible(TRUE);
+    $method->invokeArgs($mandateContributionConnector, []);
   }
 
   /**
