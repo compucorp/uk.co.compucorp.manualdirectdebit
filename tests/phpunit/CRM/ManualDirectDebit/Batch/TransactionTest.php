@@ -15,31 +15,24 @@ require_once __DIR__ . '/../../../BaseHeadlessTest.php';
  */
 class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
 
-  /**
-   * @var array
-   */
   protected $recurringContribution;
-  /**
-   * @var array
-   */
   protected $mandateStorage;
+  protected $testRollingMembershipType;
+  protected $testRollingMembershipTypePriceFieldValue;
   protected $batch;
-  protected $batchTypeId = 0;
-  protected $recurringContributionDDCode = 0;
-
-  private $directDebitPaymentInstrumentId = 0;
-  private $memberDuesFinancialTypeId = 0;
-  private $contributionPendingStatusValue = 0;
-  private $testRollingMembershipType = NULL;
-  private $testRollingMembershipTypePriceFieldValue = NULL;
-  private $tag1 = NULL;
-  private $tag2 = NULL;
-  private $group1 = NULL;
-  private $group2 = NULL;
-  private $contact1 = NULL;
-  private $contact2 = NULL;
-  private $mandate1 = NULL;
-  private $mandate2 = NULL;
+  protected $tag1;
+  protected $tag2;
+  protected $group1;
+  protected $group2;
+  protected $contact1;
+  protected $contact2;
+  protected $mandate1;
+  protected $mandate2;
+  protected $batchTypeId;
+  protected $recurringContributionDDCode;
+  protected $directDebitPaymentInstrumentId;
+  protected $memberDuesFinancialTypeId;
+  protected $contributionPendingStatusValue;
 
   public function setUp() {
     SettingFabricator::fabricate();
@@ -266,15 +259,31 @@ class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
       'non_deductible_amount' => 0,
     ];
     $paymentPlan = CRM_MembershipExtras_Test_Fabricator_PaymentPlanOrder::fabricate($paymentPlanMembershipOrder);
+    $this->relateMandateToRecurringContributions($params);
+    return $paymentPlan;
+  }
 
-    // workaround to add mandate to contributions
-    $query = "select id from civicrm_contribution_recur where contact_id = %1";
-    $recurringContributionIds = CRM_Core_DAO::executeQuery($query, [1 => [$params['contact_id'], 'Positive']])->fetchAll();
-    foreach ($recurringContributionIds as $recurringContributionId) {
-      $this->relateMandateToExistingContributions($recurringContributionId, $params['mandate_id']);
+  /**
+   * Relates the given mandate to all the recurring contributions under the given contact
+   * workaround to add mandate to contributions
+   *
+   * @param array $params
+   */
+  private function relateMandateToRecurringContributions($params) {
+    $recurringContributions = civicrm_api3('ContributionRecur', 'get', [
+      'return' => 'id',
+      'sequential' => 1,
+      'contact_id' => $params['contact_id'],
+      'options' => ['limit' => 0],
+    ]);
+
+    if ($recurringContributions['count'] < 1) {
+      return;
     }
 
-    return $paymentPlan;
+    foreach ($recurringContributions['values'] as $recurringContribution) {
+      $this->relateMandateToExistingContributions($recurringContribution['id'], $params['mandate_id']);
+    }
   }
 
   /**
@@ -347,6 +356,9 @@ class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
 
   /**
    * Tests create recurrMandateRef entity
+   *
+   * I used one function to contain all the tests to finish faster by running setUp with creatimg the payment plans only once
+   * instead of multiple times
    */
   public function testTransactionSearch() {
     list($this->contact1, $this->mandate1) = $this->createContactAndMandate([
