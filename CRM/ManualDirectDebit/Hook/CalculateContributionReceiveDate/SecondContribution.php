@@ -77,11 +77,18 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
       $membershipsStartDate->format('Y-m-' . $recurringContribution['cycle_day'])
     );
 
-    $this->receiveDate = $this->calculateNextInstalmentReceiveDate(
+    $secondInstalmentReceiveDate = $this->calculateNextInstalmentReceiveDate(
       $firstMembershipCycleDate,
       $recurringContribution['frequency_interval'],
       $recurringContribution['frequency_unit']
     );
+    $this->receiveDate = $secondInstalmentReceiveDate;
+
+    $firstInstalmentDateTime = new DateTime($firstContribution['receive_date']);
+    $secondInstalmentDateTime = new DateTime($secondInstalmentReceiveDate);
+    if ($firstInstalmentDateTime > $secondInstalmentDateTime) {
+      $this->receiveDate = $firstInstalmentDateTime->format('Y-m-d H:i:s');
+    }
   }
 
   /**

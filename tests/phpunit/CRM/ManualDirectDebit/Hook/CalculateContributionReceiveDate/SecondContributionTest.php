@@ -82,16 +82,16 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
   /**
    * Builds mock receive date calculator object.
    *
-   * @param string $dayNextMonth
+   * @param string $secondInstalmentReceiveDate
    *
    * @return \CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator
    * @throws \Exception
    */
-  private function buildReceiveDateCalculatorMock($dayNextMonth) {
+  private function buildReceiveDateCalculatorMock($secondInstalmentReceiveDate) {
     $calculator = $this->createMock(ReceiveDateCalculator::class);
     $calculator
       ->method('getSameDayNextMonth')
-      ->willReturn(new DateTime($dayNextMonth));
+      ->willReturn(new DateTime($secondInstalmentReceiveDate));
 
     return $calculator;
   }
@@ -187,6 +187,43 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
     $receiveDateCalculator->process();
 
     $this->assertEquals($programmedSecondInstalmentReceiveDate, $receiveDate);
+  }
+
+  public function testSecondContributionIsNotBeforeFirst() {
+    $membershipStartDate = '2020-08-04';
+    $firstInstalmentReceiveDate = '2020-10-05 00:00:00';
+    $receiveDate = $this->defaultContributionParams['receive_date'] = '2020-11-05 00:00:00';
+
+    $recurringContribution = $this->setupPlan($membershipStartDate, $firstInstalmentReceiveDate, [
+      'amount' => 120,
+      'frequency_unit' => 'month',
+      'frequency_interval' => 1,
+      'installments' => 12,
+      'cycle_day' => 5,
+    ]);
+    $this->defaultContributionParams['contribution_recur_id'] = $recurringContribution['id'];
+
+    $settings = [
+      'new_instruction_run_dates' => [4],
+      'payment_collection_run_dates' => [5],
+      'minimum_days_to_first_payment' => 3,
+      'second_instalment_date_behaviour' => SettingsManager::SECOND_INSTALMENT_BEHAVIOUR_FORCE_SECOND_MONTH,
+    ];
+    $settingsManager = $this->buildSettingsManagerMock($settings);
+    $receiveDateCalculatorHelper = $this->buildReceiveDateCalculatorMock('2020-09-05');
+
+    $receiveDateCalculator = new SecondContributionReceiveDateCalculator(
+      $receiveDate,
+      $this->defaultContributionParams,
+      $settingsManager,
+      $receiveDateCalculatorHelper
+    );
+    $receiveDateCalculator->process();
+
+    $firstInstalmentDateTime = new DateTime($firstInstalmentReceiveDate);
+    $calculatedSecondInstalmentReceiveDateTime = new DateTime($receiveDate);
+    $this->assertFalse($firstInstalmentDateTime > $calculatedSecondInstalmentReceiveDateTime, "First instalment ($firstInstalmentReceiveDate) is after second instalment ($receiveDate)!");
+    $this->assertEquals('2020-10-05 00:00:00', $receiveDate);
   }
 
   /**
