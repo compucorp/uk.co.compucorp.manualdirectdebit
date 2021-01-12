@@ -70,7 +70,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_UpdateSubscription {
 
   private function preventChangingDirectDebitPaymentMethod() {
     CRM_Core_Region::instance('page-body')->add([
-      'template' => "{$this->templatePath}/CRM/Member/Form/UpdateSubscriptionModifications.tpl"
+      'template' => "{$this->templatePath}/CRM/Member/Form/UpdateSubscriptionModifications.tpl",
     ]);
   }
 

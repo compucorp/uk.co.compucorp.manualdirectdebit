@@ -38,9 +38,10 @@ class CRM_ManualDirectDebit_Hook_ValidateForm_MandateValidator {
   public function checkValidation() {
     $currentPaymentInstrumentId = $this->getCurrentPaymentInstrumentId();
 
-    if ( ! CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($currentPaymentInstrumentId) || $this->isEditForm()) {
+    if (!CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($currentPaymentInstrumentId) || $this->isEditForm()) {
       $this->turnOffDirectDebitValidation();
-    } else {
+    }
+    else {
       $this->checkSettings();
       $this->validateMandateIsNotEmpty();
     }
@@ -82,7 +83,8 @@ class CRM_ManualDirectDebit_Hook_ValidateForm_MandateValidator {
   private function checkSettings() {
     try {
       CRM_ManualDirectDebit_Common_SettingsManager::getMinimumDayForFirstPayment();
-    } catch (CiviCRM_API3_Exception $error) {
+    }
+    catch (CiviCRM_API3_Exception $error) {
       $currentError = $this->form->getVar('_errors');
       $currentError[] = ['directDebitMandate' => "Please, configure minimum days to first payment"];
       $this->form->setVar('_errors', $currentError);

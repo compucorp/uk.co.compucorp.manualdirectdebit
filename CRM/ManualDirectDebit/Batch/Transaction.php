@@ -169,7 +169,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         'op' => '=',
         'field' => self::DD_MANDATE_TABLE . '.originator_number',
       ],
-      'contribution_status' => [
+      'contribution_status_id' => [
         'op' => 'IN',
         'field' => 'civicrm_contribution.contribution_status_id',
       ],
@@ -220,6 +220,22 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       'contribution_recur_contribution_status_id' => [
         'op' => 'IN',
         'field' => 'civicrm_contribution_recur.contribution_status_id',
+      ],
+      'contact_tags' => [
+        'op' => 'IN',
+        'field' => 'civicrm_entity_tag.tag_id',
+      ],
+      'group' => [
+        'op' => 'IN',
+        'field' => 'civicrm_group_contact.group_id',
+      ],
+      'contribution_amount_low' => [
+        'op' => '>=',
+        'field' => 'civicrm_contribution.total_amount',
+      ],
+      'contribution_amount_high' => [
+        'op' => '<=',
+        'field' => 'civicrm_contribution.total_amount',
       ],
     ];
   }
@@ -431,10 +447,13 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $query->join('value_dd_information', 'LEFT JOIN civicrm_value_dd_information ON civicrm_value_dd_information.mandate_id = civicrm_value_dd_mandate.id');
     $query->join('contribution', 'LEFT JOIN civicrm_contribution ON civicrm_contribution.id = civicrm_value_dd_information.entity_id');
     $query->join('contact', 'LEFT JOIN civicrm_contact ON civicrm_contribution.contact_id = civicrm_contact.id');
+    $query->join('email', 'LEFT JOIN civicrm_email ON (civicrm_contact.id = civicrm_email.contact_id AND civicrm_email.is_primary = 1)');
     $query->join('contribution_recur', 'LEFT JOIN civicrm_contribution_recur ON civicrm_contribution.contribution_recur_id = civicrm_contribution_recur.id');
     $query->join('entity_batch', 'LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . $this->params['entityTable'] . '.id AND civicrm_entity_batch.entity_table = \'' . $this->params['entityTable'] . '\'');
     $query->join('civicrm_option_group', 'LEFT JOIN civicrm_option_group ON civicrm_option_group.name = "direct_debit_codes"');
     $query->join('civicrm_option_value', 'LEFT JOIN civicrm_option_value ON civicrm_option_group.id = civicrm_option_value.option_group_id AND civicrm_option_value.value = ' . self::DD_MANDATE_TABLE . '.dd_code');
+    $query->join('civicrm_entity_tag', 'LEFT JOIN civicrm_entity_tag ON civicrm_entity_tag.entity_id = civicrm_contact.id AND civicrm_entity_tag.entity_table = \'civicrm_contact\'');
+    $query->join('civicrm_group_contact', 'LEFT JOIN civicrm_group_contact ON civicrm_group_contact.contact_id = civicrm_contact.id AND civicrm_group_contact.status = \'Added\'');
 
     //select
     $query->select(implode(' , ', $this->returnValues));
@@ -453,7 +472,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     }
 
     $this->addContributionReceiveDateCondition($query);
-    $this->addContributionCancelDateCondition($query);
+    $this->addSortNameCondition($query);
 
     if ($this->notPresent) {
       $batchStatus = CRM_Core_PseudoConstant::get('CRM_Batch_DAO_Batch', 'status_id', ['labelColumn' => 'name']);
@@ -645,26 +664,17 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   }
 
   /**
-   * Add query where condition as per relative cancel date.
+   * Add query where condition for contact name/email.
    *
    * @param $query
    */
-  private function addContributionCancelDateCondition(&$query) {
-    if (!empty($this->params['contribution_cancel_date_relative'])) {
-      $relativeDate = explode('.', $this->params['contribution_cancel_date_relative']);
-      $date = CRM_Utils_Date::relativeToAbsolute($relativeDate[0], $relativeDate[1]);
-      $query->where('civicrm_contribution.cancel_date >= @cancel_date_start', ['cancel_date_start' => $date['from']]);
-      $query->where('civicrm_contribution.cancel_date <= @cancel_date_end', ['cancel_date_end' => $date['to']]);
-    }
-    if (!empty($this->params['contribution_cancel_date_low'])) {
-      $query->where('civicrm_contribution.cancel_date >= @cancel_date_start',
-                     ['cancel_date_start' => date('Ymd', strtotime($this->params['contribution_cancel_date_low']))]
-                   );
-    }
-    if (!empty(!empty($this->params['contribution_cancel_date_high']))) {
-      $query->where('civicrm_contribution.cancel_date <= @cancel_date_end',
-                     ['cancel_date_end' => date('Ymd', strtotime($this->params['contribution_cancel_date_high']))]
-                   );
+  private function addSortNameCondition(&$query) {
+    if (!empty($this->params['sort_name'])) {
+      $sort_name = $this->params['sort_name'];
+      if (mb_strpos($sort_name, '%') === FALSE) {
+        $sort_name = "%{$sort_name}%";
+      }
+      $query->where('civicrm_contact.sort_name LIKE @sort_name OR civicrm_contact.nick_name LIKE @sort_name OR civicrm_email.email LIKE @sort_name', ['sort_name' => $sort_name]);
     }
   }
 

@@ -3,7 +3,7 @@
 /**
  * Collect data for message template by mandate id
  */
-class CRM_ManualDirectDebit_Mail_DataCollector_Mandate extends CRM_ManualDirectDebit_Mail_DataCollector_Base{
+class CRM_ManualDirectDebit_Mail_DataCollector_Mandate extends CRM_ManualDirectDebit_Mail_DataCollector_Base {
 
   /**
    * Entered Mandate id
@@ -32,7 +32,7 @@ class CRM_ManualDirectDebit_Mail_DataCollector_Mandate extends CRM_ManualDirectD
       $this->contributionId = $contributionId;
     }
     else {
-      throw new CiviCRM_API3_Exception("Can't find contribution id by mandate id",'dd_1');
+      throw new CiviCRM_API3_Exception("Can't find contribution id by mandate id", 'dd_1');
     }
   }
 
@@ -51,7 +51,7 @@ class CRM_ManualDirectDebit_Mail_DataCollector_Mandate extends CRM_ManualDirectD
   ";
 
     $dao = CRM_Core_DAO::executeQuery($query, [
-      1 => [$this->enteredMandateId, 'Integer']
+      1 => [$this->enteredMandateId, 'Integer'],
     ]);
 
     while ($dao->fetch()) {

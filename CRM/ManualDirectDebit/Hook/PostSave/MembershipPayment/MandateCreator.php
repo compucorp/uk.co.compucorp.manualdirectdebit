@@ -70,7 +70,7 @@ class CRM_ManualDirectDebit_Hook_PostSave_MembershipPayment_MandateCreator {
    */
   public function assignMandateForContributions() {
 
-    if (! $this->isContributionRecurring() || ! $this->isCurrentPaymentInstrumentDirectDebit()) {
+    if (!$this->isContributionRecurring() || !$this->isCurrentPaymentInstrumentDirectDebit()) {
       return FALSE;
     }
 

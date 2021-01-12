@@ -22,7 +22,7 @@ class CRM_ManualDirectDebit_Common_Activity {
       'activity_type_id' => $activityTypeName,
       'activity_date_time' => date('YmdHis'),
       'target_id' => $withContactId,
-      'source_record_id' => $sourceRecordId
+      'source_record_id' => $sourceRecordId,
     ];
 
     if (!empty($addedByContactId)) {

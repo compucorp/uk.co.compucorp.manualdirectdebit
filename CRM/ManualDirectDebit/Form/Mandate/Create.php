@@ -195,7 +195,8 @@ class CRM_ManualDirectDebit_Form_Mandate_Create extends CRM_Core_Form {
       $sqlSelectDebitMandateID = "SELECT MAX(id) as id FROM `civicrm_file`";
       $queryResult = CRM_Core_DAO::executeQuery($sqlSelectDebitMandateID);
       $queryResult->fetch();
-    } catch (Exception $exception) {
+    }
+    catch (Exception $exception) {
       $transaction->rollback();
 
       throw $exception;
@@ -234,7 +235,8 @@ class CRM_ManualDirectDebit_Form_Mandate_Create extends CRM_Core_Form {
   private function getMinimumDayForFirstPayment() {
     try {
       $minimumDaysToFirstPayment = CRM_ManualDirectDebit_Common_SettingsManager::getMinimumDayForFirstPayment();
-    } catch (CiviCRM_API3_Exception $error) {
+    }
+    catch (CiviCRM_API3_Exception $error) {
       $minimumDaysToFirstPayment = 0;
     }
 

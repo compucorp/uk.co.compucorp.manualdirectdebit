@@ -51,7 +51,7 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
 
     $fieldsWithHelp = [];
     $allowedConfigFields  = SettingsManager::getConfigFields();
-    foreach ($allowedConfigFields  as $name => $config) {
+    foreach ($allowedConfigFields as $name => $config) {
       $this->add(
         $config['html_type'],
         $name,
@@ -92,7 +92,7 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
     $allowedConfigFields = SettingsManager::getConfigFields();
     $submittedValues = $this->exportValues();
     $valuesToSave = array_intersect_key($submittedValues, $allowedConfigFields);
-      civicrm_api3('setting', 'create', $valuesToSave);
+    civicrm_api3('setting', 'create', $valuesToSave);
   }
 
   /**

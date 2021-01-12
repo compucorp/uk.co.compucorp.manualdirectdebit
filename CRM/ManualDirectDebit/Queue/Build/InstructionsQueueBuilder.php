@@ -41,4 +41,5 @@ class CRM_ManualDirectDebit_Queue_Build_InstructionsQueueBuilder extends CRM_Man
     );
     $this->queue->createItem($task);
   }
+
 }

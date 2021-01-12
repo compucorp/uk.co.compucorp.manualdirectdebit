@@ -38,15 +38,17 @@ class CRM_ManualDirectDebit_Event_Listener_TokenRender {
       case 'new_direct_debit_recurring_payment':
       case 'update_direct_debit_recurring_payment':
       case 'offline_direct_debit_auto_renewal':
-      $recurringContributionId = $this->event->context['actionSearchResult']->source_record_id;
+        $recurringContributionId = $this->event->context['actionSearchResult']->source_record_id;
         $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution($recurringContributionId);
         break;
+
       case 'direct_debit_payment_reminder':
         $contributionId = $this->event->context['actionSearchResult']->source_record_id;
         $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Contribution($contributionId);
         break;
+
       case 'direct_debit_mandate_update':
-        $mandateId= $this->event->context['actionSearchResult']->source_record_id;
+        $mandateId = $this->event->context['actionSearchResult']->source_record_id;
         $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Mandate($mandateId);
         break;
     }

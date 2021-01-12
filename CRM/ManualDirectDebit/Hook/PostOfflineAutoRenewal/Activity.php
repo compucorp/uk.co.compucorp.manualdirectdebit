@@ -3,7 +3,7 @@
 /**
  * Process 'postOfflineAutoRenewal' hook and create activity
  */
-class  CRM_ManualDirectDebit_Hook_PostOfflineAutoRenewal_Activity extends CRM_ManualDirectDebit_Hook_Common_PostActivityBase {
+class CRM_ManualDirectDebit_Hook_PostOfflineAutoRenewal_Activity extends CRM_ManualDirectDebit_Hook_Common_PostActivityBase {
 
   /**
    * Creates activity

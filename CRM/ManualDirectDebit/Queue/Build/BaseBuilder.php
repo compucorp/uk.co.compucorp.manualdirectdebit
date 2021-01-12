@@ -23,4 +23,5 @@ abstract class CRM_ManualDirectDebit_Queue_Build_BaseBuilder {
   }
 
   abstract public function buildQueue();
+
 }

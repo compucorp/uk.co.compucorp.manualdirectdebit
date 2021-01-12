@@ -53,7 +53,7 @@ class CRM_ManualDirectDebit_ScheduleJob_TargetContribution {
       $contributionDataList[] = [
         "contributionId" => $dao->contribution_id,
         "email" => $dao->email,
-        "contactId" => $dao->contact_id
+        "contactId" => $dao->contact_id,
       ];
     }
 

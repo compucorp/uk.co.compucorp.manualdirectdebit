@@ -116,7 +116,8 @@ class CRM_ManualDirectDebit_Hook_Custom_Mandate_MandateDataGenerator {
       $date = new DateTime();
       $date->setTimestamp(strtotime($dateString));
       $formattedDate = $date->format('Y-m-d H:i:s');
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
       $formattedDate = $this->generateCurrentDateAndTime();
     }
 

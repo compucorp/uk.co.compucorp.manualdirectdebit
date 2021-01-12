@@ -50,7 +50,7 @@ class CRM_ManualDirectDebit_Page_AJAX {
     $params['rp'] = $rowCount;
 
     $params['context'] = $context;
-    $params['offset'] = ($params['page'] - 1) * $params['rp'];
+    $params['offset'] = $offset;
     $params['rowCount'] = $params['rp'];
     $params['sort'] = CRM_Utils_Array::value('sortBy', $params);
     $params['total'] = 0;
