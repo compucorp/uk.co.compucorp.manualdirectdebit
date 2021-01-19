@@ -96,6 +96,110 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
     return $calculator;
   }
 
+  /**
+   * Configures a payment plan to be used on tests.
+   *
+   * @param string $membershipStartDate
+   * @param string $firstInstalmentReceiveDate
+   * @param array $params
+   *
+   * @return mixed
+   * @throws \CiviCRM_API3_Exception
+   */
+  private function setupPlan($membershipStartDate, $firstInstalmentReceiveDate, array $params) {
+    $mainMembershipType = $this->createMembershipType([
+      'name' => 'Main Rolling Membership',
+      'period_type' => 'rolling',
+      'minimum_fee' => $params['amount'],
+      'duration_interval' => $params['installments'],
+      'duration_unit' => 'month',
+    ]);
+
+    $contact = ContactFabricator::fabricate();
+    $recurringContribution = RecurringContributionFabricator::fabricate([
+      'contact_id' => $contact['id'],
+      'amount' => $params['amount'],
+      'currency' => NULL,
+      'frequency_unit' => $params['frequency_unit'],
+      'frequency_interval' => $params['frequency_interval'],
+      'installments' => $params['installments'],
+      'start_date' => $firstInstalmentReceiveDate,
+      'contribution_status_id' => 'Pending',
+      'is_test' => 0,
+      'cycle_day' => $params['cycle_day'],
+      'payment_processor_id' => 'Offline Recurring Contribution',
+      'financial_type_id' => 'Member Dues',
+      'payment_instrument_id' => 'direct_debit',
+      'campaign_id' => NULL,
+    ]);
+    $contribution = ContributionFabricator::fabricate([
+      'currency' => NULL,
+      'source' => NULL,
+      'contact_id' => $contact['id'],
+      'fee_amount' => 0,
+      'net_amount' => $params['amount'] / $params['installments'],
+      'total_amount' => $params['amount'] / $params['installments'],
+      'receive_date' => $firstInstalmentReceiveDate,
+      'payment_instrument_id' => 'direct_debit',
+      'financial_type_id' => 'Member Dues',
+      'is_test' => 0,
+      'contribution_status_id' => 'Pending',
+      'is_pay_later' => TRUE,
+      'skipLineItem' => 1,
+      'skipCleanMoney' => TRUE,
+      'contribution_recur_id' => $recurringContribution['id'],
+    ]);
+    $membership = MembershipFabricator::fabricate([
+      'contact_id' => $contact['id'],
+      'membership_type_id' => $mainMembershipType->membershipType['id'],
+      'join_date' => $membershipStartDate,
+      'start_date' => $membershipStartDate,
+      'end_date' => NULL,
+      'contribution_recur_id' => $recurringContribution['id'],
+      'financial_type_id' => 'Member Dues',
+      'skipLineItem' => 1,
+    ]);
+    LineItemFabricator::fabricate([
+      'entity_table' => 'civicrm_membership',
+      'entity_id' => $membership['id'],
+      'contribution_id' => $contribution['id'],
+      'price_field_id' => $mainMembershipType->priceFieldValue['price_field_id'],
+      'price_field_value_id' => $mainMembershipType->priceFieldValue['id'],
+      'label' => $mainMembershipType->membershipType['name'],
+      'qty' => 1,
+      'unit_price' => $contribution['total_amount'],
+      'line_total' => $contribution['total_amount'],
+      'financial_type_id' => 'Member Dues',
+      'non_deductible_amount' => 0,
+      'auto_renew' => 0,
+    ]);
+
+    return $recurringContribution;
+  }
+
+  /**
+   * Obtains the field's ID for the given field name and group name.
+   *
+   * @param string $fieldGroup
+   * @param string $fieldName
+   *
+   * @return int
+   * @throws \CiviCRM_API3_Exception
+   */
+  private function getCustomFieldID($fieldGroup, $fieldName) {
+    $result = civicrm_api3('CustomField', 'get', [
+      'sequential' => 1,
+      'custom_group_id' => $fieldGroup,
+      'name' => $fieldName,
+    ]);
+
+    if ($result['count'] > 0) {
+      return $result['values'][0]['id'];
+    }
+
+    return 0;
+  }
+
   public function testForceSecondContributionOnSecondMonthWhenStartDateToFirstPaymentIsMoreThan30Days() {
     $membershipStartDate = '2020-01-01';
     $firstInstalmentReceiveDate = '2020-02-05 00:00:00';
@@ -226,85 +330,61 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
     $this->assertEquals('2020-10-05 00:00:00', $receiveDate);
   }
 
-  /**
-   * Configures a payment plan to be used on tests.
-   *
-   * @param string $membershipStartDate
-   * @param string $firstInstalmentReceiveDate
-   * @param array $params
-   *
-   * @return mixed
-   * @throws \CiviCRM_API3_Exception
-   */
-  private function setupPlan($membershipStartDate, $firstInstalmentReceiveDate, array $params) {
-    $mainMembershipType = $this->createMembershipType([
-      'name' => 'Main Rolling Membership',
-      'period_type' => 'rolling',
-      'minimum_fee' => $params['amount'],
-      'duration_interval' => $params['installments'],
-      'duration_unit' => 'month',
+  public function testSecondContributionOnRenewalsIsNotChanged() {
+    $previousPeriod = $this->setupPlan('2019-08-04', '2019-09-21', [
+      'amount' => 120,
+      'frequency_unit' => 'month',
+      'frequency_interval' => 1,
+      'installments' => 12,
+      'cycle_day' => 5,
     ]);
 
-    $contact = ContactFabricator::fabricate();
-    $recurringContribution = RecurringContributionFabricator::fabricate([
-      'contact_id' => $contact['id'],
-      'amount' => $params['amount'],
-      'currency' => NULL,
-      'frequency_unit' => $params['frequency_unit'],
-      'frequency_interval' => $params['frequency_interval'],
-      'installments' => $params['installments'],
-      'start_date' => $firstInstalmentReceiveDate,
-      'contribution_status_id' => 'Pending',
-      'is_test' => 0,
-      'cycle_day' => $params['cycle_day'],
-      'payment_processor_id' => 'Offline Recurring Contribution',
-      'financial_type_id' => 'Member Dues',
-      'payment_instrument_id' => 'direct_debit',
-      'campaign_id' => NULL,
+    $membershipStartDate = '2019-08-04';
+    $firstInstalmentReceiveDate = '2020-08-21 00:00:00';
+    $receiveDate = $this->defaultContributionParams['receive_date'] = '2020-09-21 00:00:00';
+    $recurringContribution = $this->setupPlan($membershipStartDate, $firstInstalmentReceiveDate, [
+      'amount' => 120,
+      'frequency_unit' => 'month',
+      'frequency_interval' => 1,
+      'installments' => 12,
+      'cycle_day' => 5,
     ]);
-    $contribution = ContributionFabricator::fabricate([
-      'currency' => NULL,
-      'source' => NULL,
-      'contact_id' => $contact['id'],
-      'fee_amount' => 0,
-      'net_amount' => $params['amount'] / $params['installments'],
-      'total_amount' => $params['amount'] / $params['installments'],
-      'receive_date' => $firstInstalmentReceiveDate,
-      'payment_instrument_id' => 'direct_debit',
-      'financial_type_id' => 'Member Dues',
-      'is_test' => 0,
-      'contribution_status_id' => 'Pending',
-      'is_pay_later' => TRUE,
-      'skipLineItem' => 1,
-      'skipCleanMoney' => TRUE,
-      'contribution_recur_id' => $recurringContribution['id'],
-    ]);
-    $membership = MembershipFabricator::fabricate([
-      'contact_id' => $contact['id'],
-      'membership_type_id' => $mainMembershipType->membershipType['id'],
-      'join_date' => $membershipStartDate,
-      'start_date' => $membershipStartDate,
-      'end_date' => NULL,
-      'contribution_recur_id' => $recurringContribution['id'],
-      'financial_type_id' => 'Member Dues',
-      'skipLineItem' => 1,
-    ]);
-    LineItemFabricator::fabricate([
-      'entity_table' => 'civicrm_membership',
-      'entity_id' => $membership['id'],
-      'contribution_id' => $contribution['id'],
-      'price_field_id' => $mainMembershipType->priceFieldValue['price_field_id'],
-      'price_field_value_id' => $mainMembershipType->priceFieldValue['id'],
-      'label' => $mainMembershipType->membershipType['name'],
-      'qty' => 1,
-      'unit_price' => $contribution['total_amount'],
-      'line_total' => $contribution['total_amount'],
-      'financial_type_id' => 'Member Dues',
-      'non_deductible_amount' => 0,
-      'auto_renew' => 0,
+    $this->defaultContributionParams['contribution_recur_id'] = $recurringContribution['id'];
+
+    $previousPeriodFieldID = $this->getCustomFieldID('related_payment_plan_periods', 'previous_period');
+    civicrm_api3('ContributionRecur', 'create', [
+      'id' => $recurringContribution['id'],
+      'custom_' . $previousPeriodFieldID => $previousPeriod['id'],
     ]);
 
-    return $recurringContribution;
+    $settings = [
+      'new_instruction_run_dates' => [4],
+      'payment_collection_run_dates' => [5, 21],
+      'minimum_days_to_first_payment' => 3,
+      'second_instalment_date_behaviour' => SettingsManager::SECOND_INSTALMENT_BEHAVIOUR_FORCE_SECOND_MONTH,
+    ];
+    $settingsManager = $this->buildSettingsManagerMock($settings);
+    $receiveDateCalculatorHelper = $this->buildReceiveDateCalculatorMock('2020-09-21');
+
+    $receiveDateCalculator = new SecondContributionReceiveDateCalculator(
+      $receiveDate,
+      $this->defaultContributionParams,
+      $settingsManager,
+      $receiveDateCalculatorHelper
+    );
+    $receiveDateCalculator->process();
+    $this->assertEquals('2020-09-21 00:00:00', $receiveDate);
+
+    $settings['second_instalment_date_behaviour'] = SettingsManager::SECOND_INSTALMENT_BEHAVIOUR_ONE_MONTH_AFTER;
+    $settingsManager = $this->buildSettingsManagerMock($settings);
+    $receiveDateCalculator = new SecondContributionReceiveDateCalculator(
+      $receiveDate,
+      $this->defaultContributionParams,
+      $settingsManager,
+      $receiveDateCalculatorHelper
+    );
+    $receiveDateCalculator->process();
+    $this->assertEquals('2020-09-21 00:00:00', $receiveDate);
   }
 
 }

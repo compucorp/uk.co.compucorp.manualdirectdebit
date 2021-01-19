@@ -35,7 +35,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
    * @inheritDoc
    */
   public function process() {
-    if (!$this->isDirectDebit()) {
+    if (!$this->isDirectDebit() || $this->isRenewal()) {
       return;
     }
 
@@ -44,6 +44,55 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
     }
 
     $this->forceSecondInstalmentOnSecondPeriod();
+  }
+
+  /**
+   * Determines if the payment plan is a renewal or if it's being created.
+   *
+   * @throws \CiviCRM_API3_Exception
+   */
+  private function isRenewal() {
+    $previousPeriodFieldID = $this->getCustomFieldID('related_payment_plan_periods', 'previous_period');
+    $result = civicrm_api3('ContributionRecur', 'get', [
+      'id' => $this->params['contribution_recur_id'],
+      'return' => ['custom_' . $previousPeriodFieldID],
+    ]);
+
+    if ($result['count'] > 0) {
+      $recurringContribution = array_shift($result['values']);
+      $previousPeriodRecurringContributionID = CRM_Utils_Array::value(
+        'custom_' . $previousPeriodFieldID,
+        $recurringContribution
+      );
+      if (!empty($previousPeriodRecurringContributionID)) {
+        return TRUE;
+      }
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Obtains ID for custom field name in given group.
+   *
+   * @param $fieldGroup
+   * @param $fieldName
+   *
+   * @return int
+   * @throws \Exception
+   */
+  protected function getCustomFieldID($fieldGroup, $fieldName) {
+    $result = civicrm_api3('CustomField', 'get', [
+      'sequential' => 1,
+      'custom_group_id' => $fieldGroup,
+      'name' => $fieldName,
+    ]);
+
+    if ($result['count'] > 0) {
+      return $result['values'][0]['id'];
+    }
+
+    throw new Exception("Cannot find customfield $fieldName in $fieldGroup group.");
   }
 
   /**
