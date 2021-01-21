@@ -307,11 +307,6 @@ function manualdirectdebit_civicrm_post($op, $objectName, $objectId, &$objectRef
     $postContributionHook = new CRM_ManualDirectDebit_Hook_Post_Contribution($objectId);
     $postContributionHook->process();
   }
-
-  if ($op == 'create' && $objectName == 'Contribution') {
-    $postContributionHook = new CRM_ManualDirectDebit_Hook_Post_Contribution($objectId);
-    $postContributionHook->process();
-  }
 }
 
 /**
@@ -395,6 +390,45 @@ function manualdirectdebit_membershipextras_postOfflineAutoRenewal($membershipId
 
   $mandate = new CRM_ManualDirectDebit_Hook_PostOfflineAutoRenewal_Mandate($recurContributionId, $previousRecurContributionId);
   $mandate->process();
+}
+
+/**
+ * Implements hook_membershipextras_calculateContributionReceiveDate().
+ */
+function manualdirectdebit_membershipextras_calculateContributionReceiveDate($contributionNumber, &$receiveDate, $contributionCreationParams) {
+  $settingsManager = new CRM_ManualDirectDebit_Common_SettingsManager();
+  $calculator = new CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator();
+
+  switch ($contributionNumber) {
+    case 1:
+      $receiveDateCalculator = new CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_FirstContribution(
+        $receiveDate,
+        $contributionCreationParams,
+        $settingsManager
+      );
+      $receiveDateCalculator->process();
+      break;
+
+    case 2:
+      $receiveDateCalculator = new CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribution(
+        $receiveDate,
+        $contributionCreationParams,
+        $settingsManager,
+        $calculator
+      );
+      $receiveDateCalculator->process();
+      break;
+
+    default:
+      $receiveDateCalculator = new CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribution(
+        $contributionNumber,
+        $receiveDate,
+        $contributionCreationParams,
+        $settingsManager,
+        $calculator
+      );
+      $receiveDateCalculator->process();
+  }
 }
 
 function manualdirectdebit_civicrm_searchTasks($objectName, &$tasks) {

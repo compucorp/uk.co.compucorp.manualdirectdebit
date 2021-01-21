@@ -2,7 +2,7 @@
   <div class="crm-submit-buttons">
     {include file="CRM/common/formButtons.tpl" location="bottom"}
   </div>
-  <h3>{ts}Mandate config{/ts}</h3>
+  <h3>{ts}Mandate Config{/ts}</h3>
   <table class="form-layout-compressed">
     <tbody>
       {foreach from=$mandateConfigSection item=elementName}
@@ -15,7 +15,7 @@
       {/foreach}
     </tbody>
   </table>
-  <h3>{ts}Payment config{/ts}</h3>
+  <h3>{ts}Payment Config{/ts}</h3>
   <table class="form-layout-compressed">
     <tbody>
       {foreach from=$paymentConfigSection item=elementName}
@@ -28,7 +28,20 @@
       {/foreach}
     </tbody>
   </table>
-  <h3>{ts}Reminder config{/ts}</h3>
+  <h3>Instalment Config</h3>
+  <table class="form-layout-compressed">
+    <tbody>
+    {foreach from=$instalmentConfigSection item=elementName}
+      <tr>
+        <td class="label">{$form.$elementName.label}</td>
+        <td>{$form.$elementName.html}
+          {if $fieldsWithHelp.$elementName}{help id=$form.$elementName.name}{/if}
+        </td>
+      </tr>
+    {/foreach}
+    </tbody>
+  </table>
+  <h3>{ts}Reminder Config{/ts}</h3>
   <table class="form-layout-compressed">
     <tbody>
       {foreach from=$reminderConfigSection item=elementName}
@@ -41,7 +54,7 @@
       {/foreach}
     </tbody>
   </table>
-  <h3>{ts}Batch config{/ts}</h3>
+  <h3>{ts}Batch Config{/ts}</h3>
   <table class="form-layout-compressed">
     <tbody>
     {foreach from=$batchConfigSection item=elementName}
