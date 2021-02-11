@@ -1,6 +1,6 @@
 <?php
 use CRM_ManualDirectDebit_Common_SettingsManager as SettingsManager;
-use CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator as ReceiveDateCalculator;
+use CRM_MembershipExtras_Service_InstalmentReceiveDateCalculator as ReceiveDateCalculator;
 
 /**
  * Class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribution.
@@ -10,7 +10,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
   /**
    * Helper object used to calculate receive dates.
    *
-   * @var \CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator
+   * @var \CRM_MembershipExtras_Service_InstalmentReceiveDateCalculator
    */
   protected $receiveDateCalculator;
 
@@ -20,7 +20,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
    * @param string $receiveDate
    * @param array $params
    * @param \CRM_ManualDirectDebit_Common_SettingsManager $settingsManager
-   * @param \CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator $calculator
+   * @param \CRM_MembershipExtras_Service_InstalmentReceiveDateCalculator $calculator
    *
    * @throws \CRM_Extension_Exception
    * @throws \CiviCRM_API3_Exception
