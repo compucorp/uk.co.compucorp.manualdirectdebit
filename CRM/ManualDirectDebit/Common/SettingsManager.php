@@ -4,8 +4,6 @@
  * Class provide information about Direct Debit Mandate Settings
  */
 class CRM_ManualDirectDebit_Common_SettingsManager {
-  const SECOND_INSTALMENT_BEHAVIOUR_ONE_MONTH_AFTER = 'one_month_after';
-  const SECOND_INSTALMENT_BEHAVIOUR_FORCE_SECOND_MONTH = 'force_second_month';
 
   public static $minimumDaysToFirstPayment;
 
@@ -17,19 +15,14 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
   public function getManualDirectDebitSettings() {
     $settingValues = $this->getSettingsValues();
 
-    $settings = [
-      'default_reference_prefix' => CRM_Utils_Array::value('manualdirectdebit_default_reference_prefix', $settingValues),
-      'minimum_reference_prefix_length' => CRM_Utils_Array::value('manualdirectdebit_minimum_reference_prefix_length', $settingValues),
-      'minimum_days_to_first_payment' => CRM_Utils_Array::value('manualdirectdebit_minimum_days_to_first_payment', $settingValues),
-      'second_instalment_date_behaviour' => CRM_Utils_Array::value('manualdirectdebit_second_instalment_date_behaviour', $settingValues),
-    ];
-
+    $settings = [];
+    $settings['default_reference_prefix'] = $settingValues['values'][0]['manualdirectdebit_default_reference_prefix'];
+    $settings['minimum_reference_prefix_length'] = $settingValues['values'][0]['manualdirectdebit_minimum_reference_prefix_length'];
     $settings['new_instruction_run_dates'] = $this->incrementAllArrayValues(
-      CRM_Utils_Array::value('manualdirectdebit_new_instruction_run_dates', $settingValues)
-    );
+      $settingValues['values'][0]['manualdirectdebit_new_instruction_run_dates']);
     $settings['payment_collection_run_dates'] = $this->incrementAllArrayValues(
-      CRM_Utils_Array::value('manualdirectdebit_payment_collection_run_dates', $settingValues)
-    );
+      $settingValues['values'][0]['manualdirectdebit_payment_collection_run_dates']);
+    $settings['minimum_days_to_first_payment'] = $settingValues['values'][0]['manualdirectdebit_minimum_days_to_first_payment'];
 
     return $settings;
   }
@@ -71,7 +64,7 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
       return self::$minimumDaysToFirstPayment;
     }
     else {
-      throw new CiviCRM_API3_Exception(ts("Please, configure minimum days to first payment"), 'required_setting_not_configured');
+      throw new CiviCRM_API3_Exception(t("Please, configure minimum days to first payment"), 'required_setting_not_configured');
     }
   }
 
@@ -95,8 +88,7 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
         $settingValues = $this->fetchSettingsValues();
       }
     }
-
-    return $settingValues['values'][0];
+    return $settingValues;
   }
 
   /**
@@ -111,7 +103,6 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
       'manualdirectdebit_new_instruction_run_dates',
       'manualdirectdebit_payment_collection_run_dates',
       'manualdirectdebit_minimum_days_to_first_payment',
-      'manualdirectdebit_second_instalment_date_behaviour',
     ];
 
     return civicrm_api3('setting', 'get', [

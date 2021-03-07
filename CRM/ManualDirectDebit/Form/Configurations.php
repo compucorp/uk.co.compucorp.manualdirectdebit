@@ -16,6 +16,7 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
    *
    * @var string[]
    */
+
   private $mandateConfigs = [];
 
   /**
@@ -24,14 +25,8 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
    *
    * @var string[]
    */
-  private $paymentConfigs = [];
 
-  /**
-   * Contains array of settings' names for Instalment Configs Section.
-   *
-   * @var array
-   */
-  private $instalmentConfigs = [];
+  private $paymentConfigs = [];
 
   /**
    * Contains array of names, which must be displayed
@@ -39,6 +34,7 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
    *
    * @var string[]
    */
+
   private $reminderConfig = [];
 
   /**
@@ -47,6 +43,7 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
    *
    * @var string[]
    */
+
   private $batchConfig = [];
 
   public function buildQuickForm() {
@@ -85,7 +82,6 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
 
     $this->assign('mandateConfigSection', $this->mandateConfigs);
     $this->assign('paymentConfigSection', $this->paymentConfigs);
-    $this->assign('instalmentConfigSection', $this->instalmentConfigs);
     $this->assign('reminderConfigSection', $this->reminderConfig);
     $this->assign('batchConfigSection', $this->batchConfig);
     $this->assign('fieldsWithHelp', $fieldsWithHelp);
@@ -105,18 +101,12 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
    * @see CRM_Core_Form::setDefaultValues()
    */
   public function setDefaultValues() {
-    $settingsMetaData = SettingsManager::getConfigFields();
-    $currentValues = civicrm_api3('setting', 'get', [
-      'return' => array_keys($settingsMetaData),
-    ]);
+    $currentValues = civicrm_api3('setting', 'get',
+      ['return' => array_keys(SettingsManager::getConfigFields())]);
     $defaults = [];
     $domainID = CRM_Core_Config::domainID();
-
-    foreach ($settingsMetaData as $settingName => $setting) {
-      $defaults[$settingName] = CRM_Utils_Array::value('default', $setting);
-      if (isset($currentValues['values'][$domainID][$settingName])) {
-        $defaults[$settingName] = $currentValues['values'][$domainID][$settingName];
-      }
+    foreach ($currentValues['values'][$domainID] as $name => $value) {
+      $defaults[$name] = $value;
     }
 
     return $defaults;
@@ -138,10 +128,6 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
         $this->paymentConfigs[] = $name;
         break;
 
-      case 'instalment_config':
-        $this->instalmentConfigs[] = $name;
-        break;
-
       case 'reminder_config':
         $this->reminderConfig[] = $name;
         break;
@@ -149,6 +135,7 @@ class CRM_ManualDirectDebit_Form_Configurations extends CRM_Core_Form {
       case 'batch_config':
         $this->batchConfig[] = $name;
         break;
+
     }
   }
 
