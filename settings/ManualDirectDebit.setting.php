@@ -1,7 +1,6 @@
 <?php
-use CRM_ManualDirectDebit_Common_SettingsManager as SettingsManager;
 
-/**
+/*
  * Metadata for Manual Direct Debit Settings
  */
 return [
@@ -24,7 +23,7 @@ return [
     'group_name' => 'Manual Direct Debit',
     'group' => 'manualdirectdebit',
     'name' => 'manualdirectdebit_minimum_reference_prefix_length',
-    'title' => 'Minimum Mandate Reference Length',
+    'title' => 'Minimum mandate reference length',
     'type' => 'Integer',
     'html_type' => 'number',
     'quick_form_type' => 'Element',
@@ -39,7 +38,7 @@ return [
     'group_name' => 'Manual Direct Debit',
     'group' => 'manualdirectdebit',
     'name' => 'manualdirectdebit_new_instruction_run_dates',
-    'title' => 'New Instruction Run Dates',
+    'title' => 'New instruction run dates',
     'type' => 'Integer',
     'html_type' => 'select',
     'quick_form_type' => 'Element',
@@ -58,14 +57,14 @@ return [
     'group_name' => 'Manual Direct Debit',
     'group' => 'manualdirectdebit',
     'name' => 'manualdirectdebit_payment_collection_run_dates',
-    'title' => 'Payment Collection Run Dates ',
+    'title' => 'Payment collection run dates ',
     'type' => 'Integer',
     'html_type' => 'select',
     'quick_form_type' => 'Element',
     'default' => 1,
     'is_required' => TRUE,
     'is_help' => FALSE,
-    'html_attributes' => generateSequenceNumbers(28),
+    'html_attributes' => generateSequenceNumbers(31),
     'extra_data' => [
       'class' => 'crm-select2',
       'multiple' => 'multiple',
@@ -77,7 +76,7 @@ return [
     'group_name' => 'Manual Direct Debit',
     'group' => 'manualdirectdebit',
     'name' => 'manualdirectdebit_minimum_days_to_first_payment',
-    'title' => 'Minimum Days from New Instruction to First Payment',
+    'title' => 'Minimum days from new instruction to first payment',
     'type' => 'Integer',
     'html_type' => 'number',
     'quick_form_type' => 'Element',
@@ -88,32 +87,11 @@ return [
     'extra_data' => '',
     'section' => 'payment_config',
   ],
-  'manualdirectdebit_second_instalment_date_behaviour' => [
-    'group_name' => 'Manual Direct Debit',
-    'group' => 'manualdirectdebit',
-    'name' => 'manualdirectdebit_second_instalment_date_behaviour',
-    'title' => 'Second Instalment Date Behaviour',
-    'type' => 'String',
-    'html_type' => 'select',
-    'quick_form_type' => 'Element',
-    'default' => SettingsManager::SECOND_INSTALMENT_BEHAVIOUR_ONE_MONTH_AFTER,
-    'is_required' => TRUE,
-    'is_help' => TRUE,
-    'html_attributes' => [
-      SettingsManager::SECOND_INSTALMENT_BEHAVIOUR_ONE_MONTH_AFTER => ts('Take second instalment 1 month after the first instalment'),
-      SettingsManager::SECOND_INSTALMENT_BEHAVIOUR_FORCE_SECOND_MONTH => ts('Take second instalment in the second month of membership'),
-    ],
-    'extra_data' => [
-      'class' => 'crm-select2',
-      'placeholder' => ts('- select -'),
-    ],
-    'section' => 'instalment_config',
-  ],
   'manualdirectdebit_days_in_advance_for_collection_reminder' => [
     'group_name' => 'Manual Direct Debit',
     'group' => 'manualdirectdebit',
     'name' => 'manualdirectdebit_days_in_advance_for_collection_reminder',
-    'title' => 'Days in Advance for Collection Reminder',
+    'title' => 'Days in advance for Collection Reminder',
     'type' => 'Integer',
     'html_type' => 'number',
     'quick_form_type' => 'Element',
@@ -128,7 +106,7 @@ return [
     'group_name' => 'Manual Direct Debit',
     'group' => 'manualdirectdebit',
     'name' => 'manualdirectdebit_batch_submission_queue_limit',
-    'title' => 'Number of Records to be Processed per Batch Submission Queue Task',
+    'title' => 'Number of records to be processed per batch submission queue task',
     'type' => 'Integer',
     'html_type' => 'number',
     'quick_form_type' => 'Element',
@@ -138,7 +116,7 @@ return [
     'html_attributes' => '',
     'extra_data' => '',
     'section' => 'batch_config',
-  ],
+  ]
 ];
 
 /**
@@ -147,6 +125,7 @@ return [
  * @param int $limit
  *
  * @return  array
+ *
  */
 function generateSequenceNumbers($limit) {
   $sequence = [];
