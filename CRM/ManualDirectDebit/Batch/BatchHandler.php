@@ -316,11 +316,12 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
     ]);
     $contribution = array_shift($result['values']);
 
-    CRM_Contribute_BAO_Contribution::transitionComponentWithReturnMessage($contribution['id'],
-      $contribution['contribution_status_id'],
-      $originalStatusID,
-      $contribution['receive_date']
-    );
+    CRM_Contribute_BAO_Contribution::transitionComponents([
+      'contribution_id' => $contribution['id'],
+      'contribution_status_id' => $contribution['contribution_status_id'],
+      'previous_contribution_status_id' => $originalStatusID,
+      'receive_date' => $contribution['receive_date'],
+    ]);
   }
 
   /**
