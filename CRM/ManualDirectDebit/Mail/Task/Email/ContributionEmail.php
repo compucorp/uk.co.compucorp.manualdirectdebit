@@ -1,22 +1,7 @@
 <?php
 use CRM_ManualDirectDebit_Mail_Task_MailDetailsModel as MailDetailsModel;
 
-class CRM_ManualDirectDebit_Mail_Task_ContributionEmailCommon extends CRM_Contact_Form_Task_EmailCommon {
-
-  /**
-   * Process the form after the input has been submitted and validated.
-   *
-   * @param CRM_Core_Form $form
-   *
-   * @throws \CRM_Core_Exception
-   */
-  public static function postProcess(&$form) {
-    self::bounceIfSimpleMailLimitExceeded(count($form->_contactIds));
-
-    // check and ensure that
-    $formValues = $form->controller->exportValues($form->getName());
-    self::submit($form, $formValues);
-  }
+class CRM_ManualDirectDebit_Mail_Task_Email_ContributionEmail extends CRM_ManualDirectDebit_Mail_Task_Email_AbstractEmailCommon {
 
   /**
    * Submit the form values.
@@ -28,8 +13,8 @@ class CRM_ManualDirectDebit_Mail_Task_ContributionEmailCommon extends CRM_Contac
    *
    * @throws \CRM_Core_Exception
    */
-  public static function submit(&$form, $formValues) {
-    self::saveMessageTemplate($formValues);
+  public function submit(&$form, $formValues) {
+    $this->saveMessageTemplate($formValues);
 
     $from = CRM_Utils_Array::value('from_email_address', $formValues);
     $from = CRM_Utils_Mail::formatFromAddress($from);
@@ -221,26 +206,6 @@ class CRM_ManualDirectDebit_Mail_Task_ContributionEmailCommon extends CRM_Contac
     }
 
     return $contactContributionIds;
-  }
-
-  /**
-   * Validates ids
-   *
-   * @param $ids
-   *
-   * @return array
-   */
-  private static function validateIds($ids) {
-    if (is_array($ids)) {
-      $validatedIds = [];
-      foreach ($ids as $id) {
-        $validatedIds[] = (int) $id;
-      }
-
-      return $validatedIds;
-    }
-
-    return [];
   }
 
 }
