@@ -107,7 +107,7 @@ class CRM_ManualDirectDebit_Mail_Task_Email_MembershipEmail extends CRM_ManualDi
           $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Membership($membershipId);
           $tplParams = $dataCollector->retrieve();
           $contactDetail = [$formattedContactDetail];
-          CRM_ManualDirectDebit_Mail_Task_Mail::sendEmail(
+          CRM_ManualDirectDebit_Mail_Task_Mail::sendDirectDebitEmail(
             $contactDetail,
             $subject,
             $formValues['text_message'],

@@ -151,7 +151,7 @@ class CRM_ManualDirectDebit_Mail_Task_Email_ContributionEmail extends CRM_Manual
       $tplParams = $dataCollector->retrieve();
       $contactDetail = [$formattedContactDetail];
       $subject = $mailDetails->getSubject();
-      CRM_ManualDirectDebit_Mail_Task_Mail::sendEmail(
+      CRM_ManualDirectDebit_Mail_Task_Mail::sendDirectDebitEmail(
         $contactDetail,
         $subject,
         $formValues['text_message'],
