@@ -36,7 +36,7 @@ class CRM_ManualDirectDebit_Mail_Task_Mail extends CRM_Activity_BAO_Activity {
    *   ( sent, activityId) if any email is sent and activityId
    * @throws \CRM_Core_Exception
    */
-  public static function sendEmail(
+  public static function sendDirectDebitEmail(
     &$contactDetails,
     &$subject,
     &$text,
