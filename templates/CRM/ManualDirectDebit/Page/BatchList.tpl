@@ -15,10 +15,10 @@
         </div>
         <div class="clear">&nbsp;</div>
         <div class="crm-submit-buttons">
-          <span class="crm-button crm-button-type-refresh crm-button_qf_Basic_refresh crm-i-button">
+          <button class="crm-button crm-form-xbutton crm-form-submit" name="_qf_Basic_refresh" value="Search" id="_qf_Basic_refresh">
             <i class="crm-i fa-check" aria-hidden="true"></i>
-            <input class="crm-form-submit default validate" crm-icon="fa-check" name="_qf_Basic_refresh" value="Search" type="submit" id="_qf_Basic_refresh">
-          </span>
+            {ts}Search{/ts}
+          </button>
         </div>
     </form>
   </div>
