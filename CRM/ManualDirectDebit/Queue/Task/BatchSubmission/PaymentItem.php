@@ -48,7 +48,7 @@ class CRM_ManualDirectDebit_Queue_Task_BatchSubmission_PaymentItem {
     $originalStatusID = civicrm_api3('Contribution', 'getvalue', [
       'return' => 'contribution_status_id',
       'id' => $contributionId,
-    ])['result'];
+    ]);
 
     $result = civicrm_api3('Contribution', 'create', [
       'id' => $contributionId,
