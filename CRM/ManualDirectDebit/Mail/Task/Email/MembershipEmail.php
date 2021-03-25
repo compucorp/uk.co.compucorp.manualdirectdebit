@@ -1,21 +1,6 @@
 <?php
 
-class CRM_ManualDirectDebit_Mail_Task_MembershipEmailCommon extends CRM_Contact_Form_Task_EmailCommon {
-
-  /**
-   * Process the form after the input has been submitted and validated.
-   *
-   * @param CRM_Core_Form $form
-   *
-   * @throws \CRM_Core_Exception
-   */
-  public static function postProcess(&$form) {
-    self::bounceIfSimpleMailLimitExceeded(count($form->_contactIds));
-
-    // check and ensure that
-    $formValues = $form->controller->exportValues($form->getName());
-    self::submit($form, $formValues);
-  }
+class CRM_ManualDirectDebit_Mail_Task_Email_MembershipEmail extends CRM_ManualDirectDebit_Mail_Task_Email_AbstractEmailCommon {
 
   /**
    * Submit the form values.
@@ -27,8 +12,8 @@ class CRM_ManualDirectDebit_Mail_Task_MembershipEmailCommon extends CRM_Contact_
    *
    * @throws \CRM_Core_Exception
    */
-  public static function submit(&$form, $formValues) {
-    self::saveMessageTemplate($formValues);
+  public function submit(&$form, $formValues) {
+    $this->saveMessageTemplate($formValues);
 
     $from = CRM_Utils_Array::value('from_email_address', $formValues);
     $from = CRM_Utils_Mail::formatFromAddress($from);
@@ -122,7 +107,7 @@ class CRM_ManualDirectDebit_Mail_Task_MembershipEmailCommon extends CRM_Contact_
           $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Membership($membershipId);
           $tplParams = $dataCollector->retrieve();
           $contactDetail = [$formattedContactDetail];
-          CRM_ManualDirectDebit_Mail_Task_Mail::sendEmail(
+          CRM_ManualDirectDebit_Mail_Task_Mail::sendDirectDebitEmail(
             $contactDetail,
             $subject,
             $formValues['text_message'],
@@ -165,7 +150,7 @@ class CRM_ManualDirectDebit_Mail_Task_MembershipEmailCommon extends CRM_Contact_
     $validatedMembershipIds = self::validateIds($membershipIds);
     $validatedMembershipIdsImploded = implode(', ', $validatedMembershipIds);
     $query = "
-      SELECT membership.id AS contribution_id 
+      SELECT membership.id AS contribution_id
       FROM civicrm_membership AS membership
       WHERE membership.contact_id = %1
         AND membership.id IN(" . $validatedMembershipIdsImploded . ")
@@ -181,26 +166,6 @@ class CRM_ManualDirectDebit_Mail_Task_MembershipEmailCommon extends CRM_Contact_
     }
 
     return $contactMembershipIds;
-  }
-
-  /**
-   * Validates ids
-   *
-   * @param $ids
-   *
-   * @return array
-   */
-  private static function validateIds($ids) {
-    if (is_array($ids)) {
-      $validatedIds = [];
-      foreach ($ids as $id) {
-        $validatedIds[] = (int) $id;
-      }
-
-      return $validatedIds;
-    }
-
-    return [];
   }
 
 }
