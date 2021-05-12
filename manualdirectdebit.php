@@ -132,6 +132,11 @@ function manualdirectdebit_civicrm_alterSettingsFolders(&$metaDataFolders = NULL
 function manualdirectdebit_civicrm_permission(&$permissions) {
   $permissionsPrefix = 'CiviCRM : ';
   $permissions['can manage direct debit batches'] = $permissionsPrefix . ts('Can manage Direct Debit Batches');
+
+  $permissions['administer ManualDirectDebit'] = [
+    E::ts('MembershipExtras: administer Manual Direct Debit'),
+    E::ts('Perform all Manual Direct Debit administration tasks in CiviCRM'),
+  ];
 }
 
 /**
@@ -142,8 +147,8 @@ function manualdirectdebit_civicrm_navigationMenu(&$menu) {
   $directDebitMenuItem = [
     'name' => ts('Direct Debit'),
     'url' => NULL,
-    'permission' => 'administer CiviCRM',
-    'operator' => NULL,
+    'permission' => 'administer CiviCRM, administer ManualDirectDebit',
+    'operator' => 'OR',
     'separator' => NULL,
   ];
   _manualdirectdebit_civix_insert_navigation_menu($menu, 'Administer/', $directDebitMenuItem);
@@ -152,22 +157,22 @@ function manualdirectdebit_civicrm_navigationMenu(&$menu) {
     [
       'name' => ts('Direct Debit Codes'),
       'url' => 'civicrm/admin/options/direct_debit_codes',
-      'permission' => 'administer CiviCRM',
-      'operator' => NULL,
+      'permission' => 'administer CiviCRM, administer ManualDirectDebit',
+      'operator' => 'OR',
       'separator' => NULL,
     ],
     [
       'name' => ts('Direct Debit Configuration'),
       'url' => 'civicrm/admin/direct_debit_configuration',
-      'permission' => 'administer CiviCRM',
-      'operator' => NULL,
+      'permission' => 'administer CiviCRM, administer ManualDirectDebit',
+      'operator' => 'OR',
       'separator' => NULL,
     ],
     [
       'name' => ts('Direct Debit Originator Number'),
       'url' => 'civicrm/admin/options/direct_debit_originator_number?reset=1',
-      'permission' => 'administer CiviCRM',
-      'operator' => NULL,
+      'permission' => 'administer CiviCRM, administer ManualDirectDebit',
+      'operator' => 'OR',
       'separator' => NULL,
     ],
   ];
