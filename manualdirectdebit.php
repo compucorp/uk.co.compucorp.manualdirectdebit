@@ -309,7 +309,7 @@ function manualdirectdebit_civicrm_postSave_civicrm_contribution($dao) {
  */
 function manualdirectdebit_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   if ($op == 'create' && $objectName == 'Contribution') {
-    $postContributionHook = new CRM_ManualDirectDebit_Hook_Post_Contribution($objectId);
+    $postContributionHook = new CRM_ManualDirectDebit_Hook_Post_Contribution($objectId, $objectRef->contact_id, $objectRef->contribution_recur_id);
     $postContributionHook->process();
   }
 }

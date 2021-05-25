@@ -47,17 +47,9 @@ class CRM_ManualDirectDebit_Hook_Custom_Contribution_ContributionDataGenerator {
    */
   private $mandateStartDate;
 
-  public function __construct($entityID, $settings) {
+  public function __construct($entityID, $settings, $mandateStartDate) {
     $this->entityID = $entityID;
     $this->settings = $settings;
-  }
-
-  /**
-   * Sets mandate start date
-   *
-   * @param $mandateStartDate
-   */
-  public function setMandateStartDate($mandateStartDate) {
     $this->mandateStartDate = $mandateStartDate;
   }
 

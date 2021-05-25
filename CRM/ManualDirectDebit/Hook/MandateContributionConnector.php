@@ -112,6 +112,15 @@ class CRM_ManualDirectDebit_Hook_MandateContributionConnector {
   }
 
   /**
+   * Gets mandate Id property
+   *
+   * @return int mandateId
+   */
+  public function getMandateId() {
+    return $this->mandateId;
+  }
+
+  /**
    * Checks types of dependency
    *
    */
