@@ -312,11 +312,6 @@ function manualdirectdebit_civicrm_post($op, $objectName, $objectId, &$objectRef
     $postContributionHook = new CRM_ManualDirectDebit_Hook_Post_Contribution($objectId);
     $postContributionHook->process();
   }
-
-  if ($op == 'create' && $objectName == 'Contribution') {
-    $postContributionHook = new CRM_ManualDirectDebit_Hook_Post_Contribution($objectId);
-    $postContributionHook->process();
-  }
 }
 
 /**
