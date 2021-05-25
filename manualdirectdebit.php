@@ -216,7 +216,7 @@ function manualdirectdebit_civicrm_postProcess($formName, &$form) {
       break;
 
     case $formName == 'CRM_Contact_Form_CustomData':
-      $isDirectDebitGroup = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($form->getVar('_groupID'));
+      $isDirectDebitGroup = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitMandateCustomGroup($form->getVar('_groupID'));
       if ($isDirectDebitGroup) {
         $manualDirectDebit = new CRM_ManualDirectDebit_Hook_PostProcess_Contribution_DirectDebitMandate($form);
         $manualDirectDebit->run();
@@ -279,7 +279,7 @@ function _manualdirectdebit_getContactType($contactId) {
  * Implements hook_civicrm_custom().
  */
 function manualdirectdebit_civicrm_custom($op, $groupID, $entityID, &$params) {
-  if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($groupID)) {
+  if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitMandateCustomGroup($groupID)) {
     if ($op == 'create') {
       $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_DataGenerator($entityID, $params);
       $mandateDataGenerator->runDataGeneration();
@@ -331,7 +331,7 @@ function manualdirectdebit_civicrm_buildForm($formName, &$form) {
   }
 
   if ($formName == 'CRM_Contact_Form_CustomData') {
-    if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($form->getVar('_groupID'))) {
+    if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitMandateCustomGroup($form->getVar('_groupID'))) {
       $customData = new CRM_ManualDirectDebit_Hook_BuildForm_CustomData($form);
       $customData->run();
     }

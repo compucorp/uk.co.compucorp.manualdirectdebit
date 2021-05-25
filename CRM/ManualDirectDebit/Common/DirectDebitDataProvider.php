@@ -164,7 +164,7 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
    *
    * @return bool
    */
-  public static function isDirectDebitCustomGroup($currentGroupId) {
+  public static function isDirectDebitMandateCustomGroup($currentGroupId) {
     $directDebitMandateId = civicrm_api3('CustomGroup', 'getvalue', [
       'sequential' => 1,
       'return' => "id",
