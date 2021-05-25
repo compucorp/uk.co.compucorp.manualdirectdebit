@@ -396,10 +396,6 @@ function manualdirectdebit_membershipextras_postOfflineAutoRenewal($membershipId
  * Implements hook_membershipextras_calculateContributionReceiveDate().
  */
 function manualdirectdebit_membershipextras_calculateContributionReceiveDate($contributionNumber, &$receiveDate, $contributionCreationParams) {
-  if ($contributionCreationParams['payment_schedule'] != CRM_MembershipExtras_Service_MembershipInstalmentsSchedule::MONTHLY) {
-    return;
-  }
-
   $settingsManager = new CRM_ManualDirectDebit_Common_SettingsManager();
   switch ($contributionNumber) {
     case 1:

@@ -30,6 +30,9 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribut
    * @throws \Exception
    */
   public function process() {
+    if (!$this->shouldProcess()) {
+      return;
+    }
     $receiveDate = new DateTime($this->params['previous_instalment_date']);
 
     $numberOfIntervals = $this->params['frequency_interval'];
