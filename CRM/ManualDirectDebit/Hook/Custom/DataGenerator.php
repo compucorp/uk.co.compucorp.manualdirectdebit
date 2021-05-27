@@ -1,5 +1,7 @@
 <?php
 
+use CRM_ManualDirectDebit_Hook_Custom_Contribution_ContributionDataGenerator as ContributionDataGenerator;
+
 /**
  * This class launch required fields generator for different entities
  */
@@ -93,8 +95,8 @@ class CRM_ManualDirectDebit_Hook_Custom_DataGenerator {
    * Generates and saves the Contribution required fields.
    */
   private function generateContributionData() {
-    $contributionDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_Contribution_ContributionDataGenerator($this->entityID, $this->settings);
-    $contributionDataGenerator->setMandateStartDate($this->mandateDataGenerator->getMandateStartDate());
+    $mandateStartDate = $this->mandateDataGenerator->getMandateStartDate();
+    $contributionDataGenerator = new ContributionDataGenerator($this->entityID, $this->settings, $mandateStartDate);
     $contributionDataGenerator->generateContributionFieldsValues();
     $contributionDataGenerator->saveGeneratedContributionValues();
   }
