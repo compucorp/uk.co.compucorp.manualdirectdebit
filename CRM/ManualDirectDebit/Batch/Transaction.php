@@ -394,42 +394,47 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @return array
    */
   private function getBatchRows($batch) {
-    $mandateItems = $this->getDDMandateInstructions();
+    if ($batch->getBatchType() === BatchHandler::BATCH_TYPE_PAYMENTS) {
+      $items = $this->getDDPayments();
+    }
+    else {
+      $items = $this->getDDMandateInstructions();
+    }
 
     $rows = [];
-    foreach ($mandateItems as $mandateItem) {
+    foreach ($items as $item) {
       $row = [];
       foreach ($this->columnHeader as $columnKey => $columnValue) {
-        if (isset($mandateItem[$columnKey])) {
-          $row[$columnKey] = $mandateItem[$columnKey];
+        if (isset($item[$columnKey])) {
+          $row[$columnKey] = $item[$columnKey];
         }
         else {
           $row[$columnKey] = NULL;
         }
       }
 
-      $row['check'] = $this->getCheckRow($batch, $mandateItem['id']);
+      $row['check'] = $this->getCheckRow($batch, $item['id']);
 
       switch ($batch->getBatchType()) {
         case BatchHandler::BATCH_TYPE_INSTRUCTIONS:
         case BatchHandler::BATCH_TYPE_CANCELLATIONS:
-          if (!empty($mandateItem['contact_id'])) {
-            $row['action'] = $this->getLinkToMandate($mandateItem['id'], $mandateItem['contact_id']);
+          if (!empty($item['contact_id'])) {
+            $row['action'] = $this->getLinkToMandate($item['id'], $item['contact_id']);
           }
 
-          $rows[$mandateItem['mandate_id']] = $row;
+          $rows[$item['mandate_id']] = $row;
           break;
 
         case BatchHandler::BATCH_TYPE_PAYMENTS:
-          if (isset($mandateItem['contribute_id'])) {
-            $contributionId = $mandateItem['contribute_id'];
+          if (isset($item['contribute_id'])) {
+            $contributionId = $item['contribute_id'];
           }
           else {
-            $contributionId = $mandateItem['id'];
+            $contributionId = $item['id'];
           }
 
-          if (!empty($mandateItem['contact_id'])) {
-            $row['action'] = $this->getLinkToContribution($contributionId, $mandateItem['contact_id']);
+          if (!empty($item['contact_id'])) {
+            $row['action'] = $this->getLinkToContribution($contributionId, $item['contact_id']);
           }
 
           $rows[$contributionId] = $row;
@@ -471,18 +476,11 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    * @return array
    */
   public function getDDMandateInstructions() {
-
     $query = CRM_Utils_SQL_Select::from(self::DD_MANDATE_TABLE);
-    $query->join('value_dd_information', 'LEFT JOIN civicrm_value_dd_information ON civicrm_value_dd_information.mandate_id = civicrm_value_dd_mandate.id');
-    $query->join('contribution', 'LEFT JOIN civicrm_contribution ON civicrm_contribution.id = civicrm_value_dd_information.entity_id');
-    $query->join('contact', 'LEFT JOIN civicrm_contact ON civicrm_contribution.contact_id = civicrm_contact.id');
-    $query->join('email', 'LEFT JOIN civicrm_email ON (civicrm_contact.id = civicrm_email.contact_id AND civicrm_email.is_primary = 1)');
-    $query->join('contribution_recur', 'LEFT JOIN civicrm_contribution_recur ON civicrm_contribution.contribution_recur_id = civicrm_contribution_recur.id');
-    $query->join('entity_batch', 'LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . $this->params['entityTable'] . '.id AND civicrm_entity_batch.entity_table = \'' . $this->params['entityTable'] . '\'');
+    $query->join('entity_batch', 'LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . self::DD_MANDATE_TABLE . '.id AND civicrm_entity_batch.entity_table = \'' . self::DD_MANDATE_TABLE . '\'');
     $query->join('civicrm_option_group', 'LEFT JOIN civicrm_option_group ON civicrm_option_group.name = "direct_debit_codes"');
     $query->join('civicrm_option_value', 'LEFT JOIN civicrm_option_value ON civicrm_option_group.id = civicrm_option_value.option_group_id AND civicrm_option_value.value = ' . self::DD_MANDATE_TABLE . '.dd_code');
-    $query->join('civicrm_entity_tag', 'LEFT JOIN civicrm_entity_tag ON civicrm_entity_tag.entity_id = civicrm_contact.id AND civicrm_entity_tag.entity_table = \'civicrm_contact\'');
-    $query->join('civicrm_group_contact', 'LEFT JOIN civicrm_group_contact ON civicrm_group_contact.contact_id = civicrm_contact.id AND civicrm_group_contact.status = \'Added\'');
+    $query->where('civicrm_entity_batch.batch_id = !entityID', ['entityID' => $this->batchID]);
 
     //select
     $query->select(implode(' , ', $this->returnValues));
@@ -500,6 +498,82 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       }
     }
 
+    if (!empty($this->params['sortBy'])) {
+      $query->orderBy($this->params['sortBy']);
+    }
+    else {
+      $query->orderBy(self::DD_MANDATE_TABLE . '.id');
+    }
+
+    if (!$this->total) {
+      if (!empty($this->params['rowCount']) &&
+        $this->params['rowCount'] > 0
+      ) {
+        $query->limit((int) $this->params['rowCount'], (int) $this->params['offset']);
+      }
+    }
+
+    $mandateItems = CRM_Core_DAO::executeQuery($query->toSQL());
+
+    $rows = [];
+    while ($mandateItems->fetch()) {
+      $mandateItem = [];
+      foreach ($this->returnValues as $key => $value) {
+        if (isset($mandateItems->$key)) {
+          $mandateItem[$key] = $mandateItems->$key;
+        }
+        else {
+          $mandateItem[$key] = NULL;
+        }
+      }
+
+      $mandateItem['amount'] = $this->formatAmount($mandateItem['amount']);
+
+      $rows[] = $mandateItem;
+    }
+
+    return $rows;
+  }
+
+  /**
+   * Returns array of Direct Debit payments
+   *
+   * @return array
+   */
+  public function getDDPayments() {
+    $query = CRM_Utils_SQL_Select::from(self::DD_MANDATE_TABLE);
+    $query->join('value_dd_information', 'INNER JOIN civicrm_value_dd_information ON civicrm_value_dd_information.mandate_id = civicrm_value_dd_mandate.id');
+    $query->join('contribution', 'INNER JOIN civicrm_contribution ON civicrm_contribution.id = civicrm_value_dd_information.entity_id');
+    $query->join('contact', 'INNER JOIN civicrm_contact ON civicrm_contribution.contact_id = civicrm_contact.id');
+    $query->join('contribution_recur', 'INNER JOIN civicrm_contribution_recur ON civicrm_contribution.contribution_recur_id = civicrm_contribution_recur.id');
+    $query->join('entity_batch', 'LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . $this->params['entityTable'] . '.id AND civicrm_entity_batch.entity_table = \'' . $this->params['entityTable'] . '\'');
+    $query->join('civicrm_option_group', 'INNER JOIN civicrm_option_group ON civicrm_option_group.name = "direct_debit_codes"');
+    $query->join('civicrm_option_value', 'INNER JOIN civicrm_option_value ON civicrm_option_group.id = civicrm_option_value.option_group_id AND civicrm_option_value.value = ' . self::DD_MANDATE_TABLE . '.dd_code');
+
+    //select
+    $query->select(implode(' , ', $this->returnValues));
+
+    $query->distinct(TRUE);
+
+    foreach ($this->searchableFields as $k => $field) {
+      if (!isset($this->params[$k])) {
+        continue;
+      }
+      if ($field['table'] === 'civicrm_entity_tag') {
+        $query->join('civicrm_entity_tag', 'INNER JOIN civicrm_entity_tag ON civicrm_entity_tag.entity_id = civicrm_contact.id AND civicrm_entity_tag.entity_table = \'civicrm_contact\'');
+      }
+      if ($field['table'] === 'civicrm_group_contact') {
+        $query->join('civicrm_group_contact', 'INNER JOIN civicrm_group_contact ON civicrm_group_contact.contact_id = civicrm_contact.id AND civicrm_group_contact.status = \'Added\'');
+      }
+
+      if ($field['op'] == 'IN') {
+        $query->where("{$field['table']}.{$field['field']} {$field['op']} (@{$k})", [$k => explode(',', $this->params[$k])]);
+      }
+      else {
+        $query->where("{$field['table']}.{$field['field']} {$field['op']} @{$k}", [$k => $this->params[$k]]);
+      }
+    }
+
     $this->addContributionReceiveDateCondition($query);
     $this->addSortNameCondition($query);
 
@@ -509,8 +583,8 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       $excluded->select($this->params['entityTable'] . '.id');
 
       if ($this->params['entityTable'] == 'civicrm_contribution') {
-        $excluded->join('value_dd_information', 'LEFT JOIN civicrm_value_dd_information ON civicrm_value_dd_information.mandate_id = civicrm_value_dd_mandate.id');
-        $excluded->join('contribution', 'LEFT JOIN civicrm_contribution ON civicrm_contribution.id = civicrm_value_dd_information.entity_id');
+        $excluded->join('value_dd_information', 'INNER JOIN civicrm_value_dd_information ON civicrm_value_dd_information.mandate_id = civicrm_value_dd_mandate.id');
+        $excluded->join('contribution', 'INNER JOIN civicrm_contribution ON civicrm_contribution.id = civicrm_value_dd_information.entity_id');
       }
       $excluded->join('entity_batch', 'LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . $this->params['entityTable'] . '.id AND civicrm_entity_batch.entity_table = \'' . $this->params['entityTable'] . '\'');
       $excluded->join('batch', 'LEFT JOIN civicrm_batch ON civicrm_entity_batch.batch_id = civicrm_batch.id');
@@ -542,23 +616,23 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $query->where('civicrm_contact.is_deleted IS NULL OR civicrm_contact.is_deleted = 0');
     $query->where('civicrm_contribution.is_test IS NULL OR civicrm_contribution.is_test = 0');
 
-    $mandateItems = CRM_Core_DAO::executeQuery($query->toSQL());
+    $paymentItems = CRM_Core_DAO::executeQuery($query->toSQL());
 
     $rows = [];
-    while ($mandateItems->fetch()) {
-      $mandateItem = [];
+    while ($paymentItems->fetch()) {
+      $paymentItem = [];
       foreach ($this->returnValues as $key => $value) {
-        if (isset($mandateItems->$key)) {
-          $mandateItem[$key] = $mandateItems->$key;
+        if (isset($paymentItems->$key)) {
+          $paymentItem[$key] = $paymentItems->$key;
         }
         else {
-          $mandateItem[$key] = NULL;
+          $paymentItem[$key] = NULL;
         }
       }
 
-      $mandateItem['amount'] = $this->formatAmount($mandateItem['amount']);
+      $paymentItem['amount'] = $this->formatAmount($paymentItem['amount']);
 
-      $rows[] = $mandateItem;
+      $rows[] = $paymentItem;
     }
 
     return $rows;
@@ -578,7 +652,15 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   public function getTotalNumber() {
     $this->total = TRUE;
 
-    return count($this->getDDMandateInstructions());
+    $batch = (new BatchHandler($this->batchID));
+    if ($batch->getBatchType() === BatchHandler::BATCH_TYPE_PAYMENTS) {
+      $items = $this->getDDPayments();
+    }
+    else {
+      $items = $this->getDDMandateInstructions();
+    }
+
+    return count($items);
   }
 
   /**
@@ -703,6 +785,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       if (mb_strpos($sort_name, '%') === FALSE) {
         $sort_name = "%{$sort_name}%";
       }
+      $query->join('email', 'LEFT JOIN civicrm_email ON (civicrm_contact.id = civicrm_email.contact_id AND civicrm_email.is_primary = 1)');
       $query->where('civicrm_contact.sort_name LIKE @sort_name OR civicrm_contact.nick_name LIKE @sort_name OR civicrm_email.email LIKE @sort_name', ['sort_name' => $sort_name]);
     }
   }
