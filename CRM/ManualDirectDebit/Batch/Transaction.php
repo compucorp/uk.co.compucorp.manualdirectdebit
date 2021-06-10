@@ -93,6 +93,8 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $this->notPresent = $notPresent;
     $this->params = $params;
 
+    // The value of $this->params['entityTable'] is 'civicrm_contribution' when
+    // using the "Direct Debit Payments" export search form
     if (empty($this->params['entityTable'])) {
       $this->params['entityTable'] = self::DD_MANDATE_TABLE;
     }
@@ -110,132 +112,159 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   private function setSearchableFields() {
     $this->searchableFields = [
       'entity_id' => [
+        'table' => self::DD_MANDATE_TABLE,
         'op' => '=',
-        'field' => self::DD_MANDATE_TABLE . '.entity_id',
+        'field' => 'entity_id',
       ],
       'bank_name' => [
+        'table' => self::DD_MANDATE_TABLE,
         'op' => '=',
-        'field' => self::DD_MANDATE_TABLE . '.bank_name',
+        'field' => 'bank_name',
       ],
       'bank_street_address' => [
+        'table' => self::DD_MANDATE_TABLE,
         'op' => '=',
-        'field' => self::DD_MANDATE_TABLE . '.bank_street_address',
+        'field' => 'bank_street_address',
       ],
       'bank_city' => [
+        'table' => self::DD_MANDATE_TABLE,
         'op' => '=',
-        'field' => self::DD_MANDATE_TABLE . '.bank_city',
+        'field' => 'bank_city',
       ],
       'bank_county' => [
+        'table' => self::DD_MANDATE_TABLE,
         'op' => '=',
-        'field' => self::DD_MANDATE_TABLE . '.bank_county',
+        'field' => 'bank_county',
       ],
       'bank_postcode' => [
+        'table' => self::DD_MANDATE_TABLE,
         'op' => '=',
-        'field' => self::DD_MANDATE_TABLE . '.bank_postcode',
+        'field' => 'bank_postcode',
       ],
       'account_holder_name' => [
+        'table' => self::DD_MANDATE_TABLE,
         'op' => '=',
-        'field' => self::DD_MANDATE_TABLE . '.account_holder_name',
+        'field' => 'account_holder_name',
       ],
       'ac_number' => [
+        'table' => self::DD_MANDATE_TABLE,
         'op' => '=',
-        'field' => self::DD_MANDATE_TABLE . '.ac_number',
+        'field' => 'ac_number',
       ],
       'sort_code' => [
+        'table' => self::DD_MANDATE_TABLE,
         'op' => '=',
-        'field' => self::DD_MANDATE_TABLE . '.sort_code',
+        'field' => 'sort_code',
       ],
       'dd_code' => [
+        'table' => self::DD_MANDATE_TABLE,
         'op' => 'IN',
-        'field' => self::DD_MANDATE_TABLE . '.dd_code',
+        'field' => 'dd_code',
       ],
       'dd_ref' => [
+        'table' => self::DD_MANDATE_TABLE,
         'op' => '=',
-        'field' => self::DD_MANDATE_TABLE . '.dd_ref',
+        'field' => 'dd_ref',
       ],
       'start_date' => [
+        'table' => self::DD_MANDATE_TABLE,
         'op' => '<=',
-        'field' => self::DD_MANDATE_TABLE . '.start_date',
+        'field' => 'start_date',
       ],
       'authorisation_date' => [
+        'table' => self::DD_MANDATE_TABLE,
         'op' => '=',
-        'field' => self::DD_MANDATE_TABLE . '.authorisation_date',
-      ],
-      'collection_day' => [
-        'op' => '=',
-        'field' => self::DD_MANDATE_TABLE . '.collection_day',
+        'field' => 'authorisation_date',
       ],
       'originator_number' => [
+        'table' => self::DD_MANDATE_TABLE,
         'op' => '=',
-        'field' => self::DD_MANDATE_TABLE . '.originator_number',
+        'field' => 'originator_number',
       ],
       'contribution_status_id' => [
+        'table' => 'civicrm_contribution',
         'op' => 'IN',
-        'field' => 'civicrm_contribution.contribution_status_id',
-      ],
-      'recur_status' => [
-        'op' => 'IN',
-        'field' => 'civicrm_contribution_recur.contribution_status_id',
+        'field' => 'contribution_status_id',
       ],
       'financial_type_id' => [
+        'table' => 'civicrm_contribution',
         'op' => 'IN',
-        'field' => 'civicrm_contribution.financial_type_id',
+        'field' => 'financial_type_id',
       ],
       'contribution_currency_type' => [
+        'table' => 'civicrm_contribution',
         'op' => 'IN',
-        'field' => 'civicrm_contribution.currency',
+        'field' => 'currency',
       ],
       'contribution_payment_instrument_id' => [
+        'table' => 'civicrm_contribution',
         'op' => 'IN',
-        'field' => 'civicrm_contribution.payment_instrument_id',
+        'field' => 'payment_instrument_id',
       ],
       'contribution_test' => [
+        'table' => 'civicrm_contribution',
         'op' => '=',
-        'field' => 'civicrm_contribution.is_test',
+        'field' => 'is_test',
       ],
       'contribution_trxn_id' => [
+        'table' => 'civicrm_contribution',
         'op' => '=',
-        'field' => 'civicrm_contribution.trxn_id',
+        'field' => 'trxn_id',
       ],
       'invoice_number' => [
+        'table' => 'civicrm_contribution',
         'op' => '=',
-        'field' => 'civicrm_contribution.invoice_number',
+        'field' => 'invoice_number',
       ],
       'contribution_pay_later' => [
+        'table' => 'civicrm_contribution',
         'op' => '=',
-        'field' => 'civicrm_contribution.is_pay_later',
+        'field' => 'is_pay_later',
       ],
       'cancel_reason' => [
+        'table' => 'civicrm_contribution',
         'op' => '=',
-        'field' => 'civicrm_contribution.cancel_reason',
+        'field' => 'cancel_reason',
       ],
       'contribution_source' => [
+        'table' => 'civicrm_contribution',
         'op' => '=',
-        'field' => 'civicrm_contribution.source',
+        'field' => 'source',
       ],
       'contribution_page_id' => [
+        'table' => 'civicrm_contribution',
         'op' => '=',
-        'field' => 'civicrm_contribution.contribution_page_id',
-      ],
-      'contribution_recur_contribution_status_id' => [
-        'op' => 'IN',
-        'field' => 'civicrm_contribution_recur.contribution_status_id',
-      ],
-      'contact_tags' => [
-        'op' => 'IN',
-        'field' => 'civicrm_entity_tag.tag_id',
-      ],
-      'group' => [
-        'op' => 'IN',
-        'field' => 'civicrm_group_contact.group_id',
+        'field' => 'contribution_page_id',
       ],
       'contribution_amount_low' => [
+        'table' => 'civicrm_contribution',
         'op' => '>=',
-        'field' => 'civicrm_contribution.total_amount',
+        'field' => 'total_amount',
       ],
       'contribution_amount_high' => [
+        'table' => 'civicrm_contribution',
         'op' => '<=',
-        'field' => 'civicrm_contribution.total_amount',
+        'field' => 'total_amount',
+      ],
+      'recur_status' => [
+        'table' => 'civicrm_contribution_recur',
+        'op' => 'IN',
+        'field' => 'contribution_status_id',
+      ],
+      'contribution_recur_contribution_status_id' => [
+        'table' => 'civicrm_contribution_recur',
+        'op' => 'IN',
+        'field' => 'contribution_status_id',
+      ],
+      'contact_tags' => [
+        'table' => 'civicrm_entity_tag',
+        'op' => 'IN',
+        'field' => 'tag_id',
+      ],
+      'group' => [
+        'table' => 'civicrm_group_contact',
+        'op' => 'IN',
+        'field' => 'group_id',
       ],
     ];
   }
@@ -463,10 +492,10 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     foreach ($this->searchableFields as $k => $field) {
       if (isset($this->params[$k])) {
         if ($field['op'] == 'IN') {
-          $query->where($field['field'] . ' ' . $field['op'] . ' (@' . $k . ')', [$k => explode(',', $this->params[$k])]);
+          $query->where("{$field['table']}.{$field['field']} {$field['op']} (@{$k})", [$k => explode(',', $this->params[$k])]);
         }
         else {
-          $query->where($field['field'] . ' ' . $field['op'] . ' @' . $k, [$k => $this->params[$k]]);
+          $query->where("{$field['table']}.{$field['field']} {$field['op']} @{$k}", [$k => $this->params[$k]]);
         }
       }
     }
