@@ -93,8 +93,6 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $this->notPresent = $notPresent;
     $this->params = $params;
 
-    // The value of $this->params['entityTable'] is 'civicrm_contribution' when
-    // using the "Direct Debit Payments" export search form
     if (empty($this->params['entityTable'])) {
       $this->params['entityTable'] = self::DD_MANDATE_TABLE;
     }
@@ -395,14 +393,16 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    */
   private function getBatchRows($batch) {
     if ($batch->getBatchType() === BatchHandler::BATCH_TYPE_PAYMENTS) {
-      $items = $this->getDDPayments();
+      $query = $this->getDDPaymentsQuery();
     }
     else {
-      $items = $this->getDDMandateInstructions();
+      $query = $this->getDDMandateInstructionsQuery();
     }
 
+    $dao = CRM_Core_DAO::executeQuery($query);
+
     $rows = [];
-    foreach ($items as $item) {
+    foreach ($this->fetchRows($dao) as $item) {
       $row = [];
       foreach ($this->columnHeader as $columnKey => $columnValue) {
         if (isset($item[$columnKey])) {
@@ -471,11 +471,38 @@ class CRM_ManualDirectDebit_Batch_Transaction {
   }
 
   /**
+   * Returns array of rows.
+   *
+   * @param CRM_Core_DAO $dao
+   * @return array
+   */
+  private function fetchRows($dao) {
+    $rows = [];
+    while ($dao->fetch()) {
+      $row = [];
+      foreach ($this->returnValues as $key => $value) {
+        if (isset($dao->$key)) {
+          $row[$key] = $dao->$key;
+        }
+        else {
+          $row[$key] = NULL;
+        }
+      }
+
+      $row['amount'] = $this->formatAmount($row['amount']);
+
+      $rows[] = $row;
+    }
+
+    return $rows;
+  }
+
+  /**
    * Returns array of Direct Debit mandate instructions
    *
    * @return array
    */
-  public function getDDMandateInstructions() {
+  public function getDDMandateInstructionsQuery() {
     $query = CRM_Utils_SQL_Select::from(self::DD_MANDATE_TABLE);
     $query->join('entity_batch', 'LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . self::DD_MANDATE_TABLE . '.id AND civicrm_entity_batch.entity_table = \'' . self::DD_MANDATE_TABLE . '\'');
     $query->join('civicrm_option_group', 'LEFT JOIN civicrm_option_group ON civicrm_option_group.name = "direct_debit_codes"');
@@ -513,26 +540,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       }
     }
 
-    $mandateItems = CRM_Core_DAO::executeQuery($query->toSQL());
-
-    $rows = [];
-    while ($mandateItems->fetch()) {
-      $mandateItem = [];
-      foreach ($this->returnValues as $key => $value) {
-        if (isset($mandateItems->$key)) {
-          $mandateItem[$key] = $mandateItems->$key;
-        }
-        else {
-          $mandateItem[$key] = NULL;
-        }
-      }
-
-      $mandateItem['amount'] = $this->formatAmount($mandateItem['amount']);
-
-      $rows[] = $mandateItem;
-    }
-
-    return $rows;
+    return $query->toSQL();
   }
 
   /**
@@ -540,7 +548,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    *
    * @return array
    */
-  public function getDDPayments() {
+  public function getDDPaymentsQuery() {
     $query = CRM_Utils_SQL_Select::from(self::DD_MANDATE_TABLE);
     $query->join('value_dd_information', 'INNER JOIN civicrm_value_dd_information ON civicrm_value_dd_information.mandate_id = civicrm_value_dd_mandate.id');
     $query->join('contribution', 'INNER JOIN civicrm_contribution ON civicrm_contribution.id = civicrm_value_dd_information.entity_id');
@@ -616,26 +624,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $query->where('civicrm_contact.is_deleted IS NULL OR civicrm_contact.is_deleted = 0');
     $query->where('civicrm_contribution.is_test IS NULL OR civicrm_contribution.is_test = 0');
 
-    $paymentItems = CRM_Core_DAO::executeQuery($query->toSQL());
-
-    $rows = [];
-    while ($paymentItems->fetch()) {
-      $paymentItem = [];
-      foreach ($this->returnValues as $key => $value) {
-        if (isset($paymentItems->$key)) {
-          $paymentItem[$key] = $paymentItems->$key;
-        }
-        else {
-          $paymentItem[$key] = NULL;
-        }
-      }
-
-      $paymentItem['amount'] = $this->formatAmount($paymentItem['amount']);
-
-      $rows[] = $paymentItem;
-    }
-
-    return $rows;
+    return $query->toSQL();
   }
 
   private function formatAmount($amount) {
@@ -654,13 +643,14 @@ class CRM_ManualDirectDebit_Batch_Transaction {
 
     $batch = (new BatchHandler($this->batchID));
     if ($batch->getBatchType() === BatchHandler::BATCH_TYPE_PAYMENTS) {
-      $items = $this->getDDPayments();
+      $query = $this->getDDPaymentsQuery();
     }
     else {
-      $items = $this->getDDMandateInstructions();
+      $query = $this->getDDMandateInstructionsQuery();
     }
+    $dao = CRM_Core_DAO::executeQuery($query);
 
-    return count($items);
+    return $dao->N;
   }
 
   /**
