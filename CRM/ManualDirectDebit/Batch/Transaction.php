@@ -569,7 +569,6 @@ class CRM_ManualDirectDebit_Batch_Transaction {
     $query->join('contribution', 'INNER JOIN civicrm_contribution ON civicrm_contribution.id = civicrm_value_dd_information.entity_id');
     $query->join('contact', 'INNER JOIN civicrm_contact ON civicrm_contribution.contact_id = civicrm_contact.id');
     $query->join('contribution_recur', 'INNER JOIN civicrm_contribution_recur ON civicrm_contribution.contribution_recur_id = civicrm_contribution_recur.id');
-    $query->join('entity_batch', 'LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . $this->params['entityTable'] . '.id AND civicrm_entity_batch.entity_table = \'' . $this->params['entityTable'] . '\'');
     $query->join('civicrm_option_group', 'INNER JOIN civicrm_option_group ON civicrm_option_group.name = "direct_debit_codes"');
     $query->join('civicrm_option_value', 'INNER JOIN civicrm_option_value ON civicrm_option_group.id = civicrm_option_value.option_group_id AND civicrm_option_value.value = ' . self::DD_MANDATE_TABLE . '.dd_code');
 
@@ -609,15 +608,16 @@ class CRM_ManualDirectDebit_Batch_Transaction {
         $excluded->join('value_dd_information', 'INNER JOIN civicrm_value_dd_information ON civicrm_value_dd_information.mandate_id = civicrm_value_dd_mandate.id');
         $excluded->join('contribution', 'INNER JOIN civicrm_contribution ON civicrm_contribution.id = civicrm_value_dd_information.entity_id');
       }
-      $excluded->join('entity_batch', 'LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . $this->params['entityTable'] . '.id AND civicrm_entity_batch.entity_table = \'' . $this->params['entityTable'] . '\'');
-      $excluded->join('batch', 'LEFT JOIN civicrm_batch ON civicrm_entity_batch.batch_id = civicrm_batch.id');
-      $excluded->join('current_batch', 'LEFT JOIN civicrm_batch current_batch ON current_batch.id = ' . $this->batchID);
+      $excluded->join('entity_batch', 'INNER JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . $this->params['entityTable'] . '.id AND civicrm_entity_batch.entity_table = \'' . $this->params['entityTable'] . '\'');
+      $excluded->join('batch', 'INNER JOIN civicrm_batch ON civicrm_entity_batch.batch_id = civicrm_batch.id');
+      $excluded->join('current_batch', 'INNER JOIN civicrm_batch current_batch ON current_batch.id = ' . $this->batchID);
       $excluded->where('civicrm_batch.status_id <> ' . CRM_Utils_Array::key('Discarded', $batchStatus));
       $excluded->where('civicrm_batch.type_id = current_batch.type_id');
 
       $query->where($this->params['entityTable'] . '.id NOT IN (' . $excluded->toSQL() . ')');
     }
     else {
+      $query->join('entity_batch', 'INNER JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = ' . $this->params['entityTable'] . '.id AND civicrm_entity_batch.entity_table = \'' . $this->params['entityTable'] . '\'');
       $query->where('civicrm_entity_batch.batch_id = !entityID', ['entityID' => $this->batchID]);
     }
 
