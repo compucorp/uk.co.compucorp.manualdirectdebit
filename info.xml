@@ -18,15 +18,15 @@
   <urls>
     <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
-  <releaseDate>2021-04-21</releaseDate>
-  <version>4.3.0</version>
+  <releaseDate>2021-06-16</releaseDate>
+  <version>4.4.0</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>5.35</ver>
   </compatibility>
   <comments>
     Supported CiviCRM versions  :
-    - 5.35.1
+    - 5.35.2
   </comments>
   <civix>
     <namespace>CRM/ManualDirectDebit</namespace>
