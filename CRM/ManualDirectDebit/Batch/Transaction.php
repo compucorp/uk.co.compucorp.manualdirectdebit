@@ -393,16 +393,14 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    */
   private function getBatchRows($batch) {
     if ($batch->getBatchType() === BatchHandler::BATCH_TYPE_PAYMENTS) {
-      $query = $this->getDDPaymentsQuery();
+      $items = $this->getDDPayments();
     }
     else {
-      $query = $this->getDDMandateInstructionsQuery();
+      $items = $this->getDDMandateInstructions();
     }
 
-    $dao = CRM_Core_DAO::executeQuery($query);
-
     $rows = [];
-    foreach ($this->fetchRows($dao) as $item) {
+    foreach ($items as $item) {
       $row = [];
       foreach ($this->columnHeader as $columnKey => $columnValue) {
         if (isset($item[$columnKey])) {
@@ -502,7 +500,18 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    *
    * @return array
    */
-  public function getDDMandateInstructionsQuery() {
+  public function getDDMandateInstructions() {
+    $query = $this->getDDMandateInstructionsQuery();
+    $dao = CRM_Core_DAO::executeQuery($query);
+    return $this->fetchRows($dao);
+  }
+
+  /**
+   * Returns a query for Direct Debit mandate instructions
+   *
+   * @return array
+   */
+  private function getDDMandateInstructionsQuery() {
     $query = CRM_Utils_SQL_Select::from(self::DD_MANDATE_TABLE);
     $query->join('contact', 'INNER JOIN civicrm_contact ON ' . self::DD_MANDATE_TABLE . '.entity_id = civicrm_contact.id');
     $query->join('civicrm_option_group', 'INNER JOIN civicrm_option_group ON civicrm_option_group.name = "direct_debit_codes"');
@@ -563,7 +572,18 @@ class CRM_ManualDirectDebit_Batch_Transaction {
    *
    * @return array
    */
-  public function getDDPaymentsQuery() {
+  public function getDDPayments() {
+    $query = $this->getDDPaymentsQuery();
+    $dao = CRM_Core_DAO::executeQuery($query);
+    return $this->fetchRows($dao);
+  }
+
+  /**
+   * Returns a query for Direct Debit payments
+   *
+   * @return array
+   */
+  private function getDDPaymentsQuery() {
     $query = CRM_Utils_SQL_Select::from(self::DD_MANDATE_TABLE);
     $query->join('value_dd_information', 'INNER JOIN civicrm_value_dd_information ON civicrm_value_dd_information.mandate_id = civicrm_value_dd_mandate.id');
     $query->join('contribution', 'INNER JOIN civicrm_contribution ON civicrm_contribution.id = civicrm_value_dd_information.entity_id');
@@ -625,7 +645,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       $query->orderBy($this->params['sortBy']);
     }
     else {
-      $query->orderBy(self::DD_MANDATE_TABLE . '.id');
+      $query->orderBy('civicrm_contribution.id');
     }
 
     if (!$this->total) {
