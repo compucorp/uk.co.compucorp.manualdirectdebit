@@ -378,7 +378,13 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       $returnValues
     );
 
-    $mandateItems = $batchTransaction->getDDMandateInstructions();
+    if ($this->getBatchType() === self::BATCH_TYPE_PAYMENTS) {
+      $mandateItems = $batchTransaction->getDDPayments();
+    }
+    else {
+      $mandateItems = $batchTransaction->getDDMandateInstructions();
+    }
+
     foreach ($mandateItems as $mandateItem) {
       switch ($this->getBatchType()) {
         case self::BATCH_TYPE_INSTRUCTIONS:

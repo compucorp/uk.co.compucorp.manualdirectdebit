@@ -645,7 +645,7 @@ class CRM_ManualDirectDebit_Batch_Transaction {
       $query->orderBy($this->params['sortBy']);
     }
     else {
-      $query->orderBy(self::DD_MANDATE_TABLE . '.id');
+      $query->orderBy('civicrm_contribution.id');
     }
 
     if (!$this->total) {
