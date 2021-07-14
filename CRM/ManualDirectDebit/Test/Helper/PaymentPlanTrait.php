@@ -1,23 +1,8 @@
 <?php
 
-use CRM_ManualDirectDebit_Common_SettingsManager as SettingsManager;
 use CRM_MembershipExtras_Test_Fabricator_MembershipType as MembershipTypeFabricator;
 
 trait CRM_ManualDirectDebit_Test_Helper_PaymentPlanTrait {
-
-  /**
-   * Builds a mock class to manage DD settings.
-   *
-   * @return mixed
-   */
-  private function buildSettingsManagerMock($settings) {
-    $settingsManager = $this->createMock(SettingsManager::class);
-    $settingsManager
-      ->method('getManualDirectDebitSettings')
-      ->willReturn(array_merge($this->defaultDDSettings, $settings));
-
-    return $settingsManager;
-  }
 
   /**
    * A helper funcitons that configures a payment plan to be used on tests.
