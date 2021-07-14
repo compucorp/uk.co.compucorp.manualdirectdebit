@@ -11,6 +11,8 @@ use CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContributi
 class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContributionTest extends BaseHeadlessTest {
 
   use CRM_ManualDirectDebit_Test_Helper_PaymentPlanTrait;
+  use CRM_ManualDirectDebit_Test_Helper_SettingsTrait;
+
   /**
    * Default direct debit settings that will be used for tests.
    *
@@ -34,6 +36,10 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
     'payment_schedule' => 'monthly',
     'payment_instrument_id' => 'direct_debit',
   ];
+
+  public function setUp() {
+    $this->mockSettings($this->defaultDDSettings);
+  }
 
   public function testSecondContributionOneMonthAfterFirstWhenSettingIsSet() {
     $membershipStartDate = '2020-01-01';

@@ -10,6 +10,7 @@ use CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContributio
 class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContributionTest extends BaseHeadlessTest {
 
   use CRM_ManualDirectDebit_Test_Helper_PaymentPlanTrait;
+  use CRM_ManualDirectDebit_Test_Helper_SettingsTrait;
 
   /**
    * Default direct debit settings that will be used for tests.
@@ -31,18 +32,18 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribut
    * @var array
    */
   private $defaultContributionParams = [
+    'payment_schedule' => 'monthly',
     'payment_instrument_id' => 'direct_debit',
   ];
 
   public function testReceiveDateCalculationOfPaymentsFollowSecondInstalment() {
     $membershipStartDate = '2020-01-15';
     $firstInstalmentReceiveDate = '2020-01-15 00:00:00';
-
+    $this->mockSettings($this->defaultDDSettings);
     $recurringContribution = $this->setupPlan($membershipStartDate, $firstInstalmentReceiveDate);
 
     $secondInstalmentReceiveDate = '2020-02-15 00:00:00';
 
-    //$this->defaultContributionParams['membership_id'] = $testRollingMembershipType;
     $this->defaultContributionParams['contribution_recur_id'] = $recurringContribution['id'];
     $this->defaultContributionParams['previous_instalment_date'] = $secondInstalmentReceiveDate;
     $this->defaultContributionParams['membership_start_date'] = $membershipStartDate;
@@ -50,6 +51,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribut
     $this->defaultContributionParams['frequency_unit'] = $recurringContribution['frequency_unit'];
 
     $settingsManager = $this->buildSettingsManagerMock([]);
+
     $receiveDateCalculator = new OtherContributionReceiveDateCalculator(
       $receiveDate,
       $this->defaultContributionParams,
