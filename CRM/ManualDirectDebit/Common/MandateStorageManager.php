@@ -238,7 +238,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
   private function getContributionsForMandate($recurContribution, $contactId) {
     $contributionIds = [];
 
-    if ($this->isMembershipExtrasInstalled() && $this->isAmountOfInstallmentsEqualAmountOfContributions($recurContribution)) {
+    if ($this->isMembershipExtrasInstalled()) {
       /**
        * If Membership was installed first, it gets all contributions for last inserted recurring contribution
        * for current contact
@@ -284,24 +284,6 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
     $isMembershipExist = $membershipExtension->id && $membershipExtension->is_active == 1;
 
     return $isMembershipExist ? TRUE : FALSE;
-  }
-
-  /**
-   * Checks if amount of installments equal to amount of contributions
-   *
-   * @param $recurContribution
-   *
-   * @return bool
-   */
-  private function isAmountOfInstallmentsEqualAmountOfContributions($recurContribution) {
-    $contributionRecurDao = CRM_Contribute_BAO_ContributionRecur::findById($recurContribution);
-    $amountOfInstallments = $contributionRecurDao->installments;
-
-    $amountOfContributions = civicrm_api3('Contribution', 'getcount', [
-      'contribution_recur_id' => $recurContribution,
-    ]);
-
-    return $amountOfInstallments == $amountOfContributions ? TRUE : FALSE;
   }
 
   /**
