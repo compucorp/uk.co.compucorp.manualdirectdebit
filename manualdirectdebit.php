@@ -402,8 +402,6 @@ function manualdirectdebit_membershipextras_postOfflineAutoRenewal($membershipId
  */
 function manualdirectdebit_membershipextras_calculateContributionReceiveDate($contributionNumber, &$receiveDate, $contributionCreationParams) {
   $settingsManager = new CRM_ManualDirectDebit_Common_SettingsManager();
-  $calculator = new CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator();
-
   switch ($contributionNumber) {
     case 1:
       $receiveDateCalculator = new CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_FirstContribution(
@@ -418,19 +416,16 @@ function manualdirectdebit_membershipextras_calculateContributionReceiveDate($co
       $receiveDateCalculator = new CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribution(
         $receiveDate,
         $contributionCreationParams,
-        $settingsManager,
-        $calculator
+        $settingsManager
       );
       $receiveDateCalculator->process();
       break;
 
     default:
       $receiveDateCalculator = new CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribution(
-        $contributionNumber,
         $receiveDate,
         $contributionCreationParams,
-        $settingsManager,
-        $calculator
+        $settingsManager
       );
       $receiveDateCalculator->process();
   }

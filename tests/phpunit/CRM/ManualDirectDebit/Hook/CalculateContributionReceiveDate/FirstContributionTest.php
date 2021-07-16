@@ -29,10 +29,6 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_FirstContribut
    * @var array
    */
   private $defaultContributionParams = [
-    'is_pay_later' => TRUE,
-    'skipLineItem' => 1,
-    'skipCleanMoney' => TRUE,
-    'fee_amount' => 0,
     'payment_instrument_id' => 'direct_debit',
   ];
 

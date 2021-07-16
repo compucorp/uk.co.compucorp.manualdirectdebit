@@ -85,7 +85,7 @@ abstract class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_Base 
       return TRUE;
     }
 
-    if ($this->params['payment_instrument_id'] === $this->directDebitPaymentInstrument['value']) {
+    if ($this->params['payment_instrument_id'] == $this->directDebitPaymentInstrument['value']) {
       return TRUE;
     }
 
