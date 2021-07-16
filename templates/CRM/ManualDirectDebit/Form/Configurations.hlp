@@ -20,10 +20,43 @@ contribution should the Direct Debit Payment Collection Reminder
 be sent to the user.{/ts}
 {/htxt}
 
+{htxt id="manualdirectdebit_second_instalment_date_behaviour"}
+  <p>
+    {ts}You can specify how you would like the system to calculate the date for the
+    second instalment for memberships paid in monthly instalments. The options
+    are:{/ts}
+  </p>
+  <ol>
+    <li>
+      <b>{ts}Take the second instalment 1 month after the first instalment(Default): {/ts}</b>
+      {ts}
+        Here, the date of the second instalment is relative to the date of the
+        first instalment. If the first instalment is delayed due to the fact that
+        the first instalment payment run date in the first month was missed, the
+        second instalment will be 1 month from that date. All following
+        instalments will be 1 month following the previous. This might be
+        preferable for ensuring that members do not have to pay for multiple
+        instalments in the same month, but it may mean that the final instalment
+        for a membership is taken in the month after the membership has expired,
+        which might be undesirable from your organisations perspective.
+      {/ts}
+    </li>
+    <li>
+      <b>{ts}Take the second instalment in the second month of membership: {/ts}</b>
+      {ts}
+        Here, the system will always take the second instalment in the second
+        month of membership. In some cases this will mean that both the first
+        instalment and the second instalment will be taken in the second month
+        of membership, if for example, the first instalment payment run date in
+        the first month was missed.
+      {/ts}
+    </li>
+  </ol>
+{/htxt}
+
 {htxt id="inactivity_code-title"}
   {ts}Mandates with inactive codes will not be selectable when
 creating a new Direct Debit contribution/ payment plan.
 Mandates and contributions that link to mandates with these
 codes will not be included in the batch.{/ts}
 {/htxt}
-
