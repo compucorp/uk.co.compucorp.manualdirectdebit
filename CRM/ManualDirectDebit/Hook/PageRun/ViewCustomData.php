@@ -66,6 +66,9 @@ class CRM_ManualDirectDebit_Hook_PageRun_ViewCustomData {
    * @throws \CRM_Core_Exception
    */
   private function addEditAndDeleteButtons() {
+    $groupId = $this->page->_groupId;
+    $this->page->assign('groupId', $groupId);
+
     CRM_Core_Resources::singleton()
       ->addScriptFile('uk.co.compucorp.manualdirectdebit', 'js/mandateEdit.js');
 
