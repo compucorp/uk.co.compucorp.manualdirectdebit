@@ -122,7 +122,7 @@ class CRM_ManualDirectDebit_Hook_Custom_Contribution_ContributionDataGenerator {
       'options' => ['limit' => 1, 'sort' => 'contribution_recur_id DESC'],
     ])['values'][0];
 
-    $receiveDateCalculator = new CRM_MembershipExtras_Service_InstallmentReceiveDateCalculator($contributionRecur);
+    $receiveDateCalculator = new CRM_MembershipExtras_Service_InstalmentReceiveDateCalculator($contributionRecur);
     $nextContributionIndex = 2;
     $this->nextContributionDate = $receiveDateCalculator->calculate($nextContributionIndex);
   }
