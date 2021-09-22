@@ -280,15 +280,12 @@ function _manualdirectdebit_getContactType($contactId) {
  */
 function manualdirectdebit_civicrm_custom($op, $groupID, $entityID, &$params) {
   if (CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isDirectDebitCustomGroup($groupID)) {
-    if ($op == 'create') {
+    if (in_array($op, ['create', 'edit', 'update'])) {
       $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_DataGenerator($entityID, $params);
-      $mandateDataGenerator->runDataGeneration();
+      $mandateDataGenerator->generateMandateData();
     }
 
     if ($op == 'edit' || $op == 'update') {
-      $mandateDataGenerator = new CRM_ManualDirectDebit_Hook_Custom_DataGenerator($entityID, $params);
-      $mandateDataGenerator->generateMandateData();
-
       $mandateStorageManager = new CRM_ManualDirectDebit_Common_MandateStorageManager();
       $cancellationChecker = new CRM_ManualDirectDebit_Hook_Custom_CancellationBatchChecker($entityID, $params, $mandateStorageManager);
       $cancellationChecker->process();
