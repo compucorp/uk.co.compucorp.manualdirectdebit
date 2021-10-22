@@ -38,30 +38,11 @@ class CRM_ManualDirectDebit_Queue_Task_BatchSubmission_PaymentItem {
     CRM_Core_DAO::executeQuery($query);
   }
 
-  /**
-   * Updates Contribution status and calls transition components to update
-   * related entities (like memberships).
-   *
-   * @param int $contributionId
-   */
   private static function recordContributionPayment($contributionId) {
-    $originalStatusID = civicrm_api3('Contribution', 'getvalue', [
-      'return' => 'contribution_status_id',
-      'id' => $contributionId,
-    ]);
-
-    $result = civicrm_api3('Contribution', 'create', [
+    civicrm_api3('Contribution', 'create', [
       'id' => $contributionId,
       'contribution_status_id' => 'Completed',
       'payment_instrument_id' => 'direct_debit',
-    ]);
-    $contribution = array_shift($result['values']);
-
-    CRM_Contribute_BAO_Contribution::transitionComponents([
-      'contribution_id' => $contribution['id'],
-      'contribution_status_id' => $contribution['contribution_status_id'],
-      'previous_contribution_status_id' => $originalStatusID,
-      'receive_date' => $contribution['receive_date'],
     ]);
   }
 
