@@ -23,4 +23,7 @@
   <requires>
     <ext>uk.co.compucorp.membershipextras</ext>
   </requires>
+  <urls>
+    <url desc="Documentation">https://github.com/compucorp/uk.co.compucorp.manualdirectdebit/blob/master/README.md</url>
+  </urls>
 </extension>
