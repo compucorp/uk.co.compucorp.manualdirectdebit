@@ -1,5 +1,6 @@
 <?php
 use CRM_ManualDirectDebit_Common_SettingsManager as SettingsManager;
+use CRM_MembershipExtras_Service_InstalmentReceiveDateCalculator as InstalmentReceiveDateCalculator;
 use CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribution as OtherContributionReceiveDateCalculator;
 
 /**
@@ -44,6 +45,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribut
 
     $secondInstalmentReceiveDate = '2020-02-15 00:00:00';
 
+    $this->defaultContributionParams['membership_id'] = $recurringContribution['membership_id'];
     $this->defaultContributionParams['contribution_recur_id'] = $recurringContribution['id'];
     $this->defaultContributionParams['previous_instalment_date'] = $secondInstalmentReceiveDate;
     $this->defaultContributionParams['membership_start_date'] = $membershipStartDate;
@@ -60,6 +62,38 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribut
     $receiveDateCalculator->process();
 
     $this->assertEquals('2020-03-15 00:00:00', $receiveDate);
+  }
+
+  public function  testReceiveDateOfNonDirectDebitPaymentsIsNotAlteredInHook() {
+    $membershipStartDate = '2020-01-31';
+    $firstInstalmentReceiveDate = '2020-01-31 00:00:00';
+    $this->mockSettings($this->defaultDDSettings);
+    $recurringContribution = $this->setupPlan($membershipStartDate, $firstInstalmentReceiveDate);
+
+    $instalmentReceiveDateCalculator = new InstalmentReceiveDateCalculator($recurringContribution);
+    $instalmentReceiveDateCalculator->setStartDate($membershipStartDate);
+
+    $secondInstalmentReceiveDate = $instalmentReceiveDateCalculator->calculate(2);
+    $thirdInstallmentReceiveDate = $instalmentReceiveDateCalculator->calculate(3);
+
+    $this->defaultContributionParams['payment_instrument_id'] = 'test_payment';
+    $this->defaultContributionParams['membership_id'] = $recurringContribution['membership_id'];;
+    $this->defaultContributionParams['contribution_recur_id'] = $recurringContribution['id'];
+    $this->defaultContributionParams['previous_instalment_date'] = $secondInstalmentReceiveDate;
+    $this->defaultContributionParams['membership_start_date'] = $membershipStartDate;
+    $this->defaultContributionParams['frequency_interval'] = $recurringContribution['frequency_interval'];
+    $this->defaultContributionParams['frequency_unit'] = $recurringContribution['frequency_unit'];
+
+    $settingsManager = $this->buildSettingsManagerMock([]);
+
+    $receiveDateCalculator = new OtherContributionReceiveDateCalculator(
+      $thirdInstallmentReceiveDate,
+      $this->defaultContributionParams,
+      $settingsManager
+    );
+    $receiveDateCalculator->process();
+
+    $this->assertEquals($thirdInstallmentReceiveDate, $instalmentReceiveDateCalculator->calculate(3));
   }
 
 }
