@@ -38,10 +38,6 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
       return;
     }
 
-    if (!$this->isDirectDebit() || $this->isRenewal()) {
-      return;
-    }
-
     if (!$this->isForceOnSecondMonth()) {
       return;
     }
@@ -169,11 +165,15 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
    * Only proceses if payment schedule is MONTHLY
    */
   protected function shouldProcess() {
-    if ($this->params['payment_schedule'] == CRM_MembershipExtras_Service_MembershipInstalmentsSchedule::MONTHLY) {
-      return TRUE;
+    if ($this->params['payment_schedule'] != CRM_MembershipExtras_Service_MembershipInstalmentsSchedule::MONTHLY) {
+      return FALSE;
     }
 
-    return FALSE;
+    if (!$this->isDirectDebit() || $this->isRenewal()) {
+      return FALSE;
+    }
+
+    return TRUE;
   }
 
 }
