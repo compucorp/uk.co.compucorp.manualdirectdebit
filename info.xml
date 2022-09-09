@@ -19,6 +19,7 @@
   </comments>
   <civix>
     <namespace>CRM/ManualDirectDebit</namespace>
+    <format>22.05.2</format>
   </civix>
   <requires>
     <ext>uk.co.compucorp.membershipextras</ext>
@@ -26,4 +27,8 @@
   <urls>
     <url desc="Documentation">https://github.com/compucorp/uk.co.compucorp.manualdirectdebit/blob/master/README.md</url>
   </urls>
+  <mixins>
+    <mixin>menu-xml@1.0.0</mixin>
+    <mixin>setting-php@1.0.0</mixin>
+  </mixins>
 </extension>
