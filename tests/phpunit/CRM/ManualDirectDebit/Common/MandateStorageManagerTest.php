@@ -94,7 +94,6 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
   }
 
   /**
-   * @depends testSaveDirectDebitMandate
    * Test assignRecurringContributionMandate function
    * @throws CiviCRM_API3_Exception
    * @throws Exception
@@ -113,7 +112,6 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
   }
 
   /**
-   * @depends testSaveDirectDebitMandate
    * Tests assignContributionMandate function
    * @return void
    * @throws CiviCRM_API3_Exception
@@ -138,7 +136,6 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
   }
 
   /**
-   * @depends testAssignContributionMandate
    * Tests ChangeMandateForContribution function
    * @return void
    * @throws CiviCRM_API3_Exception
@@ -183,7 +180,6 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
   }
 
   /**
-   * @depends testAssignContributionMandate
    * Tests DeleteMandate function
    * @return void
    * @throws CiviCRM_API3_Exception
