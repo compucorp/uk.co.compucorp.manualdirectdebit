@@ -58,21 +58,13 @@ class CRM_ManualDirectDebit_Mail_Task_Mail extends CRM_Activity_BAO_Activity {
       $userID = CRM_Core_Session::getLoggedInContactID();
     }
 
-    list($fromDisplayName, $fromEmail, $fromDoNotEmail) = CRM_Contact_BAO_Contact::getContactDetails($userID);
+    [$fromDisplayName, $fromEmail, $fromDoNotEmail] = CRM_Contact_BAO_Contact::getContactDetails($userID);
     if (!$fromEmail) {
-      return array(count($contactDetails), 0, count($contactDetails));
+      return [count($contactDetails), 0, count($contactDetails)];
     }
     if (!trim($fromDisplayName)) {
       $fromDisplayName = $fromEmail;
     }
-
-    // CRM-4575
-    // token replacement of addressee/email/postal greetings
-    // get the tokens added in subject and message
-    $subjectToken = CRM_Utils_Token::getTokens($subject);
-    $messageToken = CRM_Utils_Token::getTokens($text);
-    $messageToken = array_merge($messageToken, CRM_Utils_Token::getTokens($html));
-    $allTokens = array_merge($messageToken, $subjectToken);
 
     if (!$from) {
       $from = "$fromDisplayName <$fromEmail>";
@@ -92,7 +84,7 @@ class CRM_ManualDirectDebit_Mail_Task_Mail extends CRM_Activity_BAO_Activity {
       $details .= $additionalDetails;
     }
 
-    $activityParams = array(
+    $activityParams = [
       'source_contact_id' => $userID,
       'activity_type_id' => $activityTypeID,
       'activity_date_time' => date('YmdHis'),
@@ -101,7 +93,7 @@ class CRM_ManualDirectDebit_Mail_Task_Mail extends CRM_Activity_BAO_Activity {
       // FIXME: check for name Completed and get ID from that lookup
       'status_id' => 2,
       'campaign_id' => $campaignId,
-    );
+    ];
 
     // CRM-5916: strip [case #…] before saving the activity (if present in subject)
     $activityParams['subject'] = preg_replace('/\[case #([0-9a-h]{7})\] /', '', $activityParams['subject']);
@@ -120,109 +112,49 @@ class CRM_ManualDirectDebit_Mail_Task_Mail extends CRM_Activity_BAO_Activity {
     $attachments = CRM_Core_BAO_File::getEntityFile('civicrm_activity',
       $activity->id
     );
-    $returnProperties = array();
-    if (isset($messageToken['contact'])) {
-      foreach ($messageToken['contact'] as $key => $value) {
-        $returnProperties[$value] = 1;
-      }
-    }
 
-    if (isset($subjectToken['contact'])) {
-      foreach ($subjectToken['contact'] as $key => $value) {
-        if (!isset($returnProperties[$value])) {
-          $returnProperties[$value] = 1;
-        }
-      }
-    }
-
-    // get token details for contacts, call only if tokens are used
-    $details = array();
-    if (!empty($returnProperties) || !empty($tokens) || !empty($allTokens)) {
-      list($details) = CRM_Utils_Token::getTokenDetails(
-        $contactIds,
-        $returnProperties,
-        NULL, NULL, FALSE,
-        $allTokens,
-        'CRM_Activity_BAO_Activity'
-      );
-    }
-
-    // call token hook
-    $tokens = array();
-    CRM_Utils_Hook::tokens($tokens);
-    $categories = array_keys($tokens);
-    $smarty = CRM_Core_Smarty::singleton();
-    $escapeSmarty = TRUE;
-
-    $contributionDetails = array();
+    $contributionDetails = [];
     if (!empty($contributionIds)) {
-      $contributionDetails = CRM_Contribute_BAO_Contribution::replaceContributionTokens(
-        $contributionIds,
-        $subject,
-        $subjectToken,
-        $text,
-        $html,
-        $messageToken,
-        $escapeSmarty
-      );
+      $contributionDetails = \Civi\Api4\Contribution::get(FALSE)
+        ->setSelect(['contact_id'])
+        ->addWhere('id', 'IN', $contributionIds)
+        ->execute()
+        // Only the last contribution per contact is resolved to tokens.
+        ->indexBy('contact_id');
     }
 
-    $sent = $notSent = array();
+    $sent = [];
     foreach ($contactDetails as $values) {
+      $tokenContext = [];
       $contactId = $values['contact_id'];
       $emailAddress = $values['email'];
 
       if (!empty($contributionDetails)) {
-        $subject = $contributionDetails[$contactId]['subject'];
-        $text = $contributionDetails[$contactId]['text'];
-        $html = $contributionDetails[$contactId]['html'];
+        $tokenContext['contributionId'] = $contributionDetails[$contactId]['id'];
       }
 
-      if (!empty($details) && is_array($details["{$contactId}"])) {
-        // unset email from details since it always returns primary email address
-        unset($details["{$contactId}"]['email']);
-        unset($details["{$contactId}"]['email_id']);
-        $values = array_merge($values, $details["{$contactId}"]);
-      }
+      $tokenSubject = $subject;
 
-      $tokenSubject = CRM_Utils_Token::replaceContactTokens($subject, $values, FALSE, $subjectToken, FALSE, $escapeSmarty);
-      $tokenSubject = CRM_Utils_Token::replaceHookTokens($tokenSubject, $values, $categories, FALSE, $escapeSmarty);
-
-      // CRM-4539
-      if ($values['preferred_mail_format'] == 'Text' || $values['preferred_mail_format'] == 'Both') {
-        $tokenText = CRM_Utils_Token::replaceContactTokens($text, $values, FALSE, $messageToken, FALSE, $escapeSmarty);
-        $tokenText = CRM_Utils_Token::replaceHookTokens($tokenText, $values, $categories, FALSE, $escapeSmarty);
-      }
-      else {
-        $tokenText = NULL;
-      }
-
-      if ($values['preferred_mail_format'] == 'HTML' || $values['preferred_mail_format'] == 'Both') {
-        $tokenHtml = CRM_Utils_Token::replaceContactTokens($html, $values, TRUE, $messageToken, FALSE, $escapeSmarty);
-        $tokenHtml = CRM_Utils_Token::replaceHookTokens($tokenHtml, $values, $categories, TRUE, $escapeSmarty);
-      }
-      else {
-        $tokenHtml = NULL;
-      }
-
-      // also add the contact tokens to the template
-      $smarty->assign_by_ref('contact', $values);
-      foreach ($tplParams as $name => $value) {
-        $smarty->assign($name, $value);
-      }
-
-      $tokenSubject = $smarty->fetch("string:$tokenSubject");
-      $tokenText = $smarty->fetch("string:$tokenText");
-      $tokenHtml = $smarty->fetch("string:$tokenHtml");
+      $renderedTemplate = CRM_Core_BAO_MessageTemplate::renderTemplate([
+        'messageTemplate' => [
+          'msg_text' => $text,
+          'msg_html' => $html,
+          'msg_subject' => $tokenSubject,
+        ],
+        'tokenContext' => $tokenContext,
+        'contactId' => $contactId,
+        'disableSmarty' => FALSE,
+        'tplParams' => $tplParams,
+      ]);
 
       $sent = FALSE;
       if (self::sendMessage(
         $from,
         $userID,
         $contactId,
-        $tokenSubject,
-        $tokenText,
-        $tokenHtml,
+        $renderedTemplate['subject'],
+        $renderedTemplate['text'],
+        $renderedTemplate['html'],
         $emailAddress,
         $activity->id,
         $attachments,
@@ -234,7 +166,7 @@ class CRM_ManualDirectDebit_Mail_Task_Mail extends CRM_Activity_BAO_Activity {
       }
     }
 
-    return array($sent, $activity->id);
+    return [$sent, $activity->id];
   }
 
 }
