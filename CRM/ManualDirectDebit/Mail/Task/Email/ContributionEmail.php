@@ -14,6 +14,7 @@ class CRM_ManualDirectDebit_Mail_Task_Email_ContributionEmail extends CRM_Manual
    * @throws \CRM_Core_Exception
    */
   public function submit(&$form, $formValues) {
+    $sent = 0;
     $this->saveMessageTemplate($formValues);
 
     $from = CRM_Utils_Array::value('from_email_address', $formValues);
@@ -78,11 +79,18 @@ class CRM_ManualDirectDebit_Mail_Task_Email_ContributionEmail extends CRM_Manual
     $mailDetails->setAttachments($attachments);
 
     foreach ($formattedContactDetails as $formattedContactDetail) {
-      self::sendEmailsForContact($form, $formValues, $mailDetails, $formattedContactDetail, $errors);
+      $sent += self::sendEmailsForContact($form, $formValues, $mailDetails, $formattedContactDetail, $errors);
     }
 
     if ($errors) {
       CRM_Core_Error::statusBounce(ts('Errors found: %1', [1 => implode('; ', $errors)]));
+    }
+
+    if ($sent > 0) {
+      CRM_Core_Session::setStatus(ts('One message was sent successfully. ', [
+        'plural' => '%count messages were sent successfully. ',
+        'count' => $sent,
+      ]), ts('Message Sent', ['plural' => 'Messages Sent', 'count' => $sent]), 'success');
     }
   }
 
@@ -120,9 +128,13 @@ class CRM_ManualDirectDebit_Mail_Task_Email_ContributionEmail extends CRM_Manual
    * @param \CRM_ManualDirectDebit_Mail_Task_MailDetailsModel $mailDetails
    * @param array $formattedContactDetail
    * @param array $errors
+   *
+   * @return int
+   *   Returns number of sent emails.
    */
   private static function sendEmailsForContact($form, $formValues, MailDetailsModel $mailDetails, $formattedContactDetail, &$errors) {
-    $contributionIds = array();
+    $contributionIds = [];
+    $sent = 0;
     if ($form->getVar('_contributionIds')) {
       $contributionIds = $form->getVar('_contributionIds');
     }
@@ -132,8 +144,10 @@ class CRM_ManualDirectDebit_Mail_Task_Email_ContributionEmail extends CRM_Manual
     $selectedContributionIdsForCurrentContact = self::getSelectedContributionIdsForCurrentContact($contactId, $contributionIds);
     foreach ($selectedContributionIdsForCurrentContact as $contributionId) {
       $mailDetails->setContributionID($contributionId);
-      self::sendEmailForContribution($form, $formValues, $mailDetails, $formattedContactDetail, $errors);
+      $sent += self::sendEmailForContribution($form, $formValues, $mailDetails, $formattedContactDetail, $errors);
     }
+
+    return $sent;
   }
 
   /**
@@ -144,14 +158,18 @@ class CRM_ManualDirectDebit_Mail_Task_Email_ContributionEmail extends CRM_Manual
    * @param \CRM_ManualDirectDebit_Mail_Task_MailDetailsModel $mailDetails
    * @param array $formattedContactDetail
    * @param array $errors
+   *
+   * @return int
+   *   Returns number of sent emails.
    */
   private static function sendEmailForContribution($form, $formValues, MailDetailsModel $mailDetails, $formattedContactDetail, &$errors) {
+    $sent = 0;
     try {
       $dataCollector = new CRM_ManualDirectDebit_Mail_DataCollector_Contribution($mailDetails->getContributionID());
       $tplParams = $dataCollector->retrieve();
       $contactDetail = [$formattedContactDetail];
       $subject = $mailDetails->getSubject();
-      CRM_ManualDirectDebit_Mail_Task_Mail::sendDirectDebitEmail(
+      [$sent, $activityId] = CRM_ManualDirectDebit_Mail_Task_Mail::sendDirectDebitEmail(
         $contactDetail,
         $subject,
         $formValues['text_message'],
@@ -176,6 +194,8 @@ class CRM_ManualDirectDebit_Mail_Task_Email_ContributionEmail extends CRM_Manual
         2 => $e->getMessage(),
       ]);
     }
+
+    return $sent;
   }
 
   /**
