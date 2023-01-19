@@ -59,15 +59,6 @@ class CRM_ManualDirectDebit_Hook_MandateContributionConnector {
   }
 
   /**
-   * Overrides wakeup to prevent creating instance of class,
-   * according to `Singleton` Pattern
-   *
-   * @var int
-   */
-  private function __wakeup() {
-  }
-
-  /**
    * Returns instance of current class, according to `Singleton` Pattern
    *
    * @return \CRM_ManualDirectDebit_Hook_MandateContributionConnector

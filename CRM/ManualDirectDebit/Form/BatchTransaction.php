@@ -204,10 +204,10 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
     if (CRM_Batch_BAO_Batch::checkBatchPermission('close', $this->_values['created_id'])) {
       if (CRM_Batch_BAO_Batch::checkBatchPermission('export', $this->_values['created_id'])) {
         $this->add('submit', 'export_batch', ts('Export Batch'), ['formtarget' => '_blank']);
-        $this->add('submit', 'save_batch', ts('Save'));
+        $this->add('submit', 'save_batch', ts('Save'), []);
         $this->add('submit', 'save_and_export_batch', ts('Save and Export Batch'), ['formtarget' => '_blank']);
-        $this->add('submit', 'submitted', ts('Submit'));
-        $this->add('submit', 'discard', ts('Discard'));
+        $this->add('submit', 'submitted', ts('Submit'), []);
+        $this->add('submit', 'discard', ts('Discard'), []);
       }
     }
 

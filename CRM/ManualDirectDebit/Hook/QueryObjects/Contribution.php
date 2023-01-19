@@ -17,8 +17,8 @@ class CRM_ManualDirectDebit_Hook_QueryObjects_Contribution extends CRM_Contact_B
   /**
    * @inheritDoc
    */
-  public function from($fieldName, $mode, $side) {
-    if (!$this->isContributionSearchForm()) {
+  public static function from($fieldName, $mode, $side) {
+    if (!self::isContributionSearchForm()) {
       return '';
     }
 
@@ -40,8 +40,8 @@ class CRM_ManualDirectDebit_Hook_QueryObjects_Contribution extends CRM_Contact_B
   /**
    * Alters where statement.
    */
-  public function where(&$query) {
-    if (!$this->isContributionSearchForm()) {
+  public static function where(&$query) {
+    if (!self::isContributionSearchForm()) {
       return;
     }
 
@@ -72,7 +72,7 @@ class CRM_ManualDirectDebit_Hook_QueryObjects_Contribution extends CRM_Contact_B
    *
    * @return bool
    */
-  private function isContributionSearchForm() {
+  private static function isContributionSearchForm() {
     if (CRM_Utils_System::currentPath() == 'civicrm/contribute/search') {
       return TRUE;
     }
