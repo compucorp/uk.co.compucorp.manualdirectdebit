@@ -46,7 +46,7 @@ jobs:
       - name: Installing Manual Direct Debit and its dependencies
         working-directory: ${{ env.CIVICRM_EXTENSIONS_DIR }}
         run: |
-          git clone --depth 1 -b MAE-807-PHP8 https://github.com/compucorp/uk.co.compucorp.membershipextras.git
+          git clone --depth 1 https://github.com/compucorp/uk.co.compucorp.membershipextras.git
           cv en uk.co.compucorp.membershipextras uk.co.compucorp.manualdirectdebit
 
       - name: Run phpunit tests
