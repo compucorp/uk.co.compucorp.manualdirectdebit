@@ -25,6 +25,7 @@ class CRM_ManualDirectDebit_Common_CollectionReminderSendFlagManager {
       return civicrm_api3('CustomField', 'getvalue', [
         'return' => 'id',
         'name' => 'is_notification_sent',
+        'custom_group_id' => 'direct_debit_collection_reminder_sendflag',
       ]);
     }
     catch (CRM_Core_Exception $e) {

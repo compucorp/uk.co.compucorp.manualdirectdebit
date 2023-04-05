@@ -24,7 +24,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
    *
    */
   public function assignContributionMandate($contributionId, $mandateID) {
-    $mandateIdCustomFieldId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName("mandate_id");
+    $mandateIdCustomFieldId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName('mandate_id', 'direct_debit_information');
 
     civicrm_api3('Contribution', 'create', [
       'id' => $contributionId,

@@ -206,14 +206,16 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProvider {
   /**
    * Gets id of custom field by name
    *
-   * @param $customFieldName
+   * @param string $customFieldName
+   * @param string $customGroupName
    *
    * @return int
    */
-  public static function getCustomFieldIdByName($customFieldName) {
+  public static function getCustomFieldIdByName($customFieldName, $customGroupName) {
     return civicrm_api3('CustomField', 'getvalue', [
       'return' => "id",
       'name' => $customFieldName,
+      'custom_group_id' => $customGroupName,
     ]);
   }
 
