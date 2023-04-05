@@ -82,7 +82,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomData {
    *  Hides 'DD ref' custom field
    */
   private function hideDdRef() {
-    $customFieldId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName("dd_ref");
+    $customFieldId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName('dd_ref', 'direct_debit_mandate');
     $ddRefElementNameId = $this->form->_groupTree[$this->directDebitMandateId]['fields'][$customFieldId]['element_name'];
     unset($this->form->_groupTree[$this->directDebitMandateId]['fields'][$customFieldId]);
     foreach ($this->form->_required as $requiredFieldsId => $requiredFieldsName) {

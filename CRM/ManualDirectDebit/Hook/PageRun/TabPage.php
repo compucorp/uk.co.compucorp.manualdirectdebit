@@ -37,8 +37,9 @@ class CRM_ManualDirectDebit_Hook_PageRun_TabPage {
    */
   private function isCustomFieldNeedToHide($contributionId) {
     $customFieldId = civicrm_api3('CustomField', 'getvalue', [
-      'return' => "id",
-      'name' => "mandate_id",
+      'return' => 'id',
+      'name' => 'mandate_id',
+      'custom_group_id' => 'direct_debit_information',
     ]);
 
     $mandateId = civicrm_api3('Contribution', 'getvalue', [

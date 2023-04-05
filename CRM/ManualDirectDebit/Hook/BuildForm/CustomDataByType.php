@@ -54,7 +54,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomDataByType {
    *  Hides Direct Debit Information if it`s empty
    */
   private function hideDirectDebitInformationIfEmpty() {
-    $customFieldId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName("mandate_id");
+    $customFieldId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName('mandate_id', 'direct_debit_information');
     $mandateIdValue = $this->customGroupTree[$this->directDebitInformationId]['fields'][$customFieldId]['element_value'];
 
     if (!isset($mandateIdValue) || empty($mandateIdValue)) {

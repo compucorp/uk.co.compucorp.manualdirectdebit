@@ -131,7 +131,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
     $this->assertNotEmpty($contribution['values']);
 
     $mandateIdCustomFieldId =
-      CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName("mandate_id");
+      CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName('mandate_id', 'direct_debit_information');
     $this->assertEquals($contribution['values'][0]['custom_' . $mandateIdCustomFieldId], $mandate->id);
   }
 
@@ -148,7 +148,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
     $fabricatedContribution = $fabricatedContributionWithMandate['contribution'];
 
     $mandateIdCustomFieldId =
-      CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName("mandate_id");
+      CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName('mandate_id', 'direct_debit_information');
 
     $contribution = civicrm_api3('Contribution', 'get', [
       'sequential' => 1,
@@ -192,7 +192,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
     $fabricatedContribution = $fabricatedContributionWithMandate['contribution'];
 
     $mandateIdCustomFieldId =
-      CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName("mandate_id");
+      CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName('mandate_id', 'direct_debit_information');
 
     $contribution = civicrm_api3('Contribution', 'get', [
       'sequential' => 1,

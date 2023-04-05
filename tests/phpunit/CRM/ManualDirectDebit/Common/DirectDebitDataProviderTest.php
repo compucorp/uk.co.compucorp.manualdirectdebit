@@ -15,7 +15,7 @@ class CRM_ManualDirectDebit_Common_DirectDebitDataProviderTest extends BaseHeadl
    * Tests getCustomFieldIdbyName function
    */
   public function testGetCustomFieldIdByName() {
-    $customFieldId = DirectDebitDataProvider::getCustomFieldIdByName('mandate_id');
+    $customFieldId = DirectDebitDataProvider::getCustomFieldIdByName('mandate_id', 'direct_debit_information');
     $this->assertNotNull($customFieldId);
   }
 
