@@ -147,6 +147,42 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base
     $this->createDirectDebitPaymentInstrument();
     $this->createDirectDebitPaymentProcessorType();
     $this->createDirectDebitPaymentProcessor();
+    $this->addDirectDebitToMembershipextrasSupportedPaymentProcessors();
+  }
+
+  /**
+   * Adds option to create instruction cancellation batches and re-orders menu.
+   *
+   * @return bool
+   * @throws \CiviCRM_API3_Exception
+   */
+  public function upgrade_0015() {
+    $this->addDirectDebitToMembershipextrasSupportedPaymentProcessors();
+
+    return TRUE;
+  }
+
+  private function addDirectDebitToMembershipextrasSupportedPaymentProcessors() {
+    $directDebitPaymentProcessors = \Civi\Api4\PaymentProcessor::get()
+      ->addSelect('id')
+      ->addWhere('name', '=', 'Direct Debit')
+      ->addWhere('is_test', 'IN', [FALSE, TRUE])
+      ->execute()
+      ->getArrayCopy();
+    if (empty($directDebitPaymentProcessors)) {
+      return;
+    }
+    $directDebitPaymentProcessorIds = array_column($directDebitPaymentProcessors, 'id');
+
+    $currentSupportedProcessorIds = civicrm_api3('Setting', 'getvalue', [
+      'name' => "membershipextras_paymentplan_supported_payment_processors",
+    ]);
+
+    $supportedPaymentProcessorIds = array_merge($directDebitPaymentProcessorIds, $currentSupportedProcessorIds);
+
+    civicrm_api3('setting', 'create', [
+      'membershipextras_paymentplan_supported_payment_processors' => $supportedPaymentProcessorIds,
+    ]);
   }
 
   /**
