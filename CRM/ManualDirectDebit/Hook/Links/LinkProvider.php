@@ -20,6 +20,10 @@ class CRM_ManualDirectDebit_Hook_Links_LinkProvider {
    * @param $recurringContributionId
    */
   public function alterRecurContributionLinks(&$values, $recurringContributionId) {
+    if (!$this->isAlreadyLinkedToMandate($recurringContributionId)) {
+      return;
+    }
+
     $contactId = CRM_Utils_Request::retrieve('cid', 'Integer');
     $contactType = $this->getContactType($contactId);
 
@@ -35,6 +39,16 @@ class CRM_ManualDirectDebit_Hook_Links_LinkProvider {
     $values['cid'] = $contactId;
     $values['cgcount'] = $this->getCgCount();
     $values['updatedRecId'] = $recurringContributionId;
+  }
+
+  private function isAlreadyLinkedToMandate($recurringContributionId) {
+    CRM_ManualDirectDebit_Common_DirectDebitDataProvider::isPaymentMethodDirectDebit($this->contributionRecurDao->payment_instrument_id);
+    $linkedMandateId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($recurringContributionId);
+    if (empty($linkedMandateId)) {
+      return FALSE;
+    }
+
+    return TRUE;
   }
 
   private function getContactType($contactId) {
