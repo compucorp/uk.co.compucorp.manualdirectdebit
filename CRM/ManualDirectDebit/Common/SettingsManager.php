@@ -25,10 +25,10 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
     ];
 
     $settings['new_instruction_run_dates'] = $this->incrementAllArrayValues(
-      CRM_Utils_Array::value('manualdirectdebit_new_instruction_run_dates', $settingValues)
+      (array) CRM_Utils_Array::value('manualdirectdebit_new_instruction_run_dates', $settingValues)
     );
     $settings['payment_collection_run_dates'] = $this->incrementAllArrayValues(
-      CRM_Utils_Array::value('manualdirectdebit_payment_collection_run_dates', $settingValues)
+      (array) CRM_Utils_Array::value('manualdirectdebit_payment_collection_run_dates', $settingValues)
     );
 
     return $settings;
