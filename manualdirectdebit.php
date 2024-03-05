@@ -83,6 +83,16 @@ function manualdirectdebit_civicrm_permission(&$permissions) {
 }
 
 /**
+ * Implements hook_civicrm_alterAPIPermissions().
+ *
+ */
+function manualdirectdebit_civicrm_alterAPIPermissions($entity, $action, &$params, &$permissions) {
+  if ($entity == 'manual_direct_debit' && $action == 'deletemandate') {
+    $permissions[$entity][$action] = ['administer ManualDirectDebit'];
+  }
+}
+
+/**
  * Implements hook_civicrm_navigationMenu().
  *
  */
@@ -392,7 +402,6 @@ function manualdirectdebit_civicrm_searchTasks($objectName, &$tasks) {
       'result' => FALSE,
     ];
   }
-
 }
 
 function manualdirectdebit_civicrm_container($container) {
