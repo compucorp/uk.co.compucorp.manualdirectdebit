@@ -48,7 +48,7 @@
   {/if}
 
     {if in_array($batchStatus, array('Open', 'Reopened'))  && $action eq 4}
-        <div class="float-right">
+        <div class="float-right" style="width:200px;">
             {$form.discard.html}
             {$form.submitted.html}
         </div>
@@ -157,3 +157,12 @@ function saveRecord(recordID, op, recordBAO, entityID) {
 }
 </script>
 {/literal}
+
+<style>
+  {literal}
+  .crm-button.crm-button-type-submitted.crm-buttonsubmitted.crm-form-xbutton,
+  .crm-button.crm-button-type-discard.crm-buttondiscard.crm-form-xbutton {
+    float: left !important;
+  }
+  {/literal}
+</style>
