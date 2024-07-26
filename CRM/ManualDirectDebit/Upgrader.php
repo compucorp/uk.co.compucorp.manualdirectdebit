@@ -6,7 +6,7 @@ use CRM_ManualDirectDebit_Batch_BatchHandler as BatchHandler;
 /**
  * Collection of upgrade steps.
  */
-class CRM_ManualDirectDebit_Upgrader extends CRM_ManualDirectDebit_Upgrader_Base {
+class CRM_ManualDirectDebit_Upgrader extends CRM_Extension_Upgrader_Base {
 
   /**
    * List of option values
