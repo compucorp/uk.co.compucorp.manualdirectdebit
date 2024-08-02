@@ -28,7 +28,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomDataByType {
 
   public function __construct($form) {
     $this->form = $form;
-    $this->customGroupTree = $form->getVar('_groupTree');
+    $this->customGroupTree = $form->getVar('groupTree');
     $this->directDebitInformationId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getGroupIDByName("direct_debit_information");
   }
 
