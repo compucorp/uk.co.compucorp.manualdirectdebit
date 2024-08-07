@@ -58,7 +58,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomData {
   private function checkIfDirectDebitMandateInGroupTree() {
     $customGroupTree = $this->form->getVar('_groupTree');
 
-    return array_key_exists($this->directDebitMandateId, $customGroupTree);
+    return !empty($customGroupTree) && array_key_exists($this->directDebitMandateId, $customGroupTree);
   }
 
   /**
