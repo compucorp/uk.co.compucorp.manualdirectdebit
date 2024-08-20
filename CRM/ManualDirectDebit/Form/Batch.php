@@ -11,6 +11,13 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
   private $batchType;
 
   /**
+   * Explicitly declare the entity api name.
+   */
+  public function getDefaultEntity() {
+    return 'Batch';
+  }
+
+  /**
    * PreProcess function.
    */
   public function preProcess() {
