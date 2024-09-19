@@ -85,6 +85,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_CustomData {
     $customFieldId = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getCustomFieldIdByName('dd_ref', 'direct_debit_mandate');
     $ddRefElementNameId = $this->form->_groupTree[$this->directDebitMandateId]['fields'][$customFieldId]['element_name'];
     unset($this->form->_groupTree[$this->directDebitMandateId]['fields'][$customFieldId]);
+    $this->form->removeElement($ddRefElementNameId);
     foreach ($this->form->_required as $requiredFieldsId => $requiredFieldsName) {
       if ($requiredFieldsName == $ddRefElementNameId) {
         unset($this->form->_required[$requiredFieldsId]);

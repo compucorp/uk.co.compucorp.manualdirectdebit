@@ -31,14 +31,15 @@ class CRM_ManualDirectDebit_Hook_Links_LinkProvider {
       'name' => ts('Use a new mandate'),
       'url' => 'civicrm/contact/view/cd/edit',
       'title' => 'Use a new mandate',
-      'qs' => 'reset=1&type=' . $contactType . '&groupID=%%groupID%%&entityID=%%cid%%&cgcount=%%cgcount%%&multiRecordDisplay=single&mode=add&updatedRecId=%%updatedRecId%%',
-      'class' => 'no-popup',
+      'qs' => 'reset=1&type=' . $contactType . '&groupID=%%groupID%%&entityID=%%cid%%&cgcount=%%cgcount%%&multiRecordDisplay=single&mode=add&updatedRecId=%%updatedRecId%%&tableId=%%cid%%',
+      'class' => 'popup',
     ];
 
     $values['groupID'] = CRM_ManualDirectDebit_Common_DirectDebitDataProvider::getGroupIDByName("direct_debit_mandate");
     $values['cid'] = $contactId;
     $values['cgcount'] = $this->getCgCount();
     $values['updatedRecId'] = $recurringContributionId;
+    $values['tableId'] = $contactId;
   }
 
   private function isAlreadyLinkedToMandate($recurringContributionId) {
