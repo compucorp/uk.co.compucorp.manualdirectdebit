@@ -13,7 +13,7 @@
               <td class="label">{ts}Mandate ID{/ts}</td>
               <td class="html-adjust positionRelative">
                 <span id="directDebitMandate"></span>
-                <span class="newMandateButton"><a href="#" id="newDirectDebitMandate">{ts}Use a new mandate{/ts}</a></span>
+                <span class="newMandateButton"><a href="#" class="crm-popup" id="newDirectDebitMandate">{ts}Use a new mandate{/ts}</a></span>
             </tr>
             </tbody>
           </table>
