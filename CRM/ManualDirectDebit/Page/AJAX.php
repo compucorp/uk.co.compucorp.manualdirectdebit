@@ -165,7 +165,16 @@ class CRM_ManualDirectDebit_Page_AJAX {
           $updated = CRM_Batch_BAO_EntityBatch::create($params);
         }
         else {
-          $updated = CRM_Batch_BAO_EntityBatch::del($params);
+          $record = \Civi\Api4\EntityBatch::get(FALSE)
+            ->addSelect('id')
+            ->addWhere('entity_id', '=', $value)
+            ->addWhere('entity_table', '=', $entityTable)
+            ->addWhere('batch_id', '=', $entityID)
+            ->execute()
+            ->first();
+          if ($record['id']) {
+            $updated = CRM_Batch_BAO_EntityBatch::del(['id' => $record['id']]);
+          }
         }
       }
     }
