@@ -58,7 +58,7 @@ class CRM_ManualDirectDebit_Mail_Task_Email_MembershipEmail extends CRM_ManualDi
     // CRM-5916: prepend case id hash to CiviCase-originating emails’ subjects
     if (isset($form->_caseId) && is_numeric($form->_caseId)) {
       $hash = substr(sha1(CIVICRM_SITE_KEY . $form->_caseId), 0, 7);
-      $subject = "[case #$hash] $subject";
+      $subject = "[#$hash] $subject";
     }
 
     $attachments = array();

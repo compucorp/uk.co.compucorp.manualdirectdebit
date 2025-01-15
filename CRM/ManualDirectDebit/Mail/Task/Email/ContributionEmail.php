@@ -38,7 +38,7 @@ class CRM_ManualDirectDebit_Mail_Task_Email_ContributionEmail extends CRM_Manual
     $subject = $formValues['subject'];
     if (isset($form->_caseId) && is_numeric($form->_caseId)) {
       $hash = substr(sha1(CIVICRM_SITE_KEY . $form->_caseId), 0, 7);
-      $subject = "[case #$hash] $subject";
+      $subject = "[#$hash] $subject";
     }
 
     $attachments = array();
