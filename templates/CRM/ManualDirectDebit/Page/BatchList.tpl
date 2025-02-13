@@ -5,7 +5,7 @@
     <form id="searchForm">
         <div class="float-left">
           <label for="type_id">{ts}Batch Type:{/ts}</label>
-          {html_options name="type_id" id="type_id" class="crm-select2 crm-form-select" options=$batchTypes selected=$type_id}
+          {html_options name="type_id" id="type_id" class="crm-form-select" options=$batchTypes selected=$type_id}
         </div>
         <div class="batch-create-date-fields float-right">
           <label for="created_date_from">{ts}From:{/ts}</label>
