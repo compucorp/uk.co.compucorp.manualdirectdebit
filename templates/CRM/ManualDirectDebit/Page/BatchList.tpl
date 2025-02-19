@@ -142,8 +142,7 @@
     CRM.$.post(postUrl, {
         records: [recordID],
         recordBAO: 'CRM_Batch_BAO_Batch',
-        op: op,
-        key: {/literal}"{crmKey name='civicrm/ajax/ar'}"{literal}
+        op: op
       }, function (html) {
         //this is custom status set when record update success.
         if (html.status == 'record-updated-success') {
