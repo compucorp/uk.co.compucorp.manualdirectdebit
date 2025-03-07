@@ -5,7 +5,7 @@
     <form id="searchForm">
         <div class="float-left">
           <label for="type_id">{ts}Batch Type:{/ts}</label>
-          {html_options name="type_id" id="type_id" class="crm-select2 crm-form-select" options=$batchTypes selected=$type_id}
+          {html_options name="type_id" id="type_id" class="crm-form-select" options=$batchTypes selected=$type_id}
         </div>
         <div class="batch-create-date-fields float-right">
           <label for="created_date_from">{ts}From:{/ts}</label>
@@ -142,8 +142,7 @@
     CRM.$.post(postUrl, {
         records: [recordID],
         recordBAO: 'CRM_Batch_BAO_Batch',
-        op: op,
-        key: {/literal}"{crmKey name='civicrm/ajax/ar'}"{literal}
+        op: op
       }, function (html) {
         //this is custom status set when record update success.
         if (html.status == 'record-updated-success') {

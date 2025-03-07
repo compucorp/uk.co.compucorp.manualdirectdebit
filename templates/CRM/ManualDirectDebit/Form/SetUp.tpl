@@ -1,4 +1,4 @@
-{crmStyle ext=uk.co.compucorp.manualdirectdebit file=css/setUp.css}
+{crmStyle ext='uk.co.compucorp.manualdirectdebit' file='css/setUp.css'}
 <div class="crm-block crm-direct-debit-set-up-form-block">
   {if $errorMessage}
     <div class="messages status no-popup">
@@ -69,7 +69,7 @@
         <div class="crm-block crm-direct-debit-set-up-guarantee">
           <div class="dd-guarantee">
             <h5><b>{ts}Direct Debit Guarantee{/ts}</b></h5>
-            <img class="dd-logo" src="{crmResURL ext=uk.co.compucorp.manualdirectdebit file=Images/debit.png}"
+            <img class="dd-logo" src="{crmResURL ext='uk.co.compucorp.manualdirectdebit' file='Images/debit.png'}"
                  alt="Direct Debit"/>
           </div>
           <div class="clear"></div>
