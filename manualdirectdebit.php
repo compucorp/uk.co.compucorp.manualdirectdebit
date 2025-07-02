@@ -38,11 +38,14 @@ function manualdirectdebit_civicrm_enable() {
  */
 function manualdirectdebit_civicrm_permission(&$permissions) {
   $permissionsPrefix = 'CiviCRM : ';
-  $permissions['can manage direct debit batches'] = $permissionsPrefix . ts('Can manage Direct Debit Batches');
+  $permissions['can manage direct debit batches'] = [
+    'label' => $permissionsPrefix . ts('Can manage Direct Debit Batches'),
+    'description' => $permissionsPrefix . ts('Can manage Direct Debit Batches'),
+  ];
 
   $permissions['administer ManualDirectDebit'] = [
-    E::ts('MembershipExtras: administer Manual Direct Debit'),
-    E::ts('Perform all Manual Direct Debit administration tasks in CiviCRM'),
+    'label' => E::ts('MembershipExtras: administer Manual Direct Debit'),
+    'description' => E::ts('Perform all Manual Direct Debit administration tasks in CiviCRM'),
   ];
 }
 
