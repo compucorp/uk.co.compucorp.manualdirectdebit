@@ -37,19 +37,21 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Membership {
     $directDebitPaymentInstrumentId = DirectDebitDataProvider::getDirectDebitPaymentInstrumentId();
     $this->form->assign('directDebitPaymentInstrumentId', $directDebitPaymentInstrumentId);
 
-    $pendingPaymentStatusID = $this->getPendingPaymentStatusID();
+    $pendingPaymentStatusID = $this->getPaymentStatusID('Pending');
+    $completedPaymentStatusID = $this->getPaymentStatusID('Completed');
     $this->form->assign('pendingPaymentStatusID', $pendingPaymentStatusID);
+    $this->form->assign('completedPaymentStatusID', $completedPaymentStatusID);
 
     CRM_Core_Region::instance('page-body')->add([
       'template' => "{$this->templatesPath}/CRM/ManualDirectDebit/Form/Membership/DDPaymentMethodWatcher.tpl",
     ]);
   }
 
-  private function getPendingPaymentStatusID() {
+  private function getPaymentStatusID(string $status) {
     return civicrm_api3('OptionValue', 'getvalue', [
       'return' => 'value',
       'option_group_id' => 'contribution_status',
-      'name' => 'Pending',
+      'name' => $status,
     ]);
   }
 
