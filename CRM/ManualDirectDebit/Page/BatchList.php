@@ -292,7 +292,7 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
 
     $pagerParameters['total'] = $this->getBatchCount($batchSearchParameters);
     $this->_pager = new CRM_Utils_Pager($pagerParameters);
-    $this->assign_by_ref('pager', $this->_pager);
+    $this->assign('pager', $this->_pager);
   }
 
   /**
