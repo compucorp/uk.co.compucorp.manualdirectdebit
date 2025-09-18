@@ -14,7 +14,7 @@ CRM.$('document').ready(function () {
         var editMandateURL = getUrlForUpdatingCurrentMandate(cgCount, mandateData.groupID, mandateData.contactId, mandateData.valueID);
         var editButtonHTML =
           '<a href="'+ editMandateURL +'" class="button edit" id="edit_direct_debit_mandate_' + cgCount + '" title="Edit Direct Debit Mandate">' +
-          '  <span><i class="crm-i fa-pencil"></i> Edit </span>' +
+          '  <span><i class="crm-i fa-pencil" role="img" aria-hidden="true"></i> Edit </span>' +
           '</a>';
 
         CRM.$(editButtonHTML).insertBefore(CRM.$(this));
