@@ -70,7 +70,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_Payment {
    */
   private function addMandateSelectionField() {
     $this->form->assign('paymentTypeLabel', ts('Direct Debit Mandate'));
-    $templateVars = $this->form->get_template_vars();
+    $templateVars = $this->form->getTemplateVars();
 
     $paymentFields = $templateVars['paymentFields'];
     $paymentFields[] = 'mandate_id';
