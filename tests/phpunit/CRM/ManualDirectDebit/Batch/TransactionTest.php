@@ -69,7 +69,7 @@ class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
   /**
    * Prepare Membership Type
    *
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function setUpMembershipType() {
     $this->directDebitPaymentInstrumentId = $this->getDirectDebitPaymentInstrumentId();
@@ -96,7 +96,7 @@ class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
    * Obtains value for the 'Payment' batch type option value.
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function getPaymentBatchTypeId() {
     return civicrm_api3('OptionValue', 'getvalue', [
@@ -110,7 +110,7 @@ class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
    * Obtains value for the 'Payment' batch type option value.
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function getRecurringContributionDDCode() {
     return civicrm_api3('OptionValue', 'getvalue', [
@@ -124,7 +124,7 @@ class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
    * Obtains value for the 'Payment' batch type option value.
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function getActiveDDCodes() {
     $result = civicrm_api3('OptionValue', 'get', [
@@ -144,7 +144,7 @@ class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
    * Obtains value for the 'Pending' contribution status option value.
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function getPendingContributionStatusValue() {
     return civicrm_api3('OptionValue', 'getvalue', [
@@ -158,7 +158,7 @@ class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
    * Obtains value for direct debit payment instrument option value.
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function getDirectDebitPaymentInstrumentId() {
     return civicrm_api3('OptionValue', 'getvalue', [
@@ -172,7 +172,7 @@ class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
    * Obtains value for direct debit payment instrument option value.
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function getMemberDuesFinancialTypeId() {
     return civicrm_api3('FinancialType', 'getvalue', [
@@ -185,7 +185,7 @@ class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
    * create tag
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function createTag($params) {
     return civicrm_api3('Tag', 'create', [
@@ -197,7 +197,7 @@ class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
    * Add tag to a contact
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function addTagToContact($params) {
     return civicrm_api3('EntityTag', 'create', [
@@ -210,7 +210,7 @@ class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
    * create group
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function createGroup($params) {
     return civicrm_api3('Group', 'create', [
@@ -223,7 +223,7 @@ class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
    * Add Group to a contact
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function addContactToGroup($params) {
     return civicrm_api3('GroupContact', 'create', [
@@ -238,7 +238,7 @@ class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
    * @param array $params
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function createPaymentPlanOrder($params) {
     $paymentPlanMembershipOrder = new CRM_MembershipExtras_Test_Entity_PaymentPlanMembershipOrder();
@@ -313,7 +313,7 @@ class CRM_ManualDirectDebit_Batch_TransactionTest extends BaseHeadlessTest {
    * Create payment plan order
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function createContactAndMandate($params = []) {
     $contact = ContactFabricator::fabricate($params);

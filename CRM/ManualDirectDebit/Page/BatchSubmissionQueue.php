@@ -81,7 +81,7 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
    * Obtains list of non-cancelled mandates for the batch.
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function getNonCancelledMandates() {
     $result = civicrm_api3('EntityBatch', 'get', [

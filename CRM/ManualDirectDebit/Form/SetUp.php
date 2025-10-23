@@ -26,7 +26,7 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
   }
 
   /**
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    */
   public function buildQuickForm() {
     parent::buildQuickForm();
@@ -91,7 +91,7 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
   /**
    * @param $contributionId
    * @return mixed
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    */
   private function getRecurringContribution($contributionId) {
     return civicrm_api3('Contribution', 'getsingle', [
@@ -103,7 +103,7 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
   /**
    * @param $recurringContribution
    * @param $values
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    */
   private function updateRecurringContribution($recurringContribution) {
     $paymentDates = $this->getPaymentDates();
@@ -130,7 +130,7 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
   /**
    * @param $values
    * @return CRM_Core_DAO|object
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    */
   private function createDirectDebitMandate($values) {
     $defaultDDCode = civicrm_api3('OptionValue', 'get', [
@@ -226,7 +226,7 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
 
   /**
    * @return array
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    */
   private function getPaymentDates() {
     $settingsManager = new CRM_ManualDirectDebit_Common_SettingsManager();
@@ -239,7 +239,7 @@ class CRM_ManualDirectDebit_Form_SetUp extends CRM_Core_Form {
 
   /**
    * @return array|mixed
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    */
   private function getContribution() {
     $contribution = civicrm_api3('Contribution', 'get', [

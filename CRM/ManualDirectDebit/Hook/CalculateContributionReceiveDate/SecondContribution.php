@@ -21,7 +21,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
    * @param \CRM_ManualDirectDebit_Common_SettingsManager $settingsManager
    *
    * @throws \CRM_Extension_Exception
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   public function __construct(&$receiveDate, array $params, SettingsManager $settingsManager) {
 
@@ -103,7 +103,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_SecondContribu
   /**
    * Forces second instalment to have the first instalment's receive date.
    *
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    * @throws \Exception
    */
   private function forceSecondInstalmentOnSecondPeriod() {

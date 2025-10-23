@@ -84,7 +84,7 @@ class CRM_ManualDirectDebit_Hook_ValidateForm_MandateValidator {
     try {
       CRM_ManualDirectDebit_Common_SettingsManager::getMinimumDayForFirstPayment();
     }
-    catch (CiviCRM_API3_Exception $error) {
+    catch (CRM_Core_Exception $error) {
       $currentError = $this->form->getVar('_errors');
       $currentError[] = ['directDebitMandate' => "Please, configure minimum days to first payment"];
       $this->form->setVar('_errors', $currentError);

@@ -24,7 +24,7 @@ class CRM_ManualDirectDebit_Mail_DataCollector_Mandate extends CRM_ManualDirectD
   /**
    * Sets contribution id
    *
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   protected function setContributionId() {
     $contributionId = $this->getContributionByMandate();
@@ -32,7 +32,7 @@ class CRM_ManualDirectDebit_Mail_DataCollector_Mandate extends CRM_ManualDirectD
       $this->contributionId = $contributionId;
     }
     else {
-      throw new CiviCRM_API3_Exception("Can't find contribution id by mandate id", 'dd_1');
+      throw new CRM_Core_Exception("Can't find contribution id by mandate id", 'dd_1');
     }
   }
 

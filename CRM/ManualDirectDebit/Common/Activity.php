@@ -32,7 +32,7 @@ class CRM_ManualDirectDebit_Common_Activity {
     try {
       $activity = civicrm_api3('Activity', 'create', $activityParams);
     }
-    catch (CiviCRM_API3_Exception $e) {
+    catch (CRM_Core_Exception $e) {
       return FALSE;
     }
 
