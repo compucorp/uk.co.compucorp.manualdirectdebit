@@ -301,7 +301,7 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
    * @param array $batchSearchParameters
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function getBatchCount($batchSearchParameters) {
     $apiParams = CRM_Batch_BAO_Batch::whereClause($batchSearchParameters);

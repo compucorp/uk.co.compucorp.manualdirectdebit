@@ -30,7 +30,7 @@ class CRM_ManualDirectDebit_Test_Fabricator_Batch extends BaseFabricator {
    * @param array $params
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   public static function fabricate(array $params = []) {
     $params = array_merge(static::$defaultParams, $params);

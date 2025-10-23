@@ -34,7 +34,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
 
   /**
    * setUp test
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    */
   public function setUp() {
     $this->contact = ContactFabricator::fabricate();
@@ -76,7 +76,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
 
   /**
    * Test assignRecurringContributionMandate function
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    * @throws Exception
    */
   public function testSaveDirectDebitMandate() {
@@ -95,7 +95,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
 
   /**
    * Test assignRecurringContributionMandate function
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    * @throws Exception
    */
   public function testAssignRecurringContributionMandate() {
@@ -114,7 +114,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
   /**
    * Tests assignContributionMandate function
    * @return void
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    * @throws Exception
    */
   public function testAssignContributionMandate() {
@@ -138,7 +138,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
   /**
    * Tests ChangeMandateForContribution function
    * @return void
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    * @throws Exception
    */
   public function testChangeMandateForContribution() {
@@ -182,7 +182,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManagerTest extends BaseHeadles
   /**
    * Tests DeleteMandate function
    * @return void
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    * @throws Exception
    */
   public function testDeleteMandate() {

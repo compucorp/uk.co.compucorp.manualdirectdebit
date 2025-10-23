@@ -44,7 +44,7 @@ abstract class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_Base 
    * @param \CRM_ManualDirectDebit_Common_SettingsManager $settingsManager
    *
    * @throws \CRM_Extension_Exception
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   public function __construct(&$receiveDate, $params, SettingsManager $settingsManager) {
     $this->receiveDate =& $receiveDate;
@@ -58,7 +58,7 @@ abstract class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_Base 
    *
    * @return mixed
    * @throws \CRM_Extension_Exception
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function getDDPaymentMethod() {
     $result = civicrm_api3('OptionValue', 'get', [
@@ -96,7 +96,7 @@ abstract class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_Base 
    * Obtains recurrring contribution used for the payment plan.
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   protected function getRecurringContribution() {
     $result = civicrm_api3('ContributionRecur', 'get', [
