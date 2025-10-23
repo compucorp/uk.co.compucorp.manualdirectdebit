@@ -236,7 +236,7 @@ class CRM_ManualDirectDebit_Form_Mandate_Create extends CRM_Core_Form {
     try {
       $minimumDaysToFirstPayment = CRM_ManualDirectDebit_Common_SettingsManager::getMinimumDayForFirstPayment();
     }
-    catch (CiviCRM_API3_Exception $error) {
+    catch (CRM_Core_Exception $error) {
       $minimumDaysToFirstPayment = 0;
     }
 

@@ -44,7 +44,7 @@ class CRM_ManualDirectDebit_Hook_Custom_CancellationBatchChecker {
    * Processes the contact to check for mandates in cancellation batches with
    * stuats different to '0C'.
    *
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   public function process() {
     $mandates = $this->getMandates();
@@ -68,7 +68,7 @@ class CRM_ManualDirectDebit_Hook_Custom_CancellationBatchChecker {
    *
    * @param array $mandate
    *
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function checkMandate($mandate) {
     if ($this->isCancelledMandate($mandate)) {
@@ -103,7 +103,7 @@ class CRM_ManualDirectDebit_Hook_Custom_CancellationBatchChecker {
    * Obtains list of open cancellation batches.
    *
    * @return array|mixed
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function getPendingCancellationBatches() {
     $result = civicrm_api3('Batch', 'get', [
@@ -126,7 +126,7 @@ class CRM_ManualDirectDebit_Hook_Custom_CancellationBatchChecker {
    * @param array $batch
    *
    * @return int
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function getPendingCancellationBatchItemID($mandate, $batch) {
     $result = civicrm_api3('EntityBatch', 'get', [
@@ -148,7 +148,7 @@ class CRM_ManualDirectDebit_Hook_Custom_CancellationBatchChecker {
    *
    * @param int $batchItemID
    *
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function removeBatchItem($batchItemID) {
     civicrm_api3('EntityBatch', 'delete', [

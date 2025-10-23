@@ -153,7 +153,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_Extension_Upgrader_Base {
    * Adds option to create instruction cancellation batches and re-orders menu.
    *
    * @return bool
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   public function upgrade_0014() {
     $this->addOptionValue([
@@ -179,7 +179,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_Extension_Upgrader_Base {
    *
    * @param array $optionValueParams
    *
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function addOptionValue($optionValueParams) {
     $optionValue = civicrm_api3('OptionValue', 'get', [
@@ -363,7 +363,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_Extension_Upgrader_Base {
 
       return TRUE;
     }
-    catch (CiviCRM_API3_Exception $e) {
+    catch (CRM_Core_Exception $e) {
       return FALSE;
     }
   }
@@ -386,7 +386,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_Extension_Upgrader_Base {
 
       return TRUE;
     }
-    catch (CiviCRM_API3_Exception $e) {
+    catch (CRM_Core_Exception $e) {
       return FALSE;
     }
   }
@@ -456,7 +456,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_Extension_Upgrader_Base {
   /**
    * Deletes 'CiviCRM Direct Debit' message template
    *
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function deleteMessageTemplates() {
     $templates = CRM_ManualDirectDebit_Common_MessageTemplate::getDefaultDirectDebitTemplates();

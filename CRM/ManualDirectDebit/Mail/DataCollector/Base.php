@@ -57,7 +57,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
    * @return array
    *
    * @throws \CRM_Core_Exception
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   public function retrieve() {
     $this->setShortDateFormat();
@@ -121,7 +121,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
         'id' => $this->contributionData['contact_id'],
       ]);
     }
-    catch (CiviCRM_API3_Exception $e) {
+    catch (CRM_Core_Exception $e) {
       return;
     }
   }
@@ -371,7 +371,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
    * Obtains data for the membership payment plan.
    *
    * @throws \CRM_Core_Exception
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function collectPaymentPlanMembershipsData() {
     if (empty($this->tplParams['orderLineItems'])) {

@@ -16,7 +16,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribut
    * @param \CRM_ManualDirectDebit_Common_SettingsManager $settingsManager
    *
    * @throws \CRM_Extension_Exception
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   public function __construct(&$receiveDate, array $params, SettingsManager $settingsManager) {
 
@@ -26,7 +26,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribut
   /**
    * @inheritDoc
    *
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    * @throws \Exception
    */
   public function process() {

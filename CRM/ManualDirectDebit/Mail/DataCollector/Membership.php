@@ -30,7 +30,7 @@ class CRM_ManualDirectDebit_Mail_DataCollector_Membership extends CRM_ManualDire
       $this->contributionId = $contributionId;
     }
     else {
-      throw new CiviCRM_API3_Exception("Can't find contribution id by membership id", 'dd_2');
+      throw new CRM_Core_Exception("Can't find contribution id by membership id", 'dd_2');
     }
   }
 

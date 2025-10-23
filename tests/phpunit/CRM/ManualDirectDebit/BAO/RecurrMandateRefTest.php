@@ -25,7 +25,7 @@ class CRM_ManualDirectDebit_BAO_RecurrMandateRefTest extends BaseHeadlessTest {
 
   /**
    * Setup test
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    */
   public function setUp() {
     //Fabricate default settings

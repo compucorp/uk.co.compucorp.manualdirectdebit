@@ -77,7 +77,7 @@ class CRM_ManualDirectDebit_Common_User {
 
       return (int) $contactId;
     }
-    catch (CiviCRM_API3_Exception $e) {
+    catch (CRM_Core_Exception $e) {
       return FALSE;
     }
   }

@@ -30,7 +30,7 @@ class CRM_ManualDirectDebit_Mail_DataCollector_RecurringContribution extends CRM
       $this->contributionId = $contributionId;
     }
     else {
-      throw new CiviCRM_API3_Exception("Can't find contribution id by recurring contribution id", 'dd_3');
+      throw new CRM_Core_Exception("Can't find contribution id by recurring contribution id", 'dd_3');
     }
   }
 

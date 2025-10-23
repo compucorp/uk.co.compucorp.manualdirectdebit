@@ -11,7 +11,7 @@ trait CRM_ManualDirectDebit_Test_Helper_PaymentPlanTrait {
    * @param string $firstInstalmentReceiveDate
    *
    * @return mixed
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   private function setupPlan($membershipStartDate, $firstInstalmentReceiveDate) {
     $testMembershipType = MembershipTypeFabricator::fabricate(
