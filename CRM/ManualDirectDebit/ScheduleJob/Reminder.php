@@ -27,7 +27,7 @@ class CRM_ManualDirectDebit_ScheduleJob_Reminder {
    * @return array
    */
   public function run() {
-    $this->setLog(ts(""));
+    $this->setLog("");
     $targetContributionDataList = CRM_ManualDirectDebit_ScheduleJob_TargetContribution::retrieve();
 
     if (empty($targetContributionDataList)) {
@@ -56,7 +56,7 @@ class CRM_ManualDirectDebit_ScheduleJob_Reminder {
         "Could not send email for contribution with id = %1. Related contact doesn't have an e-mail or has the 'do not send e-mail' flag set.",
         [1 => $targetContributionData['contributionId']]
       ));
-      $this->setLog(ts(""));
+      $this->setLog("");
 
       return;
     }
@@ -75,7 +75,7 @@ class CRM_ManualDirectDebit_ScheduleJob_Reminder {
       ]));
     }
 
-    $this->setLog(ts(""));
+    $this->setLog("");
   }
 
   /**
