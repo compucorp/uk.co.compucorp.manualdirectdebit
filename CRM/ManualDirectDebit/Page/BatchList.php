@@ -300,17 +300,19 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
    *
    * @param array $batchSearchParameters
    *
-   * @return array
+   * @return int
    * @throws \CRM_Core_Exception
    */
   private function getBatchCount($batchSearchParameters) {
-    $apiParams = CRM_Batch_BAO_Batch::whereClause($batchSearchParameters);
+    $tempParams = $batchSearchParameters;
+    unset($tempParams['created_date']);
+    $apiParams = CRM_Batch_BAO_Batch::whereClause($tempParams);
 
     if (isset($batchSearchParameters['created_date'])) {
       $apiParams['created_date'] = $batchSearchParameters['created_date'];
     }
 
-    return civicrm_api3('Batch', 'getCount', $batchSearchParameters);
+    return civicrm_api3('Batch', 'getCount', $apiParams);
   }
 
   /**
