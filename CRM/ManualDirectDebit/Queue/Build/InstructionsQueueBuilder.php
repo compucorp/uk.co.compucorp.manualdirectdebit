@@ -3,6 +3,8 @@
 class CRM_ManualDirectDebit_Queue_Build_InstructionsQueueBuilder extends CRM_ManualDirectDebit_Queue_Build_BaseBuilder {
 
   public function buildQueue() {
+    \Civi::cache('metadata')->clear();
+
     $rows = civicrm_api3('EntityBatch', 'get', [
       'return' => ['entity_id'],
       'options' => ['limit' => 0],

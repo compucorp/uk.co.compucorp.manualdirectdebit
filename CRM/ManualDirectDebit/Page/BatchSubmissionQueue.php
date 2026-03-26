@@ -84,6 +84,8 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
    * @throws \CRM_Core_Exception
    */
   private function getNonCancelledMandates() {
+    \Civi::cache('metadata')->clear();
+
     $result = civicrm_api3('EntityBatch', 'get', [
       'sequential' => 1,
       'batch_id' => $this->batchId,

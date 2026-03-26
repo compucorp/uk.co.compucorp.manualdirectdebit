@@ -75,6 +75,7 @@ class CRM_ManualDirectDebit_Hook_Custom_CancellationBatchChecker {
       return;
     }
 
+    \Civi::cache('metadata')->clear();
     $pendingCancellationBatches = $this->getPendingCancellationBatches();
     foreach ($pendingCancellationBatches as $batch) {
       $batchItemID = $this->getPendingCancellationBatchItemID($mandate, $batch);
