@@ -211,7 +211,7 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
       }
     }
 
-    $this->_group = CRM_Core_PseudoConstant::nestedGroup();
+    $this->_group = CRM_Core_PseudoConstant::nestedGroup(TRUE, NULL, TRUE, 'plain');
 
     CRM_Contribute_BAO_Query::buildSearchForm($this);
     $this->addElement('checkbox', 'toggleSelects', NULL, NULL);
