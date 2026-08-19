@@ -76,4 +76,72 @@ test.describe('Print Direct Debit Letters', () => {
     await civi.expectActivityOfType(page, member.contactId, 'Print PDF Letter');
     civi.expectNoServerErrors(serverErrors);
   });
+
+  // A member with no contribution has nothing to bill, so no letter can be
+  // built for them. The run must still produce the other letters, and must not
+  // record a letter against the member who did not get one.
+  test('records the letter only against the members it could generate one for', async ({ page }) => {
+    const posted = seed.members.letters;
+    const skipped = seed.members.noContribution;
+    const templateTitle = seed.templateTitles.signUp;
+    const serverErrors = civi.watchForServerErrors(page);
+
+    await page.goto('/civicrm/member/search?reset=1', { waitUntil: 'domcontentloaded' });
+    await civi.waitForCiviJs(page);
+
+    // Every seeded member shares this first name, so one search returns both.
+    await page.fill('input[name="sort_name"]', 'Ddtest');
+    await civi.runSearch(page);
+
+    await civi.selectResultRow(page, posted.lastName);
+    await civi.selectResultRow(page, skipped.lastName);
+    await civi.runTask(page, 'Print Direct Debit Letters');
+    await civi.useTemplate(page, templateTitle);
+
+    const downloadStarted = page.waitForEvent('download', { timeout: 120000 });
+    await civi.submitTaskForm(page, /download document|make pdf|download/i);
+    const download = await downloadStarted;
+
+    const file = path.join(os.tmpdir(), 'mdd-e2e-letter-mixed.pdf');
+    await download.saveAs(file);
+    const pdf = fs.readFileSync(file);
+
+    expect(pdf.subarray(0, 5).toString(), 'the other letters should still be produced').toBe('%PDF-');
+
+    await civi.expectActivityOfType(page, posted.contactId, 'Print PDF Letter');
+    await civi.expectNoActivityOfType(page, skipped.contactId, 'Print PDF Letter');
+    civi.expectNoServerErrors(serverErrors);
+  });
+
+  // When no letter at all can be built, the user needs telling. An empty
+  // document would otherwise download as a blank one-page PDF.
+  test('says so when it cannot generate any letter at all', async ({ page }) => {
+    const skipped = seed.members.noContribution;
+    const templateTitle = seed.templateTitles.signUp;
+    const serverErrors = civi.watchForServerErrors(page);
+
+    await page.goto('/civicrm/member/search?reset=1', { waitUntil: 'domcontentloaded' });
+    await civi.waitForCiviJs(page);
+
+    await page.fill('input[name="sort_name"]', skipped.lastName);
+    await civi.runSearch(page);
+
+    await civi.selectResultRow(page, skipped.lastName);
+    await civi.runTask(page, 'Print Direct Debit Letters');
+    await civi.useTemplate(page, templateTitle);
+
+    let downloaded = false;
+    page.on('download', () => { downloaded = true; });
+    await civi.submitTaskForm(page, /download document|make pdf|download/i);
+    await page.waitForLoadState('domcontentloaded');
+
+    await expect(
+      page.locator('body'),
+      'the user should be told no letters could be generated'
+    ).toContainText(/No Direct Debit letters could be generated/i);
+
+    expect(downloaded, 'nothing should be downloaded when there is no letter').toBe(false);
+    await civi.expectNoActivityOfType(page, skipped.contactId, 'Print PDF Letter');
+    civi.expectNoServerErrors(serverErrors);
+  });
 });
