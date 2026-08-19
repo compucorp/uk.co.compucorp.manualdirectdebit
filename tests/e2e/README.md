@@ -70,7 +70,13 @@ docker exec -w /var/www/default/htdocs/httpdocs my_php_container \
 ```
 
 Then copy the JSON out to `tests/e2e/.seed/seed.json`, or point `SEED_FILE` at
-wherever it landed. Re-running the script simply seeds another set of members.
+wherever it landed.
+
+Each run suffixes its members' names and email addresses with a short random
+token, recorded as `run` in the JSON, so seeding repeatedly on the same site
+does not leave several members answering to the same name — the journeys pick
+their member out of the search results by name, and would otherwise select an
+earlier run's.
 
 > The script creates contacts and memberships, and asks CiviCRM to spool mail to
 > the database. Only run it on a local or test site.

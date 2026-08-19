@@ -20,6 +20,11 @@ if (!class_exists('CRM_ManualDirectDebit_Common_MandateStorageManager')) {
 
 define('SEED_TAG', 'MDD E2E');
 
+// Seeding twice on the same site would otherwise leave two members answering to
+// the same name and email address, and the journeys pick their member out of
+// the search results by name. Suffixing keeps each run's members its own.
+define('SEED_RUN', strtoupper(substr(dechex(crc32(uniqid('', TRUE))), 0, 4)));
+
 /**
  * Applies the Direct Debit settings a mandate needs to be generated.
  */
@@ -147,6 +152,7 @@ function seed_membership_type() {
  *   IDs of everything created.
  */
 function seed_member($lastName, $withEmail, $collectionDate) {
+  $lastName .= SEED_RUN;
   $membershipType = seed_membership_type();
   $mandateStorage = new CRM_ManualDirectDebit_Common_MandateStorageManager();
 
@@ -252,6 +258,47 @@ function seed_mandate($contactId) {
 }
 
 /**
+ * Creates a Direct Debit member with a mandate but nothing to bill.
+ *
+ * The letter for this member cannot be generated, which is what makes it
+ * useful: it proves the run continues and that nothing is recorded against a
+ * member who was not written to.
+ *
+ * @param string $lastName
+ *   Last name, used to find the contact in the search results.
+ *
+ * @return array
+ *   IDs of everything created.
+ */
+function seed_member_without_a_contribution($lastName) {
+  $lastName .= SEED_RUN;
+  $membershipType = seed_membership_type();
+
+  $contactId = civicrm_api3('Contact', 'create', [
+    'contact_type' => 'Individual',
+    'first_name' => 'Ddtest',
+    'last_name' => $lastName,
+    'source' => SEED_TAG,
+  ])['id'];
+
+  $membershipId = civicrm_api3('Membership', 'create', [
+    'contact_id' => $contactId,
+    'membership_type_id' => $membershipType['id'],
+    'join_date' => date('Y-m-d'),
+    'start_date' => date('Y-m-d'),
+    'source' => SEED_TAG,
+  ])['id'];
+
+  return [
+    'contactId' => (int) $contactId,
+    'lastName' => $lastName,
+    'email' => NULL,
+    'membershipId' => (int) $membershipId,
+    'mandateId' => seed_mandate($contactId),
+  ];
+}
+
+/**
  * Records a Direct Debit activity against a member.
  *
  * @param string $activityTypeName
@@ -311,6 +358,7 @@ $collectionReminder = seed_member('Reminder', TRUE, $collectionDate);
 $autoRenew = seed_member('Autorenew', TRUE, $collectionDate);
 $mandateUpdate = seed_member('Mandateupdate', TRUE, $collectionDate);
 $letters = seed_member('Letters', FALSE, $collectionDate);
+$noContribution = seed_member_without_a_contribution('Nocontribution');
 
 // Creating the payment plan raises the sign-up activity by itself. Re-pointing
 // a plan at a second mandate is what raises the payment-update activity.
@@ -326,6 +374,7 @@ seed_activity('direct_debit_mandate_update', $mandateUpdate['contactId'], $manda
 
 $seed = [
   'seededOn' => date('c'),
+  'run' => SEED_RUN,
   'collectionDate' => $collectionDate,
   'members' => [
     'signUp' => $signUp,
@@ -334,6 +383,7 @@ $seed = [
     'autoRenew' => $autoRenew,
     'mandateUpdate' => $mandateUpdate,
     'letters' => $letters,
+    'noContribution' => $noContribution,
   ],
   'activityTypeLabels' => [
     'signUp' => seed_activity_type_label('new_direct_debit_recurring_payment'),
