@@ -34,7 +34,7 @@ function seed_settings() {
   Civi::settings()->set('manualdirectdebit_new_instruction_run_dates', [1, 15]);
   Civi::settings()->set('manualdirectdebit_payment_collection_run_dates', [1, 15]);
   Civi::settings()->set('manualdirectdebit_minimum_days_to_first_payment', 5);
-  Civi::settings()->set('manualdirectdebit_days_in_advance_notice_period', 10);
+  Civi::settings()->set('manualdirectdebit_days_in_advance_for_collection_reminder', 10);
 }
 
 /**
