@@ -3,5 +3,5 @@ package-lock.json
 test-results/
 playwright-report/
 .auth/
-.seed/
+.seed*/
 *.webm
