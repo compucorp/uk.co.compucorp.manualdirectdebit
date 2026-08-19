@@ -227,8 +227,11 @@ async function runSearch (page) {
   await search.waitFor({ state: 'visible' });
   await search.click();
 
+  // Results-area markers only. A generic '.messages' selector matches hidden
+  // warning containers that some versions render on the search page, and
+  // waiting for one of those to become visible never returns.
   await page
-    .locator('table.selector, .crm-search-results, .crm-results-block, .messages')
+    .locator('table.selector, .crm-search-results, .crm-results-block, .crm-empty-table')
     .first()
     .waitFor({ state: 'visible' });
 
