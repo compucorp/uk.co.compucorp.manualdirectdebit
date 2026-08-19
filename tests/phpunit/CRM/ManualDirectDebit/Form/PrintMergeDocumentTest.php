@@ -111,6 +111,59 @@ class CRM_ManualDirectDebit_Form_PrintMergeDocumentTest extends BaseHeadlessTest
   }
 
   /**
+   * Tests the contact lookup that decides who a letter is recorded against.
+   *
+   * Activities are recorded per contact, so a contact holding more than one
+   * membership has to resolve to a single contact ID, and a membership that
+   * was not asked for must not appear at all.
+   */
+  public function testContactLookupResolvesEachMembershipToItsContact() {
+    $firstMembershipId = $this->setUpDirectDebitMembership();
+    $contactId = civicrm_api3('Membership', 'getvalue', [
+      'id' => $firstMembershipId,
+      'return' => 'contact_id',
+    ]);
+    $secondMembershipId = $this->addMembershipToContact($contactId);
+    $otherMembershipId = $this->createMembershipWithoutAContribution();
+
+    $contactIds = $this->getContactIdsKeyedByMembership([$firstMembershipId, $secondMembershipId]);
+
+    $this->assertEquals(
+      [$firstMembershipId => $contactId, $secondMembershipId => $contactId],
+      $contactIds,
+      'Both memberships should resolve to the one contact that holds them'
+    );
+    $this->assertCount(1, array_unique($contactIds), 'The contact should collapse to a single activity recipient');
+    $this->assertArrayNotHasKey($otherMembershipId, $contactIds, 'Only the requested memberships should be returned');
+  }
+
+  /**
+   * Gives an existing contact a second membership.
+   *
+   * @param int $contactId
+   *   Contact to add the membership to.
+   *
+   * @return int
+   *   ID of the created membership.
+   */
+  private function addMembershipToContact($contactId) {
+    $membershipType = MembershipTypeFabricator::fabricate([
+      'name' => 'Test Second Membership',
+      'period_type' => 'rolling',
+      'minimum_fee' => 60,
+      'duration_interval' => 1,
+      'duration_unit' => 'year',
+    ]);
+
+    return civicrm_api3('Membership', 'create', [
+      'contact_id' => $contactId,
+      'membership_type_id' => $membershipType['id'],
+      'join_date' => '2026-01-01',
+      'start_date' => '2026-01-01',
+    ])['id'];
+  }
+
+  /**
    * Generates a single Direct Debit letter.
    *
    * @param int $membershipId
@@ -125,7 +178,25 @@ class CRM_ManualDirectDebit_Form_PrintMergeDocumentTest extends BaseHeadlessTest
     $method = new ReflectionMethod($this->form, 'generateDirectDebitHTML');
     $method->setAccessible(TRUE);
 
-    return $method->invoke($this->form, $membershipId, $body);
+    $contactIds = $this->getContactIdsKeyedByMembership([$membershipId]);
+
+    return $method->invoke($this->form, $membershipId, $contactIds[$membershipId], $body);
+  }
+
+  /**
+   * Calls the form's membership to contact lookup.
+   *
+   * @param array $membershipIds
+   *   Memberships to look up.
+   *
+   * @return array
+   *   Contact ID, keyed by membership ID.
+   */
+  private function getContactIdsKeyedByMembership($membershipIds) {
+    $method = new ReflectionMethod($this->form, 'getContactIdsKeyedByMembership');
+    $method->setAccessible(TRUE);
+
+    return $method->invoke($this->form, $membershipIds);
   }
 
   /**

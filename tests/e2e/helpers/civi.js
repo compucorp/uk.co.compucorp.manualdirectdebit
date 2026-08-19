@@ -498,6 +498,35 @@ async function expectActivityOfType (page, contactId, activityType) {
 }
 
 /**
+ * Asserts no activity of a given type is recorded against a contact.
+ *
+ * @param {import('@playwright/test').Page} page
+ *   The page to query from.
+ * @param {number} contactId
+ *   The contact that should have no such activity.
+ * @param {string} activityType
+ *   Name of the activity type, for example "Print PDF Letter".
+ */
+async function expectNoActivityOfType (page, contactId, activityType) {
+  await page.waitForLoadState('domcontentloaded');
+  await waitForCiviJs(page);
+
+  const count = await page.evaluate(async ([cid, type]) => {
+    const result = await window.CRM.api3('Activity', 'getcount', {
+      target_contact_id: cid,
+      activity_type_id: type,
+    });
+
+    return typeof result === 'number' ? result : result.result;
+  }, [contactId, activityType]);
+
+  expect(
+    count,
+    `no "${activityType}" activity should be recorded for contact ${contactId}`
+  ).toBe(0);
+}
+
+/**
  * Asserts a rendered message has its Direct Debit content filled in.
  *
  * @param {string} content
@@ -544,6 +573,7 @@ module.exports = {
   submitTaskForm,
   setReceiveDateRange,
   expectActivityOfType,
+  expectNoActivityOfType,
   expectEmailActivity,
   expectDirectDebitContentResolved,
   expectNoServerErrors,
