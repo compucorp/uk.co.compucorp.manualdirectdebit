@@ -138,6 +138,84 @@ class CRM_ManualDirectDebit_Form_PrintMergeDocumentTest extends BaseHeadlessTest
   }
 
   /**
+   * Tests a membership with no contact is skipped, not recorded as written to.
+   *
+   * A membership selected in the search can be gone by the time the form is
+   * submitted. Its contact used to come back as NULL and be carried through:
+   * PHP keys an array by NULL as the empty string, so the run ended up asking
+   * for an activity against contact '', which failed outside the per-membership
+   * try/catch and took the whole run down with it.
+   */
+  public function testMembershipWithoutAContactIsSkipped() {
+    $membershipId = $this->setUpDirectDebitMembership();
+    $missingMembershipId = $this->deletedMembershipId();
+
+    $generated = $this->collectLetters([$membershipId, $missingMembershipId]);
+
+    $this->assertCount(1, $generated['letters'], 'Only the membership with a contact should produce a letter');
+    $this->assertEquals(
+      [$this->contactIdOf($membershipId)],
+      $generated['contactIds'],
+      'The membership with no contact should not be recorded against anyone'
+    );
+    $this->assertNotContains('', $generated['contactIds'], 'An empty contact ID must never reach createActivities()');
+    $this->assertArrayHasKey($missingMembershipId, $generated['failed']);
+    $this->assertContains('could not be matched to a contact', $generated['failed'][$missingMembershipId]);
+  }
+
+  /**
+   * Tests a contact holding several memberships is recorded once.
+   *
+   * Letter activities are recorded per contact, so a contact who is sent two
+   * letters must still only be written down once.
+   */
+  public function testAContactWithSeveralMembershipsIsRecordedOnce() {
+    $firstMembershipId = $this->setUpDirectDebitMembership();
+    $contactId = $this->contactIdOf($firstMembershipId);
+
+    // Billed by the same contribution, which is what a membership order with
+    // two line items looks like, so both memberships have something to render.
+    $secondMembershipId = $this->addMembershipToContact($contactId);
+    civicrm_api3('MembershipPayment', 'create', [
+      'membership_id' => $secondMembershipId,
+      'contribution_id' => $this->getContributionIdFor($firstMembershipId),
+    ]);
+
+    $generated = $this->collectLetters([$firstMembershipId, $secondMembershipId]);
+
+    $this->assertCount(2, $generated['letters'], 'Both memberships should produce a letter');
+    $this->assertEquals([$contactId], $generated['contactIds'], 'The contact should be recorded exactly once');
+    $this->assertEmpty($generated['failed'], 'Neither membership should have failed');
+  }
+
+  /**
+   * Tests one membership with nothing to bill does not stop the others.
+   *
+   * This is the behaviour the task was written for: the rest of the letters
+   * are still produced, and the member who did not get one is not recorded as
+   * having been written to.
+   */
+  public function testAMembershipWithNothingToBillDoesNotStopTheRest() {
+    $membershipId = $this->setUpDirectDebitMembership();
+    $unbillableMembershipId = $this->createMembershipWithoutAContribution();
+
+    $generated = $this->collectLetters([$membershipId, $unbillableMembershipId]);
+
+    $this->assertCount(1, $generated['letters'], 'The membership that could be billed should still produce a letter');
+    $this->assertEquals(
+      [$this->contactIdOf($membershipId)],
+      $generated['contactIds'],
+      'Nothing should be recorded against the member who got no letter'
+    );
+    $this->assertArrayHasKey($unbillableMembershipId, $generated['failed']);
+    $this->assertContains(
+      "Can't find contribution id by membership id",
+      $generated['failed'][$unbillableMembershipId],
+      'The reason the membership failed should be carried through to the log'
+    );
+  }
+
+  /**
    * Gives an existing contact a second membership.
    *
    * @param int $contactId
@@ -161,6 +239,71 @@ class CRM_ManualDirectDebit_Form_PrintMergeDocumentTest extends BaseHeadlessTest
       'join_date' => '2026-01-01',
       'start_date' => '2026-01-01',
     ])['id'];
+  }
+
+  /**
+   * Runs the form's letter collection over the given memberships.
+   *
+   * @param array $membershipIds
+   *   Memberships to generate letters for.
+   *
+   * @return array
+   *   The letters, the contacts to record them against, and the failures.
+   */
+  private function collectLetters($membershipIds) {
+    $method = new ReflectionMethod($this->form, 'generateDirectDebitLetters');
+    $method->setAccessible(TRUE);
+
+    return $method->invoke($this->form, $membershipIds, '<p>{$mandateData.bank_name}</p>');
+  }
+
+  /**
+   * Creates a membership and deletes it, leaving an ID nothing answers to.
+   *
+   * @return int
+   *   ID of the deleted membership.
+   */
+  private function deletedMembershipId() {
+    $membershipId = $this->createMembershipWithoutAContribution();
+    civicrm_api3('Membership', 'delete', ['id' => $membershipId]);
+
+    return $membershipId;
+  }
+
+  /**
+   * Returns the contact a membership belongs to.
+   *
+   * @param int $membershipId
+   *   The membership to look up.
+   *
+   * @return int
+   *   ID of the contact.
+   */
+  private function contactIdOf($membershipId) {
+    return (int) civicrm_api3('Membership', 'getvalue', [
+      'id' => $membershipId,
+      'return' => 'contact_id',
+    ]);
+  }
+
+  /**
+   * Returns the contribution a membership is billed by.
+   *
+   * The same one the data collector reads, so a membership this finds a
+   * contribution for is a membership a letter can be generated for.
+   *
+   * @param int $membershipId
+   *   The membership to look up.
+   *
+   * @return int
+   *   ID of the contribution.
+   */
+  private function getContributionIdFor($membershipId) {
+    return (int) civicrm_api3('MembershipPayment', 'getvalue', [
+      'membership_id' => $membershipId,
+      'return' => 'contribution_id',
+      'options' => ['sort' => 'contribution_id DESC', 'limit' => 1],
+    ]);
   }
 
   /**
@@ -209,11 +352,7 @@ class CRM_ManualDirectDebit_Form_PrintMergeDocumentTest extends BaseHeadlessTest
     $recurringContribution = $this->setupPlan('2026-01-01', '2026-01-01');
     $membershipId = $recurringContribution['membership_id'];
 
-    $contributionId = civicrm_api3('MembershipPayment', 'getvalue', [
-      'membership_id' => $membershipId,
-      'return' => 'contribution_id',
-      'options' => ['sort' => 'contribution_id DESC', 'limit' => 1],
-    ]);
+    $contributionId = $this->getContributionIdFor($membershipId);
 
     $mandate = MandateFabricator::fabricate(['entity_id' => $recurringContribution['contact_id']]);
     $this->mandateStorage->assignRecurringContributionMandate($recurringContribution['id'], $mandate['id']);
