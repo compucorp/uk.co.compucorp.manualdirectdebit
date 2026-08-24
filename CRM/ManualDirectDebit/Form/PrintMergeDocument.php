@@ -50,6 +50,51 @@ class CRM_ManualDirectDebit_Form_PrintMergeDocument extends CRM_Member_Form_Task
     $formValues = $this->controller->exportValues($this->getName());
     list($formValues, $htmlMessage) = $this->processMessageTemplate($formValues);
 
+    $generated = $this->generateDirectDebitLetters($membershipIDs, $htmlMessage);
+
+    // Nothing to put in the document. Say so, rather than handing the user a
+    // blank PDF, which is what an empty list would otherwise produce.
+    if (empty($generated['letters'])) {
+      $this->logFailedMemberships($generated['failed']);
+      CRM_Core_Error::statusBounce(ts('No Direct Debit letters could be generated for the selected memberships. Check the log for the reason.'));
+    }
+
+    // Only the memberships that produced a letter, so nobody is recorded as
+    // having been written to when they were not.
+    $this->createActivities(
+      $htmlMessage,
+      $generated['contactIds'],
+      isset($formValues['subject']) ? $formValues['subject'] : NULL,
+      isset($formValues['campaign_id']) ? $formValues['campaign_id'] : NULL
+    );
+
+    CRM_Utils_PDF_Utils::html2pdf($generated['letters'], 'DirectDebitLetter.pdf', FALSE, $formValues);
+
+    $this->postProcessHook();
+
+    $this->logFailedMemberships($generated['failed']);
+
+    CRM_Utils_System::civiExit();
+  }
+
+  /**
+   * Renders a letter for each of the given memberships.
+   *
+   * A membership that cannot produce a letter is collected rather than
+   * aborting the run: it may have nothing to bill, or it may no longer be
+   * there at all by the time the form is submitted.
+   *
+   * @param array $membershipIDs
+   *   IDs of the memberships to generate letters for.
+   * @param string $htmlMessage
+   *   Body of the selected message template.
+   *
+   * @return array
+   *   'letters' the rendered letters, 'contactIds' who to record them
+   *   against, and 'failed' the reason each membership produced no letter,
+   *   keyed by membership ID.
+   */
+  protected function generateDirectDebitLetters($membershipIDs, $htmlMessage) {
     $membershipContacts = $this->getContactIdsKeyedByMembership($membershipIDs);
 
     $failedMemberships = [];
@@ -57,6 +102,7 @@ class CRM_ManualDirectDebit_Form_PrintMergeDocument extends CRM_Member_Form_Task
     // Keyed by contact ID so a contact holding several memberships is only
     // recorded once, however many letters they are sent.
     $letterContactIds = [];
+
     foreach ($membershipIDs as $membershipId) {
       // Without a contact there is nobody to address the letter to, and
       // nobody to record it against: carrying a NULL through would key
@@ -78,29 +124,11 @@ class CRM_ManualDirectDebit_Form_PrintMergeDocument extends CRM_Member_Form_Task
       }
     }
 
-    // Nothing to put in the document. Say so, rather than handing the user a
-    // blank PDF, which is what an empty list would otherwise produce.
-    if (empty($generatedHtmlList)) {
-      $this->logFailedMemberships($failedMemberships);
-      CRM_Core_Error::statusBounce(ts('No Direct Debit letters could be generated for the selected memberships. Check the log for the reason.'));
-    }
-
-    // Only the memberships that produced a letter, so nobody is recorded as
-    // having been written to when they were not.
-    $this->createActivities(
-      $htmlMessage,
-      array_keys($letterContactIds),
-      isset($formValues['subject']) ? $formValues['subject'] : NULL,
-      isset($formValues['campaign_id']) ? $formValues['campaign_id'] : NULL
-    );
-
-    CRM_Utils_PDF_Utils::html2pdf($generatedHtmlList, 'DirectDebitLetter.pdf', FALSE, $formValues);
-
-    $this->postProcessHook();
-
-    $this->logFailedMemberships($failedMemberships);
-
-    CRM_Utils_System::civiExit();
+    return [
+      'letters' => $generatedHtmlList,
+      'contactIds' => array_keys($letterContactIds),
+      'failed' => $failedMemberships,
+    ];
   }
 
   /**
