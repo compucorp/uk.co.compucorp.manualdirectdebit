@@ -58,7 +58,16 @@ class CRM_ManualDirectDebit_Form_PrintMergeDocument extends CRM_Member_Form_Task
     // recorded once, however many letters they are sent.
     $letterContactIds = [];
     foreach ($membershipIDs as $membershipId) {
-      $contactId = isset($membershipContacts[$membershipId]) ? $membershipContacts[$membershipId] : NULL;
+      // Without a contact there is nobody to address the letter to, and
+      // nobody to record it against: carrying a NULL through would key
+      // $letterContactIds by the empty string and hand that to
+      // createActivities() as a target contact.
+      if (!isset($membershipContacts[$membershipId])) {
+        $failedMemberships[$membershipId] = ts('The membership could not be matched to a contact.');
+        continue;
+      }
+
+      $contactId = $membershipContacts[$membershipId];
 
       try {
         $generatedHtmlList[] = $this->generateDirectDebitHTML($membershipId, $contactId, $htmlMessage);
