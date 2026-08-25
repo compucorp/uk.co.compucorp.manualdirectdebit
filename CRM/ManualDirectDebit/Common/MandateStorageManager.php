@@ -50,7 +50,7 @@ class CRM_ManualDirectDebit_Common_MandateStorageManager {
       'mandate_id' => $mandateId,
     ];
     if ($existingMandateId) {
-      $activityType = 'update';
+      $activityType = 'edit';
       $mandateReferenceId = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateReferenceId($existingMandateId, $contributionRecurId);
       $params['id'] = $mandateReferenceId;
     }
