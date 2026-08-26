@@ -1,0 +1,12 @@
+{
+  "name": "manualdirectdebit-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright end-to-end tests for the Manual Direct Debit communication journeys.",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.45.0"
+  }
+}
