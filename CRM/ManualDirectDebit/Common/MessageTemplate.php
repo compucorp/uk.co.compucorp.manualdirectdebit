@@ -72,16 +72,15 @@ class CRM_ManualDirectDebit_Common_MessageTemplate {
     return TRUE;
   }
 
-  public static function getMessageTemplateIdByTitle($title) {
-    $messageTemplate = civicrm_api3('MessageTemplate', 'get', [
-      'sequential' => 1,
-      'return' => ['id'],
-      'msg_title' => $title,
-    ]);
-
-    return $messageTemplate['count'] == 1 ? $messageTemplate['values'][0]['id'] : FALSE;
-  }
-
+  /**
+   * Returns the Direct Debit message template with the given machine name.
+   *
+   * @param string $templateName
+   *   Machine name of the template.
+   *
+   * @return int|null
+   *   ID of the template, or NULL when it is missing or ambiguous.
+   */
   public static function getTemplateIdByName($templateName) {
     $machineNameCustomFieldId = civicrm_api3('CustomField', 'getvalue', [
       'return' => 'id',
@@ -93,6 +92,14 @@ class CRM_ManualDirectDebit_Common_MessageTemplate {
       'sequential' => 1,
       'custom_' . $machineNameCustomFieldId => $templateName,
     ]);
+
+    if ($template['count'] > 1) {
+      Civi::log()->warning(
+        'More than one message template carries the Direct Debit machine name ' . $templateName
+        . ', so none of them can be used. Remove the duplicates, leaving one.',
+        ['template_ids' => array_column($template['values'], 'id')]
+      );
+    }
 
     if (empty($template['id'])) {
       return NULL;
