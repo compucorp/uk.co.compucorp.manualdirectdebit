@@ -66,7 +66,7 @@ class CRM_ManualDirectDebit_Common_SettingsManager {
       'sequential' => 1,
     ]);
 
-    if (isset($settingValues[$settingTitle]) && !empty($settingValues[$settingTitle])) {
+    if (isset($settingValues[$settingTitle]) && !CRM_Utils_System::isNull($settingValues[$settingTitle])) {
       self::$minimumDaysToFirstPayment = $settingValues[$settingTitle];
       return self::$minimumDaysToFirstPayment;
     }
