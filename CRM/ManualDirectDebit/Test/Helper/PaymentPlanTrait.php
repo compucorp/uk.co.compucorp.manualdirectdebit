@@ -44,7 +44,7 @@ trait CRM_ManualDirectDebit_Test_Helper_PaymentPlanTrait {
       'line_total' => $testMembershipTypePriceFieldValue['amount'],
       'financial_type_id' => 'Member Dues',
       'non_deductible_amount' => 0,
-    ];;
+    ];
 
     $recurringContribution = CRM_MembershipExtras_Test_Fabricator_PaymentPlanOrder::fabricate($paymentPlanEntity);
 

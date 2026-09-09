@@ -7,7 +7,7 @@ class CRM_ManualDirectDebit_Queue_Task_BatchSubmission_InstructionItem {
 
     foreach ($batchTaskItems as $batchTaskItem) {
       try {
-        self::updateDDMandate('first_time_payment', $batchTaskItem['mandate_id']);;
+        self::updateDDMandate('first_time_payment', $batchTaskItem['mandate_id']);
       }
       catch (Exception $e) {
         $errorMessage = 'Failed to process mandate with Id: ' . $batchTaskItem['mandate_id'] . ' - Error message : ' . $e->getMessage();

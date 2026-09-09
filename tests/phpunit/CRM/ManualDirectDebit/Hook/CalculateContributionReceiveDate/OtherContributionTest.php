@@ -77,7 +77,7 @@ class CRM_ManualDirectDebit_Hook_CalculateContributionReceiveDate_OtherContribut
     $thirdInstallmentReceiveDate = $instalmentReceiveDateCalculator->calculate(3);
 
     $this->defaultContributionParams['payment_instrument_id'] = 'test_payment';
-    $this->defaultContributionParams['membership_id'] = $recurringContribution['membership_id'];;
+    $this->defaultContributionParams['membership_id'] = $recurringContribution['membership_id'];
     $this->defaultContributionParams['contribution_recur_id'] = $recurringContribution['id'];
     $this->defaultContributionParams['previous_instalment_date'] = $secondInstalmentReceiveDate;
     $this->defaultContributionParams['membership_start_date'] = $membershipStartDate;
