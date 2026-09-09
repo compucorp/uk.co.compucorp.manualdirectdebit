@@ -125,6 +125,13 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_Extension_Upgrader_Base {
   ];
 
   /**
+   * IDs of the Direct Debit message template custom fields, keyed by name.
+   *
+   * @var array
+   */
+  private $ddTemplateCustomFieldIds = [];
+
+  /**
    * List of custom groups
    *
    * @var array
@@ -333,8 +340,12 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_Extension_Upgrader_Base {
     ]);
   }
 
+  /**
+   * Creates the Direct Debit message template custom group.
+   */
   private function addDDTemplateCustomGroup() {
     $this->importCustomGroupXML('DDTemplate_customgroup.xml');
+    $this->ddTemplateCustomFieldIds = [];
   }
 
   private function addCollectionReminderFlagCustomGroup() {
@@ -347,10 +358,16 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_Extension_Upgrader_Base {
     $import->run($customGroupsXMLFile);
   }
 
+  /**
+   * Marks the installed Direct Debit templates as Direct Debit templates.
+   */
   private function setDDTemplatesCustomFields() {
     $templates = CRM_ManualDirectDebit_Common_MessageTemplate::getDefaultDirectDebitTemplates();
+    // As in createMessageTemplates(): read once, before anything is marked.
+    $hadStampedTemplates = $this->hasStampedMessageTemplate();
+
     foreach ($templates as $template) {
-      $templateId = CRM_ManualDirectDebit_Common_MessageTemplate::getMessageTemplateIdByTitle($template['title']);
+      $templateId = $this->getInstalledMessageTemplateId($template, $hadStampedTemplates);
       if ($templateId) {
         $this->fillDDTemplateCustomFieldsData($templateId, $template['name']);
       }
@@ -407,44 +424,207 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_Extension_Upgrader_Base {
    */
   private function createMessageTemplates() {
     $templates = CRM_ManualDirectDebit_Common_MessageTemplate::getDefaultDirectDebitTemplates();
+    $hadStampedTemplates = $this->hasStampedMessageTemplate();
+
     foreach ($templates as $messageTemplateParam) {
-      $this->createMessageTemplate($messageTemplateParam);
+      $this->createMessageTemplate($messageTemplateParam, $hadStampedTemplates);
     }
   }
 
   /**
-   * Creates message template
+   * Creates a Direct Debit message template, unless it is already installed.
    *
-   * @param $params
+   * @param array $params
+   * @param bool $hadStampedTemplates
    */
-  private function createMessageTemplate($params) {
-    $templatePath = $this->extensionDir . '/templates/CRM/ManualDirectDebit/MessageTemplate/' . $params['templateFile'];
-    $templateBodyHtml = file_get_contents($templatePath);
+  private function createMessageTemplate($params, $hadStampedTemplates) {
+    $templateId = $this->getInstalledMessageTemplateId($params, $hadStampedTemplates);
 
-    $messageTemplate = civicrm_api3('MessageTemplate', 'create', [
-      'msg_title' => $params['title'],
-      'msg_subject' => $params['title'],
-      'is_reserved' => 0,
-      'msg_html' => $templateBodyHtml,
-      'is_active' => 1,
-      'msg_text' => 'N/A',
-    ]);
+    if (!$templateId) {
+      $templatePath = $this->extensionDir . '/templates/CRM/ManualDirectDebit/MessageTemplate/' . $params['templateFile'];
+      $templateBodyHtml = file_get_contents($templatePath);
 
-    $this->fillDDTemplateCustomFieldsData($messageTemplate['id'], $params['name']);
+      $messageTemplate = civicrm_api3('MessageTemplate', 'create', [
+        'msg_title' => $params['title'],
+        'msg_subject' => $params['title'],
+        'is_reserved' => 0,
+        'msg_html' => $templateBodyHtml,
+        'is_active' => 1,
+        'msg_text' => 'N/A',
+      ]);
+
+      $templateId = $messageTemplate['id'];
+    }
+
+    if (!$this->getDDTemplateCustomFieldId('is_direct_debit_template')) {
+      Civi::log()->warning(
+        'The Direct Debit message template custom group does not exist yet, so ' . $params['name']
+        . ' has been left unmarked. Upgrading to revision 0008 creates the group and marks it.'
+      );
+
+      return;
+    }
+
+    $this->fillDDTemplateCustomFieldsData($templateId, $params['name']);
   }
 
-  private function fillDDTemplateCustomFieldsData($id, $machineName) {
-    $isDDTemplateCustomFieldId = civicrm_api3('CustomField', 'getvalue', [
-      'return' => 'id',
-      'custom_group_id' => 'direct_debit_message_template',
-      'name' => 'is_direct_debit_template',
+  /**
+   * Returns the Direct Debit message template already installed, if any.
+   *
+   * @param array $params
+   * @param bool $hadStampedTemplates
+   *   Whether any template carried a machine name when this run started.
+   *
+   * @return int|null
+   */
+  private function getInstalledMessageTemplateId($params, $hadStampedTemplates) {
+    $machineNameCustomFieldId = $this->getDDTemplateCustomFieldId('template_machine_name');
+
+    if ($machineNameCustomFieldId) {
+      $templateId = $this->getOldestMessageTemplateId([
+        'custom_' . $machineNameCustomFieldId => $params['name'],
+      ]);
+
+      if ($templateId) {
+        return $templateId;
+      }
+
+      if ($hadStampedTemplates) {
+        return NULL;
+      }
+    }
+
+    return $this->getUnclaimedMessageTemplateIdByTitle($params['title']);
+  }
+
+  /**
+   * Whether any message template still carries a Direct Debit machine name.
+   *
+   * Ask this once per run, before anything is marked.
+   *
+   * @return bool
+   */
+  private function hasStampedMessageTemplate() {
+    $machineNameCustomFieldId = $this->getDDTemplateCustomFieldId('template_machine_name');
+
+    if (!$machineNameCustomFieldId) {
+      return FALSE;
+    }
+
+    $machineNames = [];
+    foreach (CRM_ManualDirectDebit_Common_MessageTemplate::getDefaultDirectDebitTemplates() as $template) {
+      $machineNames[] = $template['name'];
+    }
+
+    $templates = civicrm_api3('MessageTemplate', 'get', [
+      'return' => ['id'],
+      'custom_' . $machineNameCustomFieldId => ['IN' => $machineNames],
+      'options' => ['limit' => 1],
     ]);
 
-    $machineNameCustomFieldId = civicrm_api3('CustomField', 'getvalue', [
-      'return' => 'id',
-      'custom_group_id' => 'direct_debit_message_template',
-      'name' => 'template_machine_name',
+    return !empty($templates['count']);
+  }
+
+  /**
+   * Returns the one unclaimed message template with the given title.
+   *
+   * @param string $title
+   *   Title to match.
+   *
+   * @return int|null
+   *   ID of the template, or NULL when there is not exactly one.
+   */
+  private function getUnclaimedMessageTemplateIdByTitle($title) {
+    $templates = civicrm_api3('MessageTemplate', 'get', [
+      'sequential' => 1,
+      'return' => ['id'],
+      'msg_title' => $title,
+      'workflow_name' => ['IS NULL' => 1],
+      'options' => ['limit' => 0, 'sort' => 'id ASC'],
     ]);
+
+    return $templates['count'] == 1 ? (int) $templates['values'][0]['id'] : NULL;
+  }
+
+  /**
+   * Returns the oldest message template matching the given filters.
+   *
+   * @param array $filters
+   *
+   * @return int|null
+   */
+  private function getOldestMessageTemplateId($filters) {
+    $templates = civicrm_api3('MessageTemplate', 'get', $filters + [
+      'sequential' => 1,
+      'return' => ['id'],
+      'options' => ['sort' => 'id ASC', 'limit' => 1],
+    ]);
+
+    return empty($templates['count']) ? NULL : (int) $templates['values'][0]['id'];
+  }
+
+  /**
+   * Returns one of the Direct Debit message template custom fields.
+   *
+   * @param string $fieldName
+   *
+   * @return int|null
+   */
+  private function getDDTemplateCustomFieldId($fieldName) {
+    if (!$this->ddTemplateCustomFieldIds) {
+      $this->ddTemplateCustomFieldIds = $this->loadDDTemplateCustomFieldIds();
+    }
+
+    return isset($this->ddTemplateCustomFieldIds[$fieldName]) ? $this->ddTemplateCustomFieldIds[$fieldName] : NULL;
+  }
+
+  /**
+   * Reads the Direct Debit message template custom fields.
+   *
+   * @return array
+   */
+  private function loadDDTemplateCustomFieldIds() {
+    $customGroups = civicrm_api3('CustomGroup', 'get', [
+      'sequential' => 1,
+      'return' => ['id'],
+      'name' => 'direct_debit_message_template',
+      'is_active' => 1,
+    ]);
+
+    if (empty($customGroups['count'])) {
+      return [];
+    }
+
+    $customFields = civicrm_api3('CustomField', 'get', [
+      'return' => ['id', 'name'],
+      'custom_group_id' => $customGroups['values'][0]['id'],
+      'is_active' => 1,
+      'options' => ['limit' => 0],
+    ]);
+
+    $customFieldIds = [];
+    foreach ($customFields['values'] as $customField) {
+      $customFieldIds[$customField['name']] = (int) $customField['id'];
+    }
+
+    return $customFieldIds;
+  }
+
+  /**
+   * Marks a message template as a Direct Debit one.
+   *
+   * @param int $id
+   * @param string $machineName
+   *
+   * @throws \CRM_Core_Exception
+   */
+  private function fillDDTemplateCustomFieldsData($id, $machineName) {
+    $isDDTemplateCustomFieldId = $this->getDDTemplateCustomFieldId('is_direct_debit_template');
+    $machineNameCustomFieldId = $this->getDDTemplateCustomFieldId('template_machine_name');
+
+    if (!$isDDTemplateCustomFieldId || !$machineNameCustomFieldId) {
+      throw new CRM_Core_Exception('The Direct Debit message template custom fields are missing. They are created by install() and by upgrade_0008().');
+    }
 
     civicrm_api3('MessageTemplate', 'create', [
       'id' => $id,
@@ -850,16 +1030,17 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_Extension_Upgrader_Base {
   }
 
   /**
-   * Deletes message templates
+   * Deletes the Direct Debit message template with the given machine name.
    *
-   * @param $machineName
+   * @param string $machineName
+   *   Machine name of the template to delete.
    */
   private function deleteMessageTemplate($machineName) {
-    $machineNameCustomFieldId = civicrm_api3('CustomField', 'getvalue', [
-      'return' => 'id',
-      'custom_group_id' => 'direct_debit_message_template',
-      'name' => 'template_machine_name',
-    ]);
+    $machineNameCustomFieldId = $this->getDDTemplateCustomFieldId('template_machine_name');
+
+    if (!$machineNameCustomFieldId) {
+      return;
+    }
 
     civicrm_api3('MessageTemplate', 'get', [
       'custom_' . $machineNameCustomFieldId => $machineName,
