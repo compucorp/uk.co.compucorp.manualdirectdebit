@@ -214,7 +214,7 @@ class CRM_ManualDirectDebit_Form_Mandate_Create extends CRM_Core_Form {
    * @return array (string)
    */
   public function getRenderableElementNames() {
-    $elementNames = array();
+    $elementNames = [];
 
     foreach ($this->_elements as $element) {
       $label = $element->getLabel();
