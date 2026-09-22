@@ -375,7 +375,7 @@ function manualdirectdebit_civicrm_container($container) {
   $priorityHigherThanCoreServices = -1;
   $container->findDefinition('dispatcher')
     ->addMethodCall('addListener',
-      array('civi.token.render', '_manualdirectdebit_civicrm_tokenRenderEventListener', $priorityHigherThanCoreServices));
+      ['civi.token.render', '_manualdirectdebit_civicrm_tokenRenderEventListener', $priorityHigherThanCoreServices]);
 }
 
 function _manualdirectdebit_civicrm_tokenRenderEventListener($event) {
