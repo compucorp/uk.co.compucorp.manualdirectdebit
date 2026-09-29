@@ -147,7 +147,7 @@ class CRM_ManualDirectDebit_Form_Batch extends CRM_Admin_Form {
     $params['created_date'] = date('YmdHis');
     $params['created_id'] = $session->get('userID');
 
-    $batch = CRM_Batch_BAO_Batch::create($params);
+    $batch = CRM_Batch_BAO_Batch::writeRecord($params);
 
     $this->_id = $batch->id;
 

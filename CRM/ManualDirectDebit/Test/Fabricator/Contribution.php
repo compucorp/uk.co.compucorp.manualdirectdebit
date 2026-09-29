@@ -35,7 +35,7 @@ class CRM_ManualDirectDebit_Test_Fabricator_Contribution extends BaseFabricator 
       $contributionSoftParams['currency'] = $contribution['currency'];
       $contributionSoftParams['amount'] = $contribution['total_amount'];
 
-      CRM_Contribute_BAO_ContributionSoft::add($contributionSoftParams);
+      CRM_Contribute_BAO_ContributionSoft::writeRecord($contributionSoftParams);
     }
 
     return $contribution;
