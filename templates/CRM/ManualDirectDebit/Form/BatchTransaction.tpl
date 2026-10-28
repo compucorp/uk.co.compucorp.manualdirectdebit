@@ -203,7 +203,7 @@ function toggleFinancialSelections(toggleID, toggleClass) {
 }
 
 function buildTransactionSelectorAssign() {
-  var sourceUrl = {/literal}'{crmURL p="civicrm/ajax/rest" h=0 q="className=CRM_ManualDirectDebit_Page_AJAX&fnName=getInstructionTransactionsList&snippet=4&context=instructionBatch&entityID=$entityID&entityTable=$entityTable&notPresent=1&statusID=$statusID&search=1"}'{literal};
+  var sourceUrl = {/literal}'{crmURL p="civicrm/ajax/direct_debit/instruction-transactions" h=0 q="snippet=4&context=instructionBatch&entityID=$entityID&entityTable=$entityTable&notPresent=1&statusID=$statusID&search=1"}'{literal};
 
   var ZeroRecordText = '<div class="status messages">{/literal}{ts escape="js"}None found.{/ts}{literal}</li></ul></div>';
 
@@ -284,7 +284,7 @@ function buildTransactionSelectorAssign() {
 }
 
 function buildTransactionSelectorRemove( ) {
-  var sourceUrl = {/literal}'{crmURL p="civicrm/ajax/rest" h=0 q="className=CRM_ManualDirectDebit_Page_AJAX&fnName=getInstructionTransactionsList&snippet=4&context=financialBatch&entityID=$entityID&entityTable=$entityTable&statusID=$statusID"}'{literal};
+  var sourceUrl = {/literal}'{crmURL p="civicrm/ajax/direct_debit/instruction-transactions" h=0 q="snippet=4&context=financialBatch&entityID=$entityID&entityTable=$entityTable&statusID=$statusID"}'{literal};
 
   var columns = [
     {/literal} {if in_array($batchStatus, array('Open', 'Reopened')) && $action eq 2}{literal} {sClass:'crm-transaction-checkbox', bSortable:false, mData: "check"}, {/literal}{/if}{literal}
