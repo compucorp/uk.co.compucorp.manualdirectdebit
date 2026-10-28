@@ -356,32 +356,55 @@ function selectAction( id, toggleSelectId, checkId ) {
   }
 }
 
-function bulkAssignRemove( action ) {
-  var postUrl = {/literal}"{crmURL p='civicrm/ajax/rest' h=0 q="className=CRM_ManualDirectDebit_Page_AJAX&fnName=bulkAssignRemove&entityID=$entityID&entityTable=$entityTable" }"{literal};
-  var fids = [];
-  if (action == 'Assign') {
-    CRM.$("input[id^='mark_x_']:checked").each( function () {
-      var a = CRM.$(this).attr('id');
-      fids.push(a);
+function bulkAssignRemove(action) {
+  var ids = [];
+  var selector = action === 'Assign' ? "input[id^='mark_x_']:checked" : "input[id^='mark_y_']:checked";
+  CRM.$(selector).each(function () {
+    var id = CRM.$(this).attr('id').split('_')[2];
+    if (id) {
+      ids.push(id);
+    }
+  });
+
+  if (!ids.length) {
+    return;
+  }
+
+  var entityID = {/literal}{$entityID}{literal};
+  var entityTable = {/literal}"{$entityTable}"{literal};
+
+  var apiCall;
+  if (action === 'Assign') {
+    var records = ids.map(function (id) {
+      return {
+        batch_id: entityID,
+        entity_table: entityTable,
+        entity_id: id
+      };
+    });
+    apiCall = CRM.api4('EntityBatch', 'save', {
+      records: records
     });
   }
-  if (action == 'Remove') {
-    CRM.$("input[id^='mark_y_']:checked").each( function () {
-      var a = CRM.$(this).attr('id');
-      fids.push(a);
+  else if (action === 'Remove') {
+    apiCall = CRM.api4('EntityBatch', 'delete', {
+      where: [
+        ['batch_id', '=', entityID],
+        ['entity_table', '=', entityTable],
+        ['entity_id', 'IN', ids]
+      ]
     });
   }
-  CRM.$.post(postUrl, { ID: fids, actions:action }, function(data) {
-    //this is custom status set when record update success.
-    if (data.status == 'record-updated-success') {
+
+  if (apiCall) {
+    apiCall.then(function () {
       buildTransactionSelectorAssign();
       buildTransactionSelectorRemove();
-      batchSummary({/literal}{$entityID}{literal});
-    }
-    else {
-      CRM.alert(data.status);
-    }
-  }, 'json');
+      if (typeof batchSummary === 'function') {
+        batchSummary(entityID);
+      }
+    });
+  }
 }
 
 function contactRecurContribution(recId, cid) {

@@ -109,7 +109,7 @@
         title: {/literal}'{ts escape="js"}Discard Batch{/ts}'{literal},
         modal: true,
         open: function () {
-            var msg = {/literal}'{ts escape="js"}Are you sure you want to discard this batch?{/ts}'{literal};
+          var msg = {/literal}'{ts escape="js"}Are you sure you want to discard this batch?{/ts}'{literal};
           CRM.$('#enableDisableStatusMsg').show().html(msg);
         },
         buttons: {
@@ -118,41 +118,19 @@
           },
           {/literal}"{ts escape='js'}Discard{/ts}"{literal}: function () {
             CRM.$(this).dialog("close");
-            saveRecord(recordID, op);
+            CRM.api4('Batch', 'update', {
+              where: [['id', '=', recordID]],
+              values: {'status_id:name': 'Discarded'}
+            }).then(function () {
+              location.reload();
+            });
           }
         }
       });
     }
-    else {
-      saveRecord(recordID, op);
-    }
-  }
-
-  function noServerResponse() {
-    CRM.alert({/literal}'{ts escape="js"}No response from the server. Check your internet connection and try reloading the page.{/ts}', '{ts escape="js"}Network Error{/ts}'{literal}, 'error');
-  }
-
-  function saveRecord(recordID, op) {
-    if (op == 'export') {
+    else if (op == 'export') {
       window.location.href = CRM.url('civicrm/direct_debit/batch/export', {reset: 1, id: recordID, status: 1});
-      return;
     }
-    var postUrl = {/literal}"{crmURL p='civicrm/ajax/rest' h=0 q='className=CRM_ManualDirectDebit_Page_AJAX&fnName=assignRemove'}"{literal};
-    //post request and get response
-    CRM.$.post(postUrl, {
-        records: [recordID],
-        recordBAO: 'CRM_Batch_BAO_Batch',
-        op: op
-      }, function (html) {
-        //this is custom status set when record update success.
-        if (html.status == 'record-updated-success') {
-          location.reload();
-        }
-        else {
-            CRM.alert(html.status);
-        }
-      },
-      'json').error(noServerResponse);
   }
 
   function batchSummary(entityID) {
