@@ -1,8 +1,5 @@
 <?php
 
-require_once 'CRM/Core/DAO.php';
-require_once 'CRM/Utils/Type.php';
-
 class CRM_ManualDirectDebit_DAO_RecurrMandateRef extends CRM_Core_DAO {
 
   /**
