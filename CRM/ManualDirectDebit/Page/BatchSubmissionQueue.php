@@ -163,7 +163,7 @@ class CRM_ManualDirectDebit_Page_BatchSubmissionQueue extends CRM_Core_Page {
       'title' => ts('Submitting the batch, this may take a while depending on how many records are processed ..'),
       'queue' => $this->queue,
       'errorMode' => CRM_Queue_Runner::ERROR_ABORT,
-      'onEnd' => array('CRM_ManualDirectDebit_Page_BatchSubmissionQueue', 'onEnd'),
+      'onEnd' => ['CRM_ManualDirectDebit_Page_BatchSubmissionQueue', 'onEnd'],
       'onEndUrl' => CRM_Utils_System::url('civicrm/direct_debit/batch-transaction', ['reset' => 1, 'action' => 'view', 'bid' => $this->batchId]),
     ]);
 

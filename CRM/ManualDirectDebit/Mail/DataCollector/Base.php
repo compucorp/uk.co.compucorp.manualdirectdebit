@@ -214,7 +214,7 @@ abstract class CRM_ManualDirectDebit_Mail_DataCollector_Base {
     $recurringContributionRows = $this->collectRecurringContributionRows($installmentsCount);
     $total = 0;
     $totalTax = 0;
-    $recurringContributionPlan = array();
+    $recurringContributionPlan = [];
     foreach ($recurringContributionRows as $index => $recurringContributionRow) {
       $total += $recurringContributionRow['amount'];
       $totalTax += $recurringContributionRow['tax'];

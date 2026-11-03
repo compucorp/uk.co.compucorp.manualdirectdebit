@@ -41,15 +41,15 @@ class CRM_ManualDirectDebit_Mail_Task_Email_ContributionEmail extends CRM_Manual
       $subject = "[case #$hash] $subject";
     }
 
-    $attachments = array();
+    $attachments = [];
     CRM_Core_BAO_File::formatAttachment($formValues,
       $attachments,
       NULL, NULL
     );
 
     // format contact details array to handle multiple emails from same contact
-    $formattedContactDetails = array();
-    $tempEmails = array();
+    $formattedContactDetails = [];
+    $tempEmails = [];
     foreach ($form->_contactIds as $key => $contactId) {
       // if we dont have details on this contactID, we should ignore
       // potentially this is due to the contact not wanting to receive email

@@ -51,7 +51,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_UpdateSubscription {
    */
   private function addContactIDToCoreFormJSVariable() {
     $contactID = CRM_Utils_Request::retrieve('cid', 'Positive', $this->form);
-    CRM_Core_Resources::singleton()->addVars('coreForm', array('contact_id' => (int) $contactID));
+    CRM_Core_Resources::singleton()->addVars('coreForm', ['contact_id' => (int) $contactID]);
   }
 
   /**
@@ -64,7 +64,7 @@ class CRM_ManualDirectDebit_Hook_BuildForm_UpdateSubscription {
     $selectedMandateID = CRM_ManualDirectDebit_BAO_RecurrMandateRef::getMandateIdForRecurringContribution($recurringContributionID);
 
     if ($selectedMandateID) {
-      CRM_Core_Resources::singleton()->addVars('coreForm', array('selected_mandate_id' => (int) $selectedMandateID));
+      CRM_Core_Resources::singleton()->addVars('coreForm', ['selected_mandate_id' => (int) $selectedMandateID]);
     }
   }
 

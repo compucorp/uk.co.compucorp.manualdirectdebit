@@ -21,9 +21,9 @@ class CRM_ManualDirectDebit_Mail_Task_Email_MembershipEmail extends CRM_ManualDi
     $subject = $formValues['subject'];
 
     // CRM-13378: Append CC and BCC information at the end of Activity Details and format cc and bcc fields
-    $elements = array('cc_id', 'bcc_id');
+    $elements = ['cc_id', 'bcc_id'];
     $additionalDetails = NULL;
-    $ccValues = $bccValues = array();
+    $ccValues = $bccValues = [];
     foreach ($elements as $element) {
       if (!empty($formValues[$element])) {
         $allEmails = explode(',', $formValues[$element]);
@@ -61,15 +61,15 @@ class CRM_ManualDirectDebit_Mail_Task_Email_MembershipEmail extends CRM_ManualDi
       $subject = "[case #$hash] $subject";
     }
 
-    $attachments = array();
+    $attachments = [];
     CRM_Core_BAO_File::formatAttachment($formValues,
       $attachments,
       NULL, NULL
     );
 
     // format contact details array to handle multiple emails from same contact
-    $formattedContactDetails = array();
-    $tempEmails = array();
+    $formattedContactDetails = [];
+    $tempEmails = [];
     foreach ($form->_contactIds as $key => $contactId) {
       // if we dont have details on this contactID, we should ignore
       // potentially this is due to the contact not wanting to receive email
@@ -88,12 +88,12 @@ class CRM_ManualDirectDebit_Mail_Task_Email_MembershipEmail extends CRM_ManualDi
         $formattedContactDetails[] = $details;
       }
     }
-    $contributionIds = array();
+    $contributionIds = [];
     if ($form->getVar('_contributionIds')) {
       $contributionIds = $form->getVar('_contributionIds');
     }
 
-    $membershipIds = array();
+    $membershipIds = [];
     if ($form->getVar('_memberIds')) {
       $membershipIds = $form->getVar('_memberIds');
     }
