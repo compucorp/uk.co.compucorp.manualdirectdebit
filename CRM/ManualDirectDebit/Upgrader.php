@@ -666,7 +666,7 @@ class CRM_ManualDirectDebit_Upgrader extends CRM_Extension_Upgrader_Base {
       'parameters' => '',
     ];
 
-    CRM_Core_BAO_Job::create($params);
+    CRM_Core_BAO_Job::writeRecord($params);
   }
 
   /**
