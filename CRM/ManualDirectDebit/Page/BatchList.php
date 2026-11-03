@@ -287,7 +287,7 @@ class CRM_ManualDirectDebit_Page_BatchList extends CRM_Core_Page_Basic {
     $pagerParameters['buttonBottom'] = 'PagerBottomButton';
     $pagerParameters['rowCount'] = $this->get(CRM_Utils_Pager::PAGE_ROWCOUNT);
     if (!$pagerParameters['rowCount']) {
-      $pagerParameters['rowCount'] = CRM_Utils_Pager::ROWCOUNT;;
+      $pagerParameters['rowCount'] = CRM_Utils_Pager::ROWCOUNT;
     }
 
     $pagerParameters['total'] = $this->getBatchCount($batchSearchParameters);
