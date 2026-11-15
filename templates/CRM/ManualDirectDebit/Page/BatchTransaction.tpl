@@ -107,53 +107,49 @@ function assignRemove(recordID, op) {
         },
         {/literal}"{ts escape='js'}Discard{/ts}"{literal}: function () {
           CRM.$(this).dialog("close");
-          var recordBAO = 'CRM_Batch_BAO_Batch';
-          saveRecord(recordID, op, recordBAO, null);
+          CRM.api4('Batch', 'update', {
+            where: [['id', '=', recordID]],
+            values: {'status_id:name': 'Discarded'}
+          }).then(function () {
+            window.location.href = CRM.url('civicrm/direct_debit/batch-list', 'reset=1&type_id=' + {/literal}"{$batchType_id}"{literal});
+          });
         }
       }
     });
+  } else if (op == 'export') {
+    window.location.href = CRM.url('civicrm/direct_debit/batch/export', {reset: 1, id: recordID, status: 1});
   } else {
-    var recordBAO = 'CRM_Batch_BAO_Batch';
-    if (op == 'assign' || op == 'remove') {
-      recordBAO = 'CRM_Batch_BAO_EntityBatch';
-    }
     var entityID = {/literal}"{$entityID}"{literal};
+    var entityTable = {/literal}"{$entityTable}"{literal};
     CRM.$('#mark_x_' + recordID).closest('tr').block({message: {/literal}'{ts escape="js"}Updating{/ts}'{literal}});
 
-    saveRecord(recordID, op, recordBAO, entityID);
-  }
-}
+    var apiCall;
+    if (op == 'assign') {
+      apiCall = CRM.api4('EntityBatch', 'save', {
+        records: [{
+          batch_id: entityID,
+          entity_table: entityTable,
+          entity_id: recordID
+        }]
+      });
+    }
+    else if (op == 'remove') {
+      apiCall = CRM.api4('EntityBatch', 'delete', {
+        where: [
+          ['batch_id', '=', entityID],
+          ['entity_table', '=', entityTable],
+          ['entity_id', '=', recordID]
+        ]
+      });
+    }
 
-function noServerResponse() {
-  CRM.alert({/literal}'{ts escape="js"}No response from the server. Check your internet connection and try reloading the page.{/ts}', '{ts escape="js"}Network Error{/ts}'{literal}, 'error');
-}
-
-function saveRecord(recordID, op, recordBAO, entityID) {
-
-  if (op == 'export') {
-    window.location.href = CRM.url('civicrm/direct_debit/batch/export', {reset: 1, id: recordID, status: 1});
-    return;
-  }
-
-  var postUrl = {/literal}"{crmURL p='civicrm/ajax/rest' h=0 q='className=CRM_ManualDirectDebit_Page_AJAX&fnName=assignRemove'}"{literal};
-  //post request and get response
-
-  CRM.$.post( postUrl, { records: [recordID], recordBAO: recordBAO, op:op, entityID:entityID, originator_number: {/literal}"{$originator_number}"{literal} }, function( html ){
-    //this is custom status set when record update success.
-    if (html.status == 'record-updated-success') {
-      if (op == 'discard') {
-        window.location.href = CRM.url('civicrm/direct_debit/batch-list', 'reset=1&type_id=' + {/literal}"{$batchType_id}"{literal});
-      }
-      else {
-        buildTransactionSelectorAssign( true );
+    if (apiCall) {
+      apiCall.then(function () {
+        buildTransactionSelectorAssign(true);
         buildTransactionSelectorRemove();
-      }
+      });
     }
-    else {
-      CRM.alert(html.status);
-    }
-  },
-  'json').error(noServerResponse);
+  }
 }
 </script>
 {/literal}
