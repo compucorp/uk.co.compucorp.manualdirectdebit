@@ -223,10 +223,10 @@ class CRM_ManualDirectDebit_Batch_BatchHandler {
       'contact_id' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.entity_id as contact_id',
       'name' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.account_holder_name as name',
       'sort_code' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.sort_code as sort_code',
-      'account_number' => 'CONCAT("\t",' . CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.ac_number) as account_number',
+      'account_number' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.ac_number as account_number',
       'amount' => 'IF(civicrm_contribution.net_amount IS NOT NULL, civicrm_contribution.net_amount , 0.00) as amount',
       'reference_number' => CRM_ManualDirectDebit_Batch_Transaction::DD_MANDATE_TABLE . '.dd_ref as reference_number',
-      'transaction_type' => 'CONCAT("\t",civicrm_option_value.label) as transaction_type',
+      'transaction_type' => 'civicrm_option_value.label as transaction_type',
     ];
 
     if ($this->getBatchType() == self::BATCH_TYPE_PAYMENTS) {
