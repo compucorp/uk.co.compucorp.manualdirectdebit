@@ -164,8 +164,6 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
    */
   private function assignDDPaymentsSearchProperties() {
     $ddCodes = CRM_Core_OptionGroup::values('direct_debit_codes');
-    $recurStatus = $contributionStatus = CRM_Core_OptionGroup::values('contribution_status', FALSE, FALSE, FALSE, NULL, 'name');
-    unset($recurStatus[array_search('Cancelled', $contributionStatus)]);
 
     $batchData = json_decode($this->_values['data'], TRUE);
 
@@ -191,9 +189,30 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
       ],
       [
         'name' => 'recur_status',
-        'value' => array_keys($recurStatus),
+        'value' => self::getCollectablePlanStatusIds(),
       ],
     ];
+  }
+
+  /**
+   * Gets the payment plan statuses whose instalments a batch can collect:
+   * every recurring contribution status except Cancelled.
+   *
+   * The statuses come from the recurring contribution status options, the
+   * ones payment plans use. Since CiviCRM 5.55 a fresh install has no
+   * "In Progress" among the contribution status options, so building this
+   * list from those left In Progress plans out of the batch.
+   *
+   * @return int[]
+   */
+  public static function getCollectablePlanStatusIds() {
+    $planStatuses = CRM_Core_PseudoConstant::get('CRM_Contribute_BAO_ContributionRecur', 'contribution_status_id', ['labelColumn' => 'name']);
+    $cancelledStatusId = array_search('Cancelled', $planStatuses);
+    if ($cancelledStatusId !== FALSE) {
+      unset($planStatuses[$cancelledStatusId]);
+    }
+
+    return array_map('intval', array_keys($planStatuses));
   }
 
   /**
