@@ -203,10 +203,17 @@ class CRM_ManualDirectDebit_Form_BatchTransaction extends CRM_Contribute_Form_Se
    * "In Progress" among the contribution status options, so building this
    * list from those left In Progress plans out of the batch.
    *
+   * If the statuses cannot be loaded the list is empty, and the batch then
+   * offers no payments rather than payments of every plan.
+   *
    * @return int[]
    */
   public static function getCollectablePlanStatusIds() {
     $planStatuses = CRM_Core_PseudoConstant::get('CRM_Contribute_BAO_ContributionRecur', 'contribution_status_id', ['labelColumn' => 'name']);
+    if (!is_array($planStatuses)) {
+      return [];
+    }
+
     $cancelledStatusId = array_search('Cancelled', $planStatuses);
     if ($cancelledStatusId !== FALSE) {
       unset($planStatuses[$cancelledStatusId]);

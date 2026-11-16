@@ -10,19 +10,10 @@ require_once __DIR__ . '/../../../BaseHeadlessTest.php';
 class CRM_ManualDirectDebit_Form_BatchTransactionTest extends BaseHeadlessTest {
 
   /**
-   * The "In Progress" contribution status a test removed, to put back.
-   *
-   * @var array|null
+   * Clears the status caches. Each test runs in a transaction that is rolled
+   * back afterwards, which brings back a removed status with its own ID.
    */
-  private $removedInProgressStatus = NULL;
-
   public function tearDown(): void {
-    if (is_array($this->removedInProgressStatus)) {
-      \Civi\Api4\OptionValue::create(FALSE)
-        ->setValues($this->removedInProgressStatus)
-        ->execute();
-      $this->removedInProgressStatus = NULL;
-    }
     CRM_Core_PseudoConstant::flush();
     Civi::cache('metadata')->clear();
 
@@ -53,22 +44,14 @@ class CRM_ManualDirectDebit_Form_BatchTransactionTest extends BaseHeadlessTest {
 
   /**
    * Removes "In Progress" from the contribution status options, as on a
-   * site installed fresh on CiviCRM 5.55 or later.
+   * site installed fresh on CiviCRM 5.55 or later. The test's transaction
+   * rollback puts it back.
    */
   private function removeInProgressFromContributionStatuses() {
-    $inProgress = \Civi\Api4\OptionValue::get(FALSE)
-      ->addSelect('option_group_id', 'label', 'value', 'name', 'weight', 'is_active', 'is_reserved', 'filter')
+    \Civi\Api4\OptionValue::delete(FALSE)
       ->addWhere('option_group_id:name', '=', 'contribution_status')
       ->addWhere('name', '=', 'In Progress')
-      ->execute()
-      ->first();
-    if (is_array($inProgress)) {
-      \Civi\Api4\OptionValue::delete(FALSE)
-        ->addWhere('id', '=', $inProgress['id'])
-        ->execute();
-      unset($inProgress['id']);
-      $this->removedInProgressStatus = $inProgress;
-    }
+      ->execute();
     CRM_Core_PseudoConstant::flush();
     Civi::cache('metadata')->clear();
 
