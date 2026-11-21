@@ -148,9 +148,8 @@ class CRM_ManualDirectDebit_Mail_Task_Mail extends CRM_Activity_BAO_Activity {
       ]);
 
       $sent = FALSE;
-      if (self::sendMessage(
+      if (self::sendDirectDebitMessage(
         $from,
-        $userID,
         $contactId,
         $renderedTemplate['subject'],
         $renderedTemplate['text'],
@@ -167,6 +166,77 @@ class CRM_ManualDirectDebit_Mail_Task_Mail extends CRM_Activity_BAO_Activity {
     }
 
     return [$sent, $activity->id];
+  }
+
+  /**
+   * Sends the email to one contact and records them as an activity target.
+   *
+   * Replaces CRM_Activity_BAO_Activity::sendMessage(), which core
+   * deprecated and then removed.
+   *
+   * @param string $from
+   * @param int $toID
+   * @param string $subject
+   * @param string $text
+   * @param string $html
+   * @param string $emailAddress
+   *   Use this 'to' email address instead of the contact's primary one.
+   * @param int $activityID
+   * @param array|null $attachments
+   * @param string|null $cc
+   * @param string|null $bcc
+   *
+   * @return bool
+   */
+  private static function sendDirectDebitMessage(
+    $from,
+    $toID,
+    $subject,
+    $text,
+    $html,
+    $emailAddress,
+    $activityID,
+    $attachments = NULL,
+    $cc = NULL,
+    $bcc = NULL
+  ) {
+    [$toDisplayName, $toEmail, $toDoNotEmail] = CRM_Contact_BAO_Contact::getContactDetails($toID);
+    if ($emailAddress) {
+      $toEmail = trim($emailAddress);
+    }
+
+    if (empty($toEmail) || $toDoNotEmail) {
+      return FALSE;
+    }
+    if (!trim($toDisplayName)) {
+      $toDisplayName = $toEmail;
+    }
+
+    $mailParams = [
+      'groupName' => 'Activity Email Sender',
+      'from' => $from,
+      'toName' => $toDisplayName,
+      'toEmail' => $toEmail,
+      'subject' => $subject,
+      'cc' => $cc,
+      'bcc' => $bcc,
+      'text' => $text,
+      'html' => $html,
+      'attachments' => $attachments,
+    ];
+
+    if (!CRM_Utils_Mail::send($mailParams)) {
+      return FALSE;
+    }
+
+    $activityContacts = CRM_Activity_BAO_ActivityContact::buildOptions('record_type_id', 'validate');
+    CRM_Activity_BAO_ActivityContact::create([
+      'activity_id' => $activityID,
+      'contact_id' => $toID,
+      'record_type_id' => CRM_Utils_Array::key('Activity Targets', $activityContacts),
+    ]);
+
+    return TRUE;
   }
 
 }

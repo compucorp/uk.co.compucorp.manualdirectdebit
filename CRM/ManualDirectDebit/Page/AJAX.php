@@ -173,7 +173,7 @@ class CRM_ManualDirectDebit_Page_AJAX {
             ->execute()
             ->first();
           if ($record['id']) {
-            $updated = CRM_Batch_BAO_EntityBatch::del(['id' => $record['id']]);
+            $updated = CRM_Batch_BAO_EntityBatch::deleteRecord(['id' => $record['id']]);
           }
         }
       }
