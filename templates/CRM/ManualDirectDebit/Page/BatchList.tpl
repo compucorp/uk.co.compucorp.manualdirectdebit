@@ -137,7 +137,7 @@
       window.location.href = CRM.url('civicrm/direct_debit/batch/export', {reset: 1, id: recordID, status: 1});
       return;
     }
-    var postUrl = {/literal}"{crmURL p='civicrm/ajax/rest' h=0 q='className=CRM_ManualDirectDebit_Page_AJAX&fnName=assignRemove'}"{literal};
+    var postUrl = {/literal}"{crmURL p='civicrm/direct_debit/batch/ajax/assign' h=0}"{literal};
     //post request and get response
     CRM.$.post(postUrl, {
         records: [recordID],
@@ -155,15 +155,5 @@
       'json').error(noServerResponse);
   }
 
-  function batchSummary(entityID) {
-    var postUrl = {/literal}"{crmURL p='civicrm/ajax/rest' h=0 q='className=CRM_Financial_Page_AJAX&fnName=getBatchSummary'}"{literal};
-    //post request and get response
-    CRM.$.post(postUrl, {batchID: entityID}, function (html) {
-        CRM.$.each(html, function (i, val) {
-          CRM.$("#row_" + i).html(val);
-        });
-      },
-    'json');
-  }
 </script>
 {/literal}

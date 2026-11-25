@@ -12,6 +12,8 @@ class CRM_ManualDirectDebit_Page_AJAX {
    * @return string
    */
   public static function getInstructionTransactionsList() {
+    self::requireAjaxRequest();
+
     $sortMapper = [
       0 => '',
       1 => 'id',
@@ -141,6 +143,8 @@ class CRM_ManualDirectDebit_Page_AJAX {
    * Callback to perform action on batch records.
    */
   public static function bulkAssignRemove() {
+    self::requireAjaxRequest();
+
     $mandatesIDs = CRM_Utils_Request::retrieveValue('ID', 'Memo');
     $entityID = CRM_Utils_Request::retrieveValue('entityID', 'String');
     $actions = CRM_Utils_Request::retrieveValue('actions', 'String');
@@ -191,6 +195,8 @@ class CRM_ManualDirectDebit_Page_AJAX {
    * Callback to perform action on batch records.
    */
   public static function assignRemove() {
+    self::requireAjaxRequest();
+
     $op = CRM_Utils_Request::retrieveValue('op', 'String');
     $recordBAO = CRM_Utils_Request::retrieveValue('recordBAO', 'String');
 
@@ -254,6 +260,20 @@ class CRM_ManualDirectDebit_Page_AJAX {
       }
     }
     CRM_Utils_JSON::output($response);
+  }
+
+  /**
+   * Refuses a request that was not sent by a javascript client.
+   *
+   * The batch screens used to reach the methods of this class through
+   * civicrm/ajax/rest, which made this check. Core removed that way of
+   * calling a class method, so each method has its own route now and makes
+   * the check itself.
+   *
+   * @throws \CRM_Core_Exception
+   */
+  private static function requireAjaxRequest() {
+    CRM_Core_Page_AJAX::validateAjaxRequestMethod();
   }
 
   /**

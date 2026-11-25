@@ -135,7 +135,7 @@ function saveRecord(recordID, op, recordBAO, entityID) {
     return;
   }
 
-  var postUrl = {/literal}"{crmURL p='civicrm/ajax/rest' h=0 q='className=CRM_ManualDirectDebit_Page_AJAX&fnName=assignRemove'}"{literal};
+  var postUrl = {/literal}"{crmURL p='civicrm/direct_debit/batch/ajax/assign' h=0}"{literal};
   //post request and get response
 
   CRM.$.post( postUrl, { records: [recordID], recordBAO: recordBAO, op:op, entityID:entityID, originator_number: {/literal}"{$originator_number}"{literal} }, function( html ){
