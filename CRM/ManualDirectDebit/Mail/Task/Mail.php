@@ -147,6 +147,16 @@ class CRM_ManualDirectDebit_Mail_Task_Mail extends CRM_Activity_BAO_Activity {
         'tplParams' => $tplParams,
       ]);
 
+      // The activity was created above with the template's subject, tokens
+      // unrendered. With one recipient (how both email tasks call this), give
+      // it the subject the email is sent with (cut to the column's 255).
+      if (count($contactDetails) === 1) {
+        \Civi\Api4\Activity::update(FALSE)
+          ->addWhere('id', '=', $activity->id)
+          ->addValue('subject', mb_substr(preg_replace('/\[case #([0-9a-h]{7})\] /', '', $renderedTemplate['subject']), 0, 255))
+          ->execute();
+      }
+
       $sent = FALSE;
       if (self::sendDirectDebitMessage(
         $from,
